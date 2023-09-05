@@ -1,5 +1,5 @@
 from django.db import models
-from .managers import EnvioManager
+from .managers import EnvioManager,EntregaManager, OperadorManager, FolioManager,EmbarqueManager
 
 
 """ Modelos de Catalogos"""
@@ -129,6 +129,8 @@ class Operador(models.Model):
     update_user = models.CharField(max_length=100, blank=True, null=True)
     version = models.BigIntegerField()
 
+    objects = OperadorManager()
+
     class Meta:
         managed = False
         db_table = 'operador'
@@ -240,6 +242,19 @@ class CpTransporte(models.Model):
         managed = False
         db_table = 'cp_transporte'
 
+class Folio(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    entidad = models.CharField(max_length=255, blank=True, null=True)
+    folio = models.BigIntegerField()
+    serie = models.CharField(max_length=255, blank=True, null=True)
+    sucursal = models.ForeignKey("Sucursal",models.DO_NOTHING,null=True)
+    sucursal_nombre  = models.CharField(max_length=50, blank=True, null=True)
+
+    objects = FolioManager()
+
+    class Meta:
+        managed = True
+        db_table = 'folio'
 
 """ Modelos de  Embarques"""
 
@@ -262,20 +277,87 @@ class Embarque(models.Model):
     empleado = models.CharField(max_length=255, blank=True, null=True)
     sx = models.CharField(unique=True, max_length=255, blank=True, null=True)
     me_num_total_mercancias = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     create_user = models.CharField(max_length=255, blank=True, null=True)
     update_user = models.CharField(max_length=255, blank=True, null=True)
-    version = models.BigIntegerField()
+    version = models.BigIntegerField(blank=True, null= True)
     cp = models.BooleanField(default= False)
+
+    objects = EmbarqueManager()
 
     class Meta:
         managed = False
         db_table = 'embarques'
+
+class Entrega(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    envio = models.ForeignKey('Envio', models.DO_NOTHING, related_name='entregas')
+    embarque = models.ForeignKey(Embarque, models.DO_NOTHING,related_name='partidas')
+    sucursal = models.CharField(max_length=255)
+    destinatario = models.CharField(max_length=255, blank=True, null=True)
+    operador = models.CharField(max_length=255, blank=True, null=True)
+    origen = models.CharField(max_length=255, blank=True, null=True)
+    entidad = models.CharField(max_length=255)
+    realizo = models.CharField(max_length=255, blank=True, null=True)
+    fecha_documento = models.DateTimeField()
+    documento = models.CharField(max_length=255)
+    tipo_documento = models.CharField(max_length=255)
+    forma_pago = models.CharField(max_length=255, blank=True, null=True)
+    paquetes = models.IntegerField(blank=True, null=True)
+    kilos = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
+    total_documento = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
+    valor = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
+    comentario = models.CharField(max_length=255, blank=True, null=True)
+    salida = models.DateTimeField(blank=True, null=True)
+    arribo = models.DateTimeField(blank=True, null=True)
+    arribo_latitud = models.DecimalField(max_digits=19, decimal_places=2, blank=True,null=True)
+    arribo_longitud = models.DecimalField(max_digits=19, decimal_places=2, blank= True, null=True)
+    recepcion = models.DateTimeField(blank=True, null=True)
+    recepcion_latitud = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
+    recepcion_longitud = models.DecimalField(max_digits=19, decimal_places=2)
+    regreso = models.DateTimeField(blank=True, null=True)
+    recibio = models.CharField(max_length=255, blank=True, null=True)
+    area = models.CharField(max_length=255, blank=True, null=True)
+    reporto_nombre = models.CharField(max_length=255, blank=True, null=True)
+    reporto_puesto = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    create_user = models.CharField(max_length=255, blank=True, null=True)
+    update_user = models.CharField(max_length=255, blank=True, null=True)
+    version = models.BigIntegerField(blank=True, null=True)
+
+    objects = EntregaManager
+
+    class Meta:
+        managed = False
+        db_table = 'entrega'
+
+class EntregaDet(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    entrega = models.ForeignKey('Entrega', models.DO_NOTHING,related_name='detalles')
+    envio_det = models.ForeignKey('EnvioDet', models.DO_NOTHING, related_name='entregas')
+    sx_instruccion_de_envio = models.CharField(max_length=255, blank=True, null=True)
+    almacen = models.CharField(max_length=255, blank=True, null=True)
+    instruccion_de_entrega_parcial = models.CharField(max_length=255, blank=True, null=True)
+    clave = models.CharField(max_length=255, blank=True, null=True)
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
+    cantidad = models.DecimalField(max_digits=19, decimal_places=2)
+    valor = models.DecimalField(max_digits=19, decimal_places=2)
+    comentario = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    create_user = models.CharField(max_length=255, blank=True, null=True)
+    update_user = models.CharField(max_length=255, blank=True, null=True)
+    version = models.BigIntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'entrega_det'
     
 class EntregaComision(models.Model):
     id = models.BigAutoField(primary_key=True)
-    entrega = models.ForeignKey('EntregaParcial', models.DO_NOTHING)
+    entrega = models.ForeignKey('Entrega', models.DO_NOTHING)
     valor = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
     valor_caja = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
     precio_tonelada = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
@@ -299,7 +381,7 @@ class EntregaComision(models.Model):
 
 class EntregaIncidencia(models.Model):
     id = models.BigAutoField(primary_key=True)
-    entrega = models.ForeignKey('EntregaParcial', models.DO_NOTHING)
+    entrega_det = models.ForeignKey('EntregaDet', models.DO_NOTHING,related_name='incidencia')
     area = models.CharField(max_length=255, blank=True, null=True)
     reporto_nombre = models.CharField(max_length=255, blank=True, null=True)
     reporto_puesto = models.CharField(max_length=255, blank=True, null=True)
@@ -315,36 +397,9 @@ class EntregaIncidencia(models.Model):
         managed = False
         db_table = 'entrega_incidencia'
 
-
-class EntregaParcial(models.Model):
+''' class EntregaRecorrido(models.Model):
     id = models.BigAutoField(primary_key=True)
-    envio_det = models.ForeignKey('EnvioDet', models.DO_NOTHING, related_name="entregas")
-    sx_instruccion_de_envio = models.CharField(max_length=255, blank=True, null=True)
-    almacen = models.CharField(max_length=255, blank=True, null=True)
-    operador = models.CharField(max_length=255, blank=True, null=True)
-    embarque_id = models.ForeignKey(Embarque, models.DO_NOTHING, related_name="entregas")
-    fecha = models.DateTimeField()
-    instruccion_de_entrega_parcial = models.CharField(max_length=255, blank=True, null=True)
-    clave = models.CharField(max_length=255, blank=True, null=True)
-    descripcion = models.CharField(max_length=255, blank=True, null=True)
-    cantidad = models.DecimalField(max_digits=19, decimal_places=2)
-    valor = models.DecimalField(max_digits=19, decimal_places=2)
-    comentario = models.CharField(max_length=255, blank=True, null=True)
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
-    create_user = models.CharField(max_length=255, blank=True, null=True)
-    update_user = models.CharField(max_length=255, blank=True, null=True)
-    version = models.BigIntegerField()
-    parcial = models.BooleanField(default= False)
-
-    class Meta:
-        managed = False
-        db_table = 'entrega_parcial'
-1
-
-class EntregaRecorrido(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    entrega = models.ForeignKey(EntregaParcial, models.DO_NOTHING, related_name="recorrido")
+    entrega = models.ForeignKey(Entrega, models.DO_NOTHING, related_name="recorrido")
     salida = models.DateTimeField(blank=True, null=True)
     arribo = models.DateTimeField(blank=True, null=True)
     arribo_latitud = models.DecimalField(max_digits=19, decimal_places=2)
@@ -357,7 +412,7 @@ class EntregaRecorrido(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'entrega_recorrido'
+        db_table = 'entrega_recorrido' '''
 
 
 class Envio(models.Model):
@@ -365,12 +420,12 @@ class Envio(models.Model):
     sucursal = models.CharField(max_length=255)
     origen = models.CharField(max_length=255)
     entidad = models.CharField(max_length=255)
+    # Este dato debe ser de tipo Date no DateT
     fecha_documento = models.DateTimeField()
     documento = models.CharField(max_length=255)
     tipo_documento = models.CharField(max_length=255)
     forma_pago = models.CharField(max_length=255, blank=True, null=True)
     pagado = models.BooleanField(default= False)
-    paquetes = models.IntegerField(blank=True, null=True)
     kilos = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
     total_documento = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
     comentario = models.CharField(max_length=255, blank=True, null=True)
@@ -382,6 +437,7 @@ class Envio(models.Model):
     update_user = models.CharField(max_length=255, blank=True, null=True)
     version = models.BigIntegerField()
     realizo = models.CharField(max_length=255, blank=True, null=True)
+    destinatario = models.CharField(max_length=255, blank=True, null=True)
 
     objects = EnvioManager()
 
@@ -409,6 +465,13 @@ class EnvioDet(models.Model):
     create_user = models.CharField(max_length=255, blank=True, null=True)
     update_user = models.CharField(max_length=255, blank=True, null=True)
     version = models.BigIntegerField()
+
+    @property
+    def saldo(self):
+        entrega = EntregaDet.objects.filter(envio_det = self)
+        enviado = sum(ent.cantidad for ent in entrega)
+        saldo = self.me_cantidad - enviado
+        return saldo 
 
 
     class Meta:

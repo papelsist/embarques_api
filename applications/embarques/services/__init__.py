@@ -1,0 +1,1 @@
+from .embarque_service import salvar_embarque
