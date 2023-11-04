@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
+import json
+from datetime import timedelta
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,7 +29,10 @@ SECRET_KEY = "django-insecure-ii0&9pue56%44abdjt8ya+!b1pc3kszktofgxb-40q(vibqi6t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '10.10.1.85'
+]
 
 
 # Application definition
@@ -45,7 +51,8 @@ DJANGO_APPS = [
 LOCAL_APPS = [
      'applications.authentication',
      'applications.reportes',
-     'applications.embarques'
+     'applications.embarques',
+     'applications.ruteo',
 ]
 
 THIRD_PART_APPS = [
@@ -96,8 +103,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'logistica_papel',
         'USER': 'root',
-        'PASSWORD': 'sys',
-        'HOST': 'localhost',
+        'PASSWORD': 'Paproot_83',
+        'HOST': '10.10.1.121',
         'PORT': 3306 ,
         #'OPTIONS': {'ssl': False},
         'OPTIONS': {'ssl_mode': 'DISABLED'},
@@ -140,6 +147,18 @@ REST_FRAMEWORK = {
     
 }
 
+REST_FRAMEWORK = { 'DEFAULT_AUTHENTICATION_CLASSES':[
+    'rest_framework.authentication.TokenAuthentication',
+    'rest_framework_simplejwt.authentication.JWTAuthentication', ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+} 
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
 
 '''
 REST_FRAMEWORK = { 'DEFAULT_AUTHENTICATION_CLASSES':[

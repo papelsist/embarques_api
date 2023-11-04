@@ -1,23 +1,20 @@
 
 from django.db import models
-from django.db.models import  Count
+from django.db.models import  Sum,Max,Q,F
 
 
 
 class EnvioManager(models.Manager):
-
-    '''  def pendientes_envio(self):
-        pendientes = self.filter(
-        detalles__entregas__id = None
-        ).annotate(
-            partidas = Count('id')
-        )
-        return pendientes '''
     
-    def find_envio(self,tipo,documento,fecha):
+    def find_envio(self,tipo,documento,fecha,sucursal):
         envios = self.get(
-            entidad = tipo, documento=documento, fecha_documento = fecha
+            entidad = tipo, documento=documento, fecha_documento = fecha, sucursal = sucursal
         )
-        print(envios.__dict__)
-
         return envios
+    
+    def pendientes_salida(self,fecha_inicial, fecha_final, sucursal):
+        envios = self.filter(instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final], sucursal=sucursal)
+        return envios  
+ 
+    
+

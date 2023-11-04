@@ -1,0 +1,12 @@
+[
+      {
+            "embarque_documento": 103,
+            "embarque_id": 136,
+            "transporte_id": 2,
+            "descripcion": "FORD TRANSI  VAN",
+            "transporte_capacidad": 4000.0,
+            "destinos": [],
+            "ocupado": 0.0,
+            "destinos_coords": []
+      }
+]

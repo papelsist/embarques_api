@@ -335,7 +335,7 @@ class Entrega(models.Model):
 
 class EntregaDet(models.Model):
     id = models.BigAutoField(primary_key=True)
-    entrega = models.ForeignKey('Entrega', models.DO_NOTHING,related_name='detalles')
+    entrega = models.ForeignKey('Entrega', models.CASCADE,related_name='detalles')
     envio_det = models.ForeignKey('EnvioDet', models.DO_NOTHING, related_name='entregas')
     sx_instruccion_de_envio = models.CharField(max_length=255, blank=True, null=True)
     almacen = models.CharField(max_length=255, blank=True, null=True)
@@ -350,6 +350,18 @@ class EntregaDet(models.Model):
     create_user = models.CharField(max_length=255, blank=True, null=True)
     update_user = models.CharField(max_length=255, blank=True, null=True)
     version = models.BigIntegerField(blank=True, null=True)
+
+    @property
+    def saldo(self): 
+        return self.envio_det.saldo
+    
+    @property
+    def enviado(self):
+        return self.envio_det.enviado
+    
+    @property
+    def cantidad_envio(self):
+        return self.envio_det.me_cantidad
 
     class Meta:
         managed = False
@@ -438,6 +450,12 @@ class Envio(models.Model):
     version = models.BigIntegerField()
     realizo = models.CharField(max_length=255, blank=True, null=True)
     destinatario = models.CharField(max_length=255, blank=True, null=True)
+    
+    @property
+    def saldo(self):
+        envios = EnvioDet.objects.filter(envio = self)
+        saldo = sum(env.saldo for env in envios)
+        return saldo 
 
     objects = EnvioManager()
 
@@ -472,6 +490,14 @@ class EnvioDet(models.Model):
         enviado = sum(ent.cantidad for ent in entrega)
         saldo = self.me_cantidad - enviado
         return saldo 
+    
+    @property
+    def enviado(self):
+        entrega = EntregaDet.objects.filter(envio_det = self)
+        enviado = sum(ent.cantidad for ent in entrega)
+       
+        return enviado
+
 
 
     class Meta:
@@ -480,7 +506,7 @@ class EnvioDet(models.Model):
     
 class InstruccionDeEnvio(models.Model):
     id = models.BigAutoField(primary_key=True)
-    envio = models.ForeignKey(Envio, models.DO_NOTHING)
+    envio = models.OneToOneField(Envio, models.DO_NOTHING, related_name='instruccion' )
     tipo = models.CharField(max_length=255, blank=True, null=True)
     contacto = models.CharField(max_length=255, blank=True, null=True)
     horario = models.CharField(max_length=255, blank=True, null=True)
@@ -494,8 +520,8 @@ class InstruccionDeEnvio(models.Model):
     direccion_municipio = models.CharField(max_length=255, blank=True, null=True)
     direccion_estado = models.CharField(max_length=255, blank=True, null=True)
     direccion_pais = models.CharField(max_length=100, blank=True, null=True)
-    direccion_latitud = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
-    direccion_longitud = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
+    direccion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
+    direccion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     fecha_de_entrega = models.DateTimeField(blank=True, null=True)
     sx = models.CharField(unique=True, max_length=255, blank=True, null=True)
     date_created = models.DateTimeField()
