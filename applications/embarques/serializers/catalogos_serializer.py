@@ -12,4 +12,4 @@ class OperadorSerializer(serializers.ModelSerializer):
 class SucursalSerializer(serializers.ModelSerializer):
     class Meta:
         model= Sucursal
-        fields = ["id","clave","nombre"]
+        fields = ["id","clave","nombre","direccion_latitud","direccion_longitud"]

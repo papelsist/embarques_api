@@ -4,7 +4,8 @@ import datetime
 import numpy as np
 import json 
 from .ruteo_dao import RuteoDao
-from applications.embarques.models import Embarque,Envio
+from applications.embarques.models import Embarque,Envio,Sucursal
+
 
 
 def obtener_diferencias(lista_a, lista_b):
@@ -161,13 +162,13 @@ def get_intersection(valores,df_coord):
 
     return puntos
 
-def get_transportes():
+def get_transportes(suc_id):
     query = """
             select e.id as embarque_id,e.documento as embarque_documento,te.* 
             from embarques e join operador o  on (e.operador_id  = o.id) join transporte_embarques te  on (o.transporte_id  = te.id) left join entrega n on (e.id = n.embarque_id)
-            where or_fecha_hora_salida is NULL and n.id is null and sucursal_id =1 order by date_created"""
+            where or_fecha_hora_salida is NULL and n.id is null and sucursal_id =%s order by date_created"""
     dao = RuteoDao()
-    transportes = dao.get_data(query)
+    transportes = dao.get_data(query,[suc_id])
 
     return transportes
 
@@ -233,9 +234,9 @@ def build_rutas(puntos,asignables, rutas, df_sin_outliers ):
 
                     if kilos_valid > ruta['transporte_capacidad']:
 
-                        print(ruta['transporte_capacidad'])
-                        print(kilos_valid)
-                        print(punto)
+                        #print(ruta['transporte_capacidad'])
+                        #print(kilos_valid)
+                        #print(punto)
 
                         if kilos_val1 < ruta['transporte_capacidad'] and kilos_val1 > kilos_val2:
 
@@ -319,54 +320,57 @@ def make_rutas_json(rutas):
 def build_ruteo_by_envios(envios):
     pass
 
-def build_ruteo_by_pendientes(fecha):
+def build_ruteo_by_pendientes(fecha,sucursal_nombre):
     
-    sucursal =  {"nombre": "CALLE 4", "latitud":19.3598997, "longitud":-99.1068492, "tipo": "EMPRESA"}
-    suc_point = (sucursal['latitud'],sucursal['longitud'])
+    sucursal = Sucursal.objects.get(nombre = sucursal_nombre)
+    #sucursal =  {"nombre": "CALLE 4", "latitud":19.3598997, "longitud":-99.1068492, "tipo": "EMPRESA"}
+    suc_point = (sucursal.direccion_latitud,sucursal.direccion_longitud)
 
-    envios = get_envios_fecha(sucursal['nombre'],fecha)
+    envios = get_envios_fecha(sucursal.nombre,fecha)
     if len(envios) > 0:
-        rutas = build_ruteo(envios, suc_point)
+        rutas = build_ruteo(envios, suc_point, sucursal.id)
         return rutas
     else:
         return {}
 
 
-def build_ruteo_by_envios(ids):
+def build_ruteo_by_envios(ids, sucursal_nombre):
     
-    sucursal =  {"nombre": "CALLE 4", "latitud":19.3598997, "longitud":-99.1068492, "tipo": "EMPRESA"}
-    suc_point = (sucursal['latitud'],sucursal['longitud'])
+    sucursal = Sucursal.objects.get(nombre = sucursal_nombre)
+    # sucursal =  {"nombre": "CALLE 4", "latitud":19.3598997, "longitud":-99.1068492, "tipo": "EMPRESA"}
+    # suc_point = (sucursal['latitud'],sucursal['longitud'])
+    suc_point = (sucursal.direccion_latitud,sucursal.direccion_longitud)
     envios = get_envios(ids)
     # print("*"*50)
     # print(envios)
     if len(envios) > 0:
-        rutas = build_ruteo(envios, suc_point)
+        rutas = build_ruteo(envios, suc_point, sucursal.id)
         return rutas
     else:
         return {}
 
-def build_ruteo(envios, suc_point):
+def build_ruteo(envios, suc_point, suc_id):
    
     
     df = make_df(envios, suc_point)
-    print(df)
+    #print(df)
     df_sin_outliers, outliers = drop_outliers(df)
-    print(outliers)
+    #print(outliers)
     df_coord, asignables = make_df_work(df_sin_outliers)
-    print(df_coord)
+    #print(df_coord)
     df_distancias = get_matriz_distancias(df_coord)
-    print(df_distancias)
+    #print(df_distancias)
     df_costos = get_matriz_costos(df_distancias)
-    print(df_costos)
+    #print(df_costos)
     df_costos_work = set_cero_matriz_costos(df_costos)
-    print(df_costos_work)
+    #print(df_costos_work)
     valores = order_costos(df_costos_work)
-    print("*"*50)
-    print(valores)
+    #print("*"*50)
+    #print(valores)
     puntos = get_intersection(valores, df_costos_work )
-    print("*"*50)
-    print(puntos)
-    transportes = get_transportes()
+    #print("*"*50)
+    #print(puntos)
+    transportes = get_transportes(suc_id)
     rutas = make_rutas(transportes)
     capacidad_total = get_capacidad_total(rutas)
     demanda = get_demanda(puntos, df_sin_outliers, capacidad_total)
@@ -380,10 +384,10 @@ def build_ruteo(envios, suc_point):
             for ruta_vacia in rutas_vacias:
                 kilos = df_sin_outliers[df_sin_outliers['envio_id'] == no_asignado]['kilos'].values
                 kilos = float(kilos)
-                print(f"Kilos enviar : {kilos}")
-                print(f"Capacidad Transporte: {ruta_vacia['transporte_capacidad']}")
+                #print(f"Kilos enviar : {kilos}")
+                #print(f"Capacidad Transporte: {ruta_vacia['transporte_capacidad']}")
                 if kilos  >= ruta_vacia['transporte_capacidad'] /2 and kilos  <= ruta_vacia['transporte_capacidad']:
-                    print("Si se puede asignar")
+                    #print("Si se puede asignar")
                     ruta_vacia['destinos'].append(no_asignado)
                     ruta_vacia['ocupado'] = kilos
                     no_asignados.remove(no_asignado) 

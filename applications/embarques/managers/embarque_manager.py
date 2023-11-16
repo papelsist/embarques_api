@@ -15,3 +15,5 @@ class EmbarqueManager(models.Manager):
     def regresos(self,fecha_inicial, fecha_final,sucursal):
         embarques = self.filter( ~Q(or_fecha_hora_salida = None),~Q(regreso = None), fecha__range=[fecha_inicial, fecha_final], sucursal = sucursal).order_by('documento')
         return embarques
+    
+ 

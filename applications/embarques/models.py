@@ -60,6 +60,8 @@ class Sucursal(models.Model):
     version = models.BigIntegerField()
     or_municipio = models.CharField(max_length=255, blank=True, null=True)
     or_estado = models.CharField(max_length=255, blank=True, null=True)
+    direccion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
+    direccion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -524,6 +526,8 @@ class InstruccionDeEnvio(models.Model):
     direccion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     fecha_de_entrega = models.DateTimeField(blank=True, null=True)
     sx = models.CharField(unique=True, max_length=255, blank=True, null=True)
+    distancia = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
+    sector = models.IntegerField(blank=True, null=True, default= 0)
     date_created = models.DateTimeField()
     last_updated = models.DateTimeField()
     create_user = models.CharField(max_length=255, blank=True, null=True)

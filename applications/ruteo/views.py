@@ -16,19 +16,27 @@ from .serializers import RutasSerializer
 def sugerencia_ruta_pendientes(request):
     fecha = request.query_params['fecha']
     sucursal = request.query_params['sucursal']
-    rutas = build_ruteo_by_pendientes(fecha)
-    print(rutas)
-    rutas_orm = ruteo_dj_orm(rutas)
+    '''  print("*"*50)
+    print(sucursal)
+    print("*"*50) '''
+    rutas = build_ruteo_by_pendientes(fecha,sucursal)
+    if rutas:
+        ''' print(rutas) '''
+        rutas_orm = ruteo_dj_orm(rutas)
 
-    rutas_serialized = RutasSerializer(rutas_orm)
-    return Response(rutas_serialized.data)
-    #return JsonResponse(rutas, safe=False)
+        rutas_serialized = RutasSerializer(rutas_orm)
+        return Response(rutas_serialized.data)
+    return Response({})
 
 @api_view(['GET'])
 def sugerencia_ruta_envios(request):
     envs = request.query_params['envios']
     envs = envs.split(",")
-    rutas = build_ruteo_by_envios(envs)  
+    sucursal = request.query_params['sucursal']
+    ''' print("*"*50)
+    print(sucursal)
+    print("*"*50) '''
+    rutas = build_ruteo_by_envios(envs, sucursal)  
     rutas_orm = ruteo_dj_orm(rutas)
     rutas_serialized = RutasSerializer(rutas_orm)
     return Response(rutas_serialized.data)

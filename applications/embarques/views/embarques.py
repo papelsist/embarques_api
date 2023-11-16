@@ -10,7 +10,7 @@ from rest_framework.generics import (ListAPIView,
                                     RetrieveUpdateAPIView
                                     )
 from ..services import (salvar_embarque, borrar_entrega_det, registrar_salida_embarque, borrar_embarque, actualizar_bitacora_embarque, 
-                        eliminar_entrega_embarque, registrar_regreso_embarque, crear_embarque_por_ruteo)
+                        eliminar_entrega_embarque, registrar_regreso_embarque, crear_embarque_por_ruteo, asignar_envios_pendientes)
 
 
 
@@ -27,9 +27,10 @@ class PendientesSalida(ListAPIView):
 
 @api_view(['POST'])
 def crear_embarque(request):
-    folio = Folio.objects.get_next_folio('EMBARQUES')
+
     operador_id =request.data['operador']
     sucursal_id = request.data['sucursal']
+    folio = Folio.objects.get_next_folio('EMBARQUES',sucursal_id)
     facturista_id = request.data['facturista']
     fecha = date.today()
     operador = Operador.objects.get(id=operador_id)
@@ -38,7 +39,7 @@ def crear_embarque(request):
     comentario = request.data.get('comentario')
     embarque = Embarque.objects.create(documento = folio, operador = operador,sucursal = sucursal,facturista= facturista,fecha = fecha, comentario = comentario, version = 0)
     embarque_serialized = EmbarqueSerializer(embarque)
-    Folio.objects.set_next_folio('EMBARQUES', folio)
+    Folio.objects.set_next_folio('EMBARQUES', folio,sucursal_id)
     return Response(embarque_serialized.data)
 
 @api_view(['GET'])
@@ -141,4 +142,10 @@ class EnviosPendientes(ListAPIView):
 def embarque_por_ruteo(request):
     ruta = request.data
     embarque = crear_embarque_por_ruteo(ruta)
+    return Response({})
+
+@api_view(['POST'])
+def asignar_evios_pendientes(request):
+    data = request.data
+    asignar_envios_pendientes(data)
     return Response({})

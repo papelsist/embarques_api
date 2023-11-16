@@ -5,6 +5,130 @@
             "transporte_id": 2,
             "descripcion": "FORD TRANSI  VAN",
             "transporte_capacidad": 4000.0,
+            "destinos": [
+                  10495,
+                  10494,
+                  10496,
+                  10497,
+                  10490,
+                  10508,
+                  10499,
+                  10504
+            ],
+            "ocupado": 1598.44,
+            "destinos_coords": [
+                  {
+                        "destino": 10495,
+                        "latitud": 19.325367,
+                        "longitud": -99.081677
+                  },
+                  {
+                        "destino": 10494,
+                        "latitud": 19.325367,
+                        "longitud": -99.081677
+                  },
+                  {
+                        "destino": 10496,
+                        "latitud": 19.325367,
+                        "longitud": -99.081677
+                  },
+                  {
+                        "destino": 10497,
+                        "latitud": 19.325367,
+                        "longitud": -99.081677
+                  },
+                  {
+                        "destino": 10490,
+                        "latitud": 19.320362,
+                        "longitud": -99.07802
+                  },
+                  {
+                        "destino": 10508,
+                        "latitud": 19.332189,
+                        "longitud": -99.087904
+                  },
+                  {
+                        "destino": 10499,
+                        "latitud": 19.339402,
+                        "longitud": -99.074731
+                  },
+                  {
+                        "destino": 10504,
+                        "latitud": 19.356876,
+                        "longitud": -99.067842
+                  }
+            ]
+      },
+      {
+            "embarque_documento": 105,
+            "embarque_id": 138,
+            "transporte_id": 2,
+            "descripcion": "FORD TRANSI  VAN",
+            "transporte_capacidad": 4000.0,
+            "destinos": [
+                  10507,
+                  10501,
+                  10506,
+                  10512
+            ],
+            "ocupado": 1187.65,
+            "destinos_coords": [
+                  {
+                        "destino": 10507,
+                        "latitud": 19.404798,
+                        "longitud": -99.112443
+                  },
+                  {
+                        "destino": 10501,
+                        "latitud": 19.413213,
+                        "longitud": -99.135691
+                  },
+                  {
+                        "destino": 10506,
+                        "latitud": 19.3852,
+                        "longitud": -99.079408
+                  },
+                  {
+                        "destino": 10512,
+                        "latitud": 19.372123,
+                        "longitud": -99.113199
+                  }
+            ]
+      },
+      {
+            "embarque_documento": 106,
+            "embarque_id": 139,
+            "transporte_id": 3,
+            "descripcion": "FORD TRANSI  VAN",
+            "transporte_capacidad": 3500.0,
+            "destinos": [
+                  10498
+            ],
+            "ocupado": 2870.25,
+            "destinos_coords": [
+                  {
+                        "destino": 10498,
+                        "latitud": 19.332189,
+                        "longitud": -99.087904
+                  }
+            ]
+      },
+      {
+            "embarque_documento": 110,
+            "embarque_id": 143,
+            "transporte_id": 1,
+            "descripcion": "VAN VW",
+            "transporte_capacidad": 2000.0,
+            "destinos": [],
+            "ocupado": 0.0,
+            "destinos_coords": []
+      },
+      {
+            "embarque_documento": 111,
+            "embarque_id": 144,
+            "transporte_id": 26,
+            "descripcion": "FORD F-350",
+            "transporte_capacidad": 7000.0,
             "destinos": [],
             "ocupado": 0.0,
             "destinos_coords": []

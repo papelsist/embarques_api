@@ -14,7 +14,7 @@ def test_report():
 
     query = """
             select 
-            e.id as embarque_id,e.documento ,e.fecha,e .or_fecha_hora_salida ,o.nombre, e.comentario 
+            e.id as embarque_id,e.documento ,e.fecha,e.or_fecha_hora_salida ,o.nombre, e.comentario 
             ,e2.id as entrega_id,e2.sucursal ,e2.destinatario, e2.documento as documento_envio ,e2.origen ,e2.entidad,e2.fecha_documento 
             ,ed.id as entrega_det_id,ed.clave,ed.descripcion, ed.cantidad,ed .valor 
             from embarques e join entrega e2  on (e.id = e2.embarque_id) join entrega_det ed on (ed.entrega_id =e2.id) join operador o on (e.operador_id  = o.id)

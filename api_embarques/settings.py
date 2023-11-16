@@ -53,6 +53,7 @@ LOCAL_APPS = [
      'applications.reportes',
      'applications.embarques',
      'applications.ruteo',
+     'applications.tableros',
 ]
 
 THIRD_PART_APPS = [

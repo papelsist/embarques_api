@@ -20,5 +20,6 @@ urlpatterns = [
     path('api/embarques/registrar_regreso', views.registrar_regreso, name='registrar_regreso'),
     path('api/embarques/regresos', views.Regresos.as_view(), name='regresos'),
     path('api/embarques/envios_pendientes', views.EnviosPendientes.as_view(), name='envios_pendientes'),
-     path('api/embarques/embarque_ruteo', views.embarque_por_ruteo, name='embarque_por_ruteo'),
+    path('api/embarques/embarque_ruteo', views.embarque_por_ruteo, name='embarque_por_ruteo'),
+    path('api/embarques/asignar_evios_pendientes', views.asignar_evios_pendientes, name='asignar_evios_pendientes'),
 ]

@@ -161,5 +161,42 @@ def crear_embarque_por_ruteo(ruta):
                 entrega_det.save()
     embarque.save()
 
+
+def asignar_envios_pendientes(data):
+    print(data)
+    embarque = Embarque.objects.get(pk=data['embarque_id'])
+    print(embarque)
+    for env in data['envios']:
+        print(env)
+        envio = Envio.objects.get(pk=env)
+        print(envio)
+        entrega = Entrega(
+                        envio=envio,
+                        embarque=embarque,
+                        sucursal = embarque.sucursal.nombre,
+                        destinatario = envio.destinatario,
+                        operador = embarque.operador.nombre,
+                        entidad = envio.entidad,
+                        fecha_documento = envio.fecha_documento,
+                        documento = envio.documento,
+                        tipo_documento = envio.tipo_documento,
+                        origen = envio.tipo_documento
+                        )
+        entrega.save()
+        for det in envio.detalles.all():
+            if det.clave != 'CORTE':
+                print(det)
+                entrega_det = EntregaDet(
+                        entrega= entrega,
+                        envio_det = det,
+                        clave = det.clave,
+                        descripcion = det.me_descripcion,
+                        cantidad = det.me_cantidad,
+                        valor = det.valor
+                    )
+                entrega_det.save()
+    embarque.save()
+
+   
     
     
