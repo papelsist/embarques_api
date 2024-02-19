@@ -22,4 +22,8 @@ urlpatterns = [
     path('api/embarques/envios_pendientes', views.EnviosPendientes.as_view(), name='envios_pendientes'),
     path('api/embarques/embarque_ruteo', views.embarque_por_ruteo, name='embarque_por_ruteo'),
     path('api/embarques/asignar_evios_pendientes', views.asignar_evios_pendientes, name='asignar_evios_pendientes'),
+    path('api/embarques/transito_operador', views.TransitoOperador.as_view(), name='transito_operador'),
+    path('api/embarques/regresos_operador', views.RegresosOperador.as_view(), name='regresos_operador'),
+    path('api/embarques/test', views.test_view, name='test'),
+    path('api/embarques/crear_incidencia', views.crear_incidencia_entrega, name='crear_incidencia'),
 ]

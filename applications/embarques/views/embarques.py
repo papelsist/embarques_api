@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from datetime import date
-from ..models import Envio, Entrega,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques
+from ..models import Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador
 from ..serializers import EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer
 
 from rest_framework.generics import (ListAPIView, 
@@ -10,7 +10,8 @@ from rest_framework.generics import (ListAPIView,
                                     RetrieveUpdateAPIView
                                     )
 from ..services import (salvar_embarque, borrar_entrega_det, registrar_salida_embarque, borrar_embarque, actualizar_bitacora_embarque, 
-                        eliminar_entrega_embarque, registrar_regreso_embarque, crear_embarque_por_ruteo, asignar_envios_pendientes)
+                        eliminar_entrega_embarque, registrar_regreso_embarque, crear_embarque_por_ruteo, asignar_envios_pendientes, get_user_logged,
+                        crear_incidencia_entrega_det)
 
 
 
@@ -137,7 +138,7 @@ class EnviosPendientes(ListAPIView):
         envios = Envio.objects.pendientes_salida(fecha_inicial, fecha_final, sucursal)
         envios_ser = [env for env in envios if env.saldo > 0  ]
         return envios_ser
-
+    
 @api_view(['POST'])
 def embarque_por_ruteo(request):
     ruta = request.data
@@ -149,3 +150,41 @@ def asignar_evios_pendientes(request):
     data = request.data
     asignar_envios_pendientes(data)
     return Response({})
+
+class TransitoOperador(ListAPIView):
+    serializer_class = EmbarqueSerializer
+    def get_queryset(self):
+        user = get_user_logged(self.request)
+        print(user)
+        operador = Operador.objects.get(user = user)
+        queryset = Embarque.objects.transito_operador(operador)
+        return queryset
+    
+class RegresosOperador(ListAPIView):
+    serializer_class = EmbarqueSerializer
+    def get_queryset(self):
+        fecha_inicial = self.request.query_params.get('fecha_inicial')
+        fecha_final = self.request.query_params.get('fecha_final')
+        user = get_user_logged(self.request)
+        print(user)
+        operador = Operador.objects.get(user = user)
+        queryset = Embarque.objects.regresos_operador(fecha_inicial,fecha_final,operador)
+        return queryset
+    
+
+@api_view(['POST'])
+def crear_incidencia_entrega(request):
+    data = request.data
+    entrega_det_id= data['entrega_det']
+    entrega_det = crear_incidencia_entrega_det( entrega_det_id,data['incidencia'])
+    #print(entrega_det)
+ 
+    return Response({"message":"Complete sucesfully"})
+
+@api_view(['GET'])  
+def test_view(request):
+    print(request)
+    return Response({"Message":"Test"})
+    
+    
+    

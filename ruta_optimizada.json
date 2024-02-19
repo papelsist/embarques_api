@@ -12,53 +12,23 @@
                   "trips_index": 0
             },
             {
-                  "distance": 0.4750825134162465,
-                  "name": "Calle Primavera",
+                  "distance": 0,
+                  "name": "Calle Marl\u00edn",
                   "location": [
-                        -98.949708,
-                        19.32724
-                  ],
-                  "waypoint_index": 8,
-                  "trips_index": 0
-            },
-            {
-                  "distance": 0.4750825134162465,
-                  "name": "Calle Primavera",
-                  "location": [
-                        -98.949708,
-                        19.32724
-                  ],
-                  "waypoint_index": 7,
-                  "trips_index": 0
-            },
-            {
-                  "distance": 0.4750825134162465,
-                  "name": "Calle Primavera",
-                  "location": [
-                        -98.949708,
-                        19.32724
-                  ],
-                  "waypoint_index": 6,
-                  "trips_index": 0
-            },
-            {
-                  "distance": 0.1526293431966485,
-                  "name": "Calle Nativitas",
-                  "location": [
-                        -99.041457,
-                        19.31155
-                  ],
-                  "waypoint_index": 5,
-                  "trips_index": 0
-            },
-            {
-                  "distance": 3.017341337647894,
-                  "name": "Calle Acueducto",
-                  "location": [
-                        -99.115395,
-                        19.250867
+                        -99.059519,
+                        19.289482
                   ],
                   "waypoint_index": 3,
+                  "trips_index": 0
+            },
+            {
+                  "distance": 7.362144807339252,
+                  "name": "",
+                  "location": [
+                        -99.089932,
+                        19.309984
+                  ],
+                  "waypoint_index": 4,
                   "trips_index": 0
             },
             {
@@ -68,35 +38,15 @@
                         -99.081663,
                         19.325431
                   ],
-                  "waypoint_index": 4,
-                  "trips_index": 0
-            },
-            {
-                  "distance": 6.082181923632065,
-                  "name": "Calle Agua Caliente",
-                  "location": [
-                        -99.073896,
-                        19.409338
-                  ],
-                  "waypoint_index": 9,
-                  "trips_index": 0
-            },
-            {
-                  "distance": 1.6160973761640443,
-                  "name": "Calle Alcanfores",
-                  "location": [
-                        -99.114584,
-                        19.344923
-                  ],
                   "waypoint_index": 2,
                   "trips_index": 0
             },
             {
-                  "distance": 7.200606026309709,
-                  "name": "Calle Ma\u00edz",
+                  "distance": 4.748184837629596,
+                  "name": "Calle Sur 127",
                   "location": [
-                        -99.116329,
-                        19.346376
+                        -99.107832,
+                        19.353772
                   ],
                   "waypoint_index": 1,
                   "trips_index": 0
@@ -104,83 +54,48 @@
       ],
       "trips": [
             {
-                  "geometry": "eeduBby{{QqA|HvU`FaBza@daA`FyJi@xAkNbQvD`F_MvgCbK|v@kVfwAxTpv@pGfGuEjzAbc@heBez@dZdb@dZqFaKbAqNxC}W}c@eeBry@i_Bma@{z@siCarBacBOgLqHnJeb@w@yEff@xDka@iJaAlEkb@ct@of@hP_m@jLsLjQ_QpeAi^bWsXyCkDuPeL`w@kgAhi@cc@nHqd@aBke@vCuRfGrA|L{|AgpAisBWms@_b@gMq\\Eoh@w_@uFmm@kOoA????jOnAzCfh@fEx@cyAlkB}h@x]cvAv}A{FjWizBtbDuiDvgHgJnOiGuCzEhGyOh^|QrJg^du@fX`Mg@t]bwE`Y`ObHrItVsAiPpf@|QbYnDpA}H",
+                  "geometry": "eeduBby{{QqA|HjUpEE`GdAmShNt@oCK\\}Ip{AjQjZNje@oLbSem@dSiHfNcuAwa@mFp@qGxIg}@n`@fWx\\sa@lXsA~L_Lz_@e@hAgO`l@iPdRyWtJlHjA|@}LpQsF_FpBtQmRvWtL`u@gfAl|@yc@q[t^r^eVhSaFaACuBBtB{bAuR_Kj_AoRvI{S|l@kb@bLgS@sClXedAoL}Vy@uMlD{JoAh@}JkMiChA_H",
                   "legs": [
                         {
                               "steps": [],
                               "summary": "",
-                              "weight": 517.8,
-                              "duration": 429.6,
-                              "distance": 2373
+                              "weight": 304,
+                              "duration": 245,
+                              "distance": 1353.4
                         },
                         {
                               "steps": [],
                               "summary": "",
-                              "weight": 262.6,
-                              "duration": 214.1,
-                              "distance": 864.3
+                              "weight": 1123.3,
+                              "duration": 996.2,
+                              "distance": 6670.3
                         },
                         {
                               "steps": [],
                               "summary": "",
-                              "weight": 2336.9,
-                              "duration": 1928.7,
-                              "distance": 11942.1
+                              "weight": 1277.1,
+                              "duration": 1154,
+                              "distance": 5897.9
                         },
                         {
                               "steps": [],
                               "summary": "",
-                              "weight": 2015.2,
-                              "duration": 1807.3,
-                              "distance": 11986.4
+                              "weight": 4799.1,
+                              "duration": 1314.2,
+                              "distance": 6452
                         },
                         {
                               "steps": [],
                               "summary": "",
-                              "weight": 1470.3,
-                              "duration": 1313.9,
-                              "distance": 6348.1
-                        },
-                        {
-                              "steps": [],
-                              "summary": "",
-                              "weight": 2262.3,
-                              "duration": 2036.7,
-                              "distance": 13157
-                        },
-                        {
-                              "steps": [],
-                              "summary": "",
-                              "weight": 0,
-                              "duration": 0,
-                              "distance": 0
-                        },
-                        {
-                              "steps": [],
-                              "summary": "",
-                              "weight": 0,
-                              "duration": 0,
-                              "distance": 0
-                        },
-                        {
-                              "steps": [],
-                              "summary": "",
-                              "weight": 2040.8,
-                              "duration": 1898.6,
-                              "distance": 17111.4
-                        },
-                        {
-                              "steps": [],
-                              "summary": "",
-                              "weight": 1647.4,
-                              "duration": 1264.6,
-                              "distance": 9761.1
+                              "weight": 1720.7,
+                              "duration": 1513.7,
+                              "distance": 7958
                         }
                   ],
                   "weight_name": "routability",
-                  "weight": 12553.3,
-                  "duration": 10893.5,
-                  "distance": 73543.40000000001
+                  "weight": 9224.2,
+                  "duration": 5223.099999999999,
+                  "distance": 28331.6
             }
       ]
 }

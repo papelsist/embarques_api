@@ -2,10 +2,40 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from .managers import UserManager
-from applications.embarques.models import Sucursal
+#from applications.embarques.models import Sucursal
 
 
 
+class Sucursal(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    activo = models.BooleanField(default= False)
+    clave = models.BigIntegerField(unique=True)
+    nombre = models.CharField(max_length=255)
+    direccion_calle = models.CharField(max_length=200, blank=True, null=True)
+    direccion_numero_exterior = models.CharField(max_length=50, blank=True, null=True)
+    direccion_numero_interior = models.CharField(max_length=50, blank=True, null=True)
+    direccion_codigo_postal = models.CharField(max_length=255, blank=True, null=True)
+    direccion_colonia = models.CharField(max_length=255, blank=True, null=True)
+    direccion_municipio = models.CharField(max_length=255, blank=True, null=True)
+    direccion_estado = models.CharField(max_length=255, blank=True, null=True)
+    direccion_pais = models.CharField(max_length=100, blank=True, null=True)
+    almacen = models.BooleanField(default= False)
+    db_url = models.CharField(max_length=255, blank=True, null=True)
+    sx = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField()
+    last_updated = models.DateTimeField()
+    create_user = models.CharField(max_length=100, blank=True, null=True)
+    update_user = models.CharField(max_length=100, blank=True, null=True)
+    version = models.BigIntegerField()
+    or_municipio = models.CharField(max_length=255, blank=True, null=True)
+    or_estado = models.CharField(max_length=255, blank=True, null=True)
+    direccion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
+    direccion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
+
+
+    class Meta:
+        managed = False
+        db_table = 'sucursal'
 
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.BigAutoField(primary_key=True)

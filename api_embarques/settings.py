@@ -30,8 +30,7 @@ SECRET_KEY = "django-insecure-ii0&9pue56%44abdjt8ya+!b1pc3kszktofgxb-40q(vibqi6t
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'localhost',
-    '10.10.1.85'
+    '*'
 ]
 
 
@@ -54,6 +53,7 @@ LOCAL_APPS = [
      'applications.embarques',
      'applications.ruteo',
      'applications.tableros',
+     'applications.knzl',
 ]
 
 THIRD_PART_APPS = [
@@ -124,7 +124,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
-]
+] 
 
 AUTH_USER_MODEL = 'authentication.User'
 
@@ -144,8 +144,7 @@ USE_L10N = True
 CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
-    'COERCE_DECIMAL_TO_STRING': False,
-    
+    'COERCE_DECIMAL_TO_STRING': False,   
 }
 
 REST_FRAMEWORK = { 'DEFAULT_AUTHENTICATION_CLASSES':[
@@ -159,22 +158,9 @@ REST_FRAMEWORK = { 'DEFAULT_AUTHENTICATION_CLASSES':[
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-}
-
-'''
-REST_FRAMEWORK = { 'DEFAULT_AUTHENTICATION_CLASSES':[
-    'rest_framework.authentication.TokenAuthentication',
-    'rest_framework_simplejwt.authentication.JWTAuthentication', ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ]
 } 
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-}
-'''
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/

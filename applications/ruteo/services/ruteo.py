@@ -317,8 +317,7 @@ def make_rutas_json(rutas):
             file_json.write(rutas_json) 
     return rutas_json
 
-def build_ruteo_by_envios(envios):
-    pass
+
 
 def build_ruteo_by_pendientes(fecha,sucursal_nombre):
     

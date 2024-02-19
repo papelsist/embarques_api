@@ -15,7 +15,8 @@ class UserManager(BaseUserManager, models.Manager):
             )
             user.set_password(password)
             #user.password = make_password(user.password)
-            user.save(using=self.db)
+            #user.save(using=self.db)
+            user.save()
             return user
 
     def create_user(self, username, password = None, **extra_fields):

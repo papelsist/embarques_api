@@ -1,5 +1,7 @@
 from django.db import models
 from .managers import EnvioManager,EntregaManager, OperadorManager, FolioManager,EmbarqueManager
+from applications.authentication.models import User
+
 
 
 """ Modelos de Catalogos"""
@@ -122,19 +124,20 @@ class Operador(models.Model):
     precio_tonelada = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
     celular = models.CharField(max_length=50, blank=True, null=True)
     email = models.CharField(max_length=255, blank=True, null=True)
-    facturista = models.ForeignKey('FacturistaEmbarques', models.DO_NOTHING)
-    transporte = models.ForeignKey('TransporteEmbarques', models.DO_NOTHING)
+    facturista = models.ForeignKey('FacturistaEmbarques', models.DO_NOTHING, blank=True, null=True)
+    transporte = models.ForeignKey('TransporteEmbarques', models.DO_NOTHING, blank=True, null=True)
     sx = models.CharField(max_length=255, blank=True, null=True)
     date_created = models.DateTimeField()
     last_updated = models.DateTimeField()
     create_user = models.CharField(max_length=100, blank=True, null=True)
     update_user = models.CharField(max_length=100, blank=True, null=True)
     version = models.BigIntegerField()
+    user = models.ForeignKey(User, models.DO_NOTHING, blank=True, null=True)
 
     objects = OperadorManager()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'operador'
 
 class Propietario(models.Model):
@@ -352,6 +355,7 @@ class EntregaDet(models.Model):
     create_user = models.CharField(max_length=255, blank=True, null=True)
     update_user = models.CharField(max_length=255, blank=True, null=True)
     version = models.BigIntegerField(blank=True, null=True)
+    kilos = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
 
     @property
     def saldo(self): 
@@ -396,15 +400,16 @@ class EntregaComision(models.Model):
 class EntregaIncidencia(models.Model):
     id = models.BigAutoField(primary_key=True)
     entrega_det = models.ForeignKey('EntregaDet', models.DO_NOTHING,related_name='incidencia')
-    area = models.CharField(max_length=255, blank=True, null=True)
-    reporto_nombre = models.CharField(max_length=255, blank=True, null=True)
-    reporto_puesto = models.CharField(max_length=255, blank=True, null=True)
+    #area = models.CharField(max_length=255, blank=True, null=True)
+    #reporto_nombre = models.CharField(max_length=255, blank=True, null=True)
+    #reporto_puesto = models.CharField(max_length=255, blank=True, null=True)
+    devuelto = models.DecimalField(max_digits=19, decimal_places=2, default=0)
     entregado = models.BooleanField(default= False) 
-    completo = models.BooleanField(default= False) 
+    incompleto = models.BooleanField(default= False) 
     maltratado = models.BooleanField(default= False) 
-    motivo = models.CharField(max_length=255, blank=True, null=True)
     impreso = models.BooleanField(default= False) 
     cortado = models.BooleanField(default= False)
+    motivo = models.CharField(max_length=255, blank=True, null=True)
     comentario = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:

@@ -1,5 +1,7 @@
-from ..models import Embarque,Entrega,EntregaDet,Envio,EnvioDet
+from ..models import Embarque,Entrega,EntregaDet,Envio,EnvioDet, EntregaIncidencia
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from datetime import datetime
+from decimal import Decimal
 
 
 
@@ -36,18 +38,23 @@ def salvar_embarque(embarque_dict):
 
         for det in ent['detalles']:
             envio_det = EnvioDet.objects.get(id = det['id'])
+            enviar = Decimal(det['enviar'])
+            kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
+            
             try:
                 entrega_det = EntregaDet.objects.get(id = det['entregaDetId'])
                 entrega_det.cantidad = det['enviar']
+                entrega_det.kilos = kilos_envio
             except EntregaDet.DoesNotExist as e:
-                print(e)
+                print("Tratando de crear un detalle no existente")
                 entrega_det = EntregaDet(
                     entrega= entrega,
                     envio_det = envio_det,
                     clave = det['clave'],
                     descripcion = det['me_descripcion'],
                     cantidad = det['enviar'],
-                    valor = det['valor']
+                    valor = det['valor'],
+                    kilos = kilos_envio
                 )
             finally:
                 entrega_det.save()
@@ -75,7 +82,6 @@ def registrar_salida_embarque(embarque_dict):
 def borrar_embarque(embarque_dict):
     embarque = Embarque.objects.get(id = embarque_dict['id'])
     if len(embarque.partidas.all())==0:
-        print('Borrar Embarque !!!')
         embarque_deleted = embarque.delete()
         return embarque_deleted[0] 
     else: 
@@ -113,7 +119,6 @@ def registrar_regreso_embarque(embarque_dict):
     partidas = embarque.partidas.all().filter(recepcion = None )
     print(len(partidas))
     if len(partidas) == 0:
-        print("Registrando el regreso")
         embarque.regreso=  datetime.now()
         embarque.save()
         actualizado = 1
@@ -123,17 +128,11 @@ def registrar_regreso_embarque(embarque_dict):
 
 
 def crear_embarque_por_ruteo(ruta):
-    #print(ruta)
     embarque_id = ruta['embarque']['id']
-    print(embarque_id)
     destinos = ruta['destinos']
     embarque = Embarque.objects.get(pk=embarque_id)
-    print(embarque)
     for destino in destinos:
-        print("*"*50)
-        print(destino['id'])
         envio = Envio.objects.get(pk=destino['id'])
-        print(envio)
         entrega = Entrega(
                         envio=envio,
                         embarque=embarque,
@@ -149,7 +148,6 @@ def crear_embarque_por_ruteo(ruta):
         entrega.save()
         for det in envio.detalles.all():
             if det.clave != 'CORTE':
-                print(det)
                 entrega_det = EntregaDet(
                         entrega= entrega,
                         envio_det = det,
@@ -197,6 +195,36 @@ def asignar_envios_pendientes(data):
                 entrega_det.save()
     embarque.save()
 
+
+def crear_incidencia_entrega_det( entrega_det_id, incidencia_dict):
+    entrega_det = EntregaDet.objects.get(pk=entrega_det_id)
+    incidencia = EntregaIncidencia()
+    incidencia.entrega_det = entrega_det
+    incidencia.motivo = incidencia_dict['motivo']
+    incidencia.comentario = incidencia_dict['comentario']
+    if "devuelto" in incidencia_dict:
+        incidencia.devuelto = incidencia_dict['devuelto']
+    if "entregado" in incidencia_dict:
+        incidencia.entregado = incidencia_dict['entregado']
+    if "incompleto" in incidencia_dict:
+        incidencia.incompleto = incidencia_dict['incompleto']
+    if "maltratado" in incidencia_dict:
+        incidencia.maltratado = incidencia_dict['maltratado']
+    if "impreso" in incidencia_dict:
+        incidencia.impreso = incidencia_dict['impreso']
+    if "cortado" in incidencia_dict:
+        incidencia.cortado = incidencia_dict['cortado']  
+    incidencia.save()
+    entrega_det.incidencia.add(incidencia)
+    entrega_det.save()
+    return entrega_det
    
-    
+
+def get_user_logged(request):
+    authentication = JWTAuthentication()
+    header = authentication.get_header(request)
+    raw_token = authentication.get_raw_token(header) 
+    validated_token = authentication.get_validated_token(raw_token)
+    user = authentication.get_user(validated_token)
+    return user
     
