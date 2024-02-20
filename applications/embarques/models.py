@@ -490,6 +490,7 @@ class EnvioDet(models.Model):
     create_user = models.CharField(max_length=255, blank=True, null=True)
     update_user = models.CharField(max_length=255, blank=True, null=True)
     version = models.BigIntegerField()
+    cortes = models.CharField(max_length=300, blank=True, null=True)
 
     @property
     def saldo(self):
