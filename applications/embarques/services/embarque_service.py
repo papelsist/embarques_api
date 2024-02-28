@@ -89,10 +89,6 @@ def borrar_embarque(embarque_dict):
     
 def actualizar_bitacora_embarque(embarque_dict):
 
-    print("*"*100)
-
-    print("*"*100)
-    
     embarque = Embarque.objects.get(id = embarque_dict['id'])
     
     partidas_dict = embarque_dict['partidas']

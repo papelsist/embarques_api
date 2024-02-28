@@ -102,14 +102,14 @@ class ActualizarEntregas(RetrieveAPIView):
 
 @api_view(['POST'])
 def actualizar_bitacora(request):
-    print(request.data) 
+
     embarque = actualizar_bitacora_embarque(request.data)
     embarque_serialized = EmbarqueSerializer(embarque)
     return Response(embarque_serialized.data)
 
 @api_view(['POST'])
 def eliminar_entrega(request):
-    print(request.data)
+  
     deleted = eliminar_entrega_embarque(request.data)
     return Response({"deleted": deleted })
 
