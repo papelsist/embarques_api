@@ -99,7 +99,7 @@ def actualizar_bitacora_embarque(embarque_dict):
         entrega.recepcion_latitud = partida["recepcion_latitud"] if "recepcion_latitud" in partida else None
         entrega.recepcion_longitud = partida["recepcion_longitud"] if  "recepcion_longitud" in partida else None
         entrega.recibio = partida["recibio"] if "recibio" in partida else None
-        entrega.save()
+        # entrega.save()
     return embarque
 
 def eliminar_entrega_embarque(entrega_dict):
