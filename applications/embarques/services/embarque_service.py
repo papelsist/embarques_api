@@ -88,18 +88,26 @@ def borrar_embarque(embarque_dict):
         return 0
     
 def actualizar_bitacora_embarque(embarque_dict):
+
+    print("*"*100)
+
+    print("*"*100)
+    
     embarque = Embarque.objects.get(id = embarque_dict['id'])
+    
     partidas_dict = embarque_dict['partidas']
+
+    
 
     for partida in partidas_dict:
         entrega = Entrega.objects.get(id = partida['entregaId'])
-        entrega.arribo = partida['arribo']
-        entrega.arribo_latitud = partida['arribo_latitud']
-        entrega.arribo_longitud = partida['arribo_longitud']
-        entrega.recepcion = partida['recepcion']
-        entrega.recepcion_latitud = partida['recepcion_latitud']
-        entrega.recepcion_longitud = partida['recepcion_longitud']
-        entrega.recibio = partida['recibio']
+        entrega.arribo = partida['arribo'] if 'arribo' in partida else None
+        entrega.arribo_latitud = partida['arribo_latitud'] if 'arribo_latitud' in partida else None
+        entrega.arribo_longitud = partida['arribo_longitud'] if 'arribo_longitud' in partida else None
+        entrega.recepcion = partida['recepcion'] if 'recepcion' in partida else None
+        entrega.recepcion_latitud = partida['recepcion_latitud'] if 'recepcion_latitud' in partida else None
+        entrega.recepcion_longitud = partida['recepcion_longitud'] if  'recepcion_longitud' in partida else None
+        entrega.recibio = partida['recibio'] if 'recibio' in partida else None
         entrega.save()
 
     return embarque

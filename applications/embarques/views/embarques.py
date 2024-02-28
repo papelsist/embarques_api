@@ -102,6 +102,7 @@ class ActualizarEntregas(RetrieveAPIView):
 
 @api_view(['POST'])
 def actualizar_bitacora(request):
+    print(request.data) 
     embarque = actualizar_bitacora_embarque(request.data)
     embarque_serialized = EmbarqueSerializer(embarque)
     return Response(embarque_serialized.data)
