@@ -90,7 +90,7 @@ def borrar_embarque(embarque_dict):
 def actualizar_bitacora_embarque(embarque_dict):
     embarque = Embarque.objects.get(id = embarque_dict['id'])
     partidas_dict = embarque_dict['partidas']
-    for partida in partidas_dict:
+    ''' for partida in partidas_dict:
         entrega = Entrega.objects.get(id = partida['entregaId'])
         entrega.arribo = partida["arribo"] if "arribo" in partida else None
         entrega.arribo_latitud = partida["arribo_latitud"] if "arribo_latitud" in partida else None
@@ -98,7 +98,7 @@ def actualizar_bitacora_embarque(embarque_dict):
         entrega.recepcion = partida["recepcion"] if "recepcion" in partida else None
         entrega.recepcion_latitud = partida["recepcion_latitud"] if "recepcion_latitud" in partida else None
         entrega.recepcion_longitud = partida["recepcion_longitud"] if  "recepcion_longitud" in partida else None
-        entrega.recibio = partida["recibio"] if "recibio" in partida else None
+        entrega.recibio = partida["recibio"] if "recibio" in partida else None '''
         # entrega.save()
     return embarque
 
