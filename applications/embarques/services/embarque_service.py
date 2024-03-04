@@ -1,4 +1,4 @@
-from ..models import Embarque,Entrega,EntregaDet,Envio,EnvioDet, EntregaIncidencia
+from ..models import Embarque,Entrega,EntregaDet,Envio,EnvioDet, EntregaIncidencia, ImgEntrega
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from datetime import datetime
 from decimal import Decimal
@@ -99,7 +99,16 @@ def actualizar_bitacora_embarque(embarque_dict):
         entrega.recepcion_latitud = partida["recepcion_latitud"] if "recepcion_latitud" in partida else None
         entrega.recepcion_longitud = partida["recepcion_longitud"] if  "recepcion_longitud" in partida else None
         entrega.recibio = partida["recibio"] if "recibio" in partida else None
+
+        if 'imagenes' in partida:
+            imagenes = partida['imagenes']
+            for imagen in imagenes:
+                img = ImgEntrega()
+                img.url_image = imagen
+                img.entrega = entrega
+                img.save()
         entrega.save()
+
     return embarque
 
 def eliminar_entrega_embarque(entrega_dict):
@@ -195,6 +204,7 @@ def asignar_envios_pendientes(data):
 
 
 def crear_incidencia_entrega_det( entrega_det_id, incidencia_dict):
+    print(incidencia_dict)
     entrega_det = EntregaDet.objects.get(pk=entrega_det_id)
     incidencia = EntregaIncidencia()
     incidencia.entrega_det = entrega_det
@@ -211,7 +221,13 @@ def crear_incidencia_entrega_det( entrega_det_id, incidencia_dict):
     if "impreso" in incidencia_dict:
         incidencia.impreso = incidencia_dict['impreso']
     if "cortado" in incidencia_dict:
-        incidencia.cortado = incidencia_dict['cortado']  
+        incidencia.cortado = incidencia_dict['cortado'] 
+    if "img1" in incidencia_dict:
+        incidencia.img1 = incidencia_dict['img1']
+    if "img2" in incidencia_dict:
+        incidencia.img2 = incidencia_dict['img2']
+    if "img3" in incidencia_dict:
+        incidencia.img3 = incidencia_dict['img3']
     incidencia.save()
     entrega_det.incidencia.add(incidencia)
     entrega_det.save()

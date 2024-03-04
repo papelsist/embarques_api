@@ -338,6 +338,19 @@ class Entrega(models.Model):
         managed = False
         db_table = 'entrega'
 
+class ImgEntrega(models.Model):
+
+    id = models.BigAutoField(primary_key=True)
+    entrega = models.ForeignKey('Entrega', models.CASCADE,related_name='imagenes')
+    url_image = models.CharField(max_length=255)
+
+    class Meta:
+        managed = True
+        db_table = 'img_entrega'
+
+
+
+
 class EntregaDet(models.Model):
     id = models.BigAutoField(primary_key=True)
     entrega = models.ForeignKey('Entrega', models.CASCADE,related_name='detalles')
@@ -372,6 +385,8 @@ class EntregaDet(models.Model):
     class Meta:
         managed = False
         db_table = 'entrega_det'
+
+
     
 class EntregaComision(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -411,10 +426,15 @@ class EntregaIncidencia(models.Model):
     cortado = models.BooleanField(default= False)
     motivo = models.CharField(max_length=255, blank=True, null=True)
     comentario = models.CharField(max_length=255, blank=True, null=True)
+    img1 = models.CharField(max_length=255, blank=True, null=True)
+    img2 = models.CharField(max_length=255, blank=True, null=True)
+    img3 = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'entrega_incidencia'
+
+
 
 ''' class EntregaRecorrido(models.Model):
     id = models.BigAutoField(primary_key=True)
