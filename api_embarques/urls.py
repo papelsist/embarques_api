@@ -12,4 +12,5 @@ urlpatterns = [
     path('',include('applications.ruteo.urls')),
     path('',include('applications.tableros.urls')),
     path('',include('applications.knzl.urls')),
+    path('',include('applications.dashboards.urls')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

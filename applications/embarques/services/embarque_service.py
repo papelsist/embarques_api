@@ -39,8 +39,8 @@ def salvar_embarque(embarque_dict):
         for det in ent['detalles']:
             envio_det = EnvioDet.objects.get(id = det['id'])
             enviar = Decimal(det['enviar'])
-            kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
             
+            kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
             try:
                 entrega_det = EntregaDet.objects.get(id = det['entregaDetId'])
                 entrega_det.cantidad = det['enviar']
@@ -188,26 +188,49 @@ def asignar_envios_pendientes(data):
                         origen = envio.tipo_documento
                         )
         entrega.save()
+        
         for det in envio.detalles.all():
             if det.clave != 'CORTE':
                 print(det)
+              
                 entrega_det = EntregaDet(
                         entrega= entrega,
                         envio_det = det,
                         clave = det.clave,
                         descripcion = det.me_descripcion,
-                        cantidad = det.me_cantidad,
-                        valor = det.valor
+                        cantidad = det.saldo,
+                        valor = det.valor,
+                        kilos = det.me_kilos
                     )
                 entrega_det.save()
     embarque.save()
 
 
 def crear_incidencia_entrega_det( entrega_det_id, incidencia_dict):
-    print(incidencia_dict)
+
     entrega_det = EntregaDet.objects.get(pk=entrega_det_id)
+    envio = entrega_det.entrega.envio
+    entrega = entrega_det.entrega
     incidencia = EntregaIncidencia()
-    incidencia.entrega_det = entrega_det
+    incidencia.envio = envio
+    incidencia.embarque = entrega.embarque.documento
+    ####### Informacion Entrega
+    incidencia.sucursal = entrega.sucursal
+    incidencia.destinatario = entrega.destinatario
+    incidencia.operador = entrega.operador
+    incidencia.origen = entrega.origen
+    incidencia.entidad = entrega.entidad
+    incidencia.realizo = entrega.realizo
+    incidencia.fecha_documento = entrega.fecha_documento
+    incidencia.documento = entrega.documento
+    incidencia.tipo_documento = entrega.tipo_documento
+    ###### Informacion EntregaDet
+    incidencia.clave = entrega_det.clave
+    incidencia.descripcion = entrega_det.descripcion
+    incidencia.cantidad =  entrega_det.cantidad
+    incidencia.valor = entrega_det.valor
+    incidencia.fecha = datetime.today()
+    ######## Infomacion Incidencia
     incidencia.motivo = incidencia_dict['motivo']
     incidencia.comentario = incidencia_dict['comentario']
     if "devuelto" in incidencia_dict:
@@ -229,8 +252,6 @@ def crear_incidencia_entrega_det( entrega_det_id, incidencia_dict):
     if "img3" in incidencia_dict:
         incidencia.img3 = incidencia_dict['img3']
     incidencia.save()
-    entrega_det.incidencia.add(incidencia)
-    entrega_det.save()
     return entrega_det
    
 

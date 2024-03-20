@@ -1,8 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from datetime import date
-from ..models import Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador
-from ..serializers import EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer
+from ..models import Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador, EntregaIncidencia
+from ..serializers import EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer, IncidenciaSerializer,EmbarqueRutaSerializer,EntregaRutaSerializer
 
 from rest_framework.generics import (ListAPIView, 
                                     CreateAPIView,
@@ -181,6 +181,27 @@ def crear_incidencia_entrega(request):
     #print(entrega_det)
  
     return Response({"message":"Complete sucesfully"})
+
+class IncidenciasEntrega(ListAPIView):
+    serializer_class = IncidenciaSerializer
+    def get_queryset(self):
+        fecha_inicial = self.request.query_params.get('fecha_inicial')
+        fecha_final = self.request.query_params.get('fecha_final')
+        queryset = EntregaIncidencia.objects.incidencias_periodo(fecha_inicial,fecha_final)
+        return queryset
+    
+class Incidencia(RetrieveAPIView):
+    serializer_class = IncidenciaSerializer
+    queryset = EntregaIncidencia.objects.filter()
+    
+class RutaEmbarque(RetrieveAPIView):
+    serializer_class = EmbarqueRutaSerializer
+    queryset = Embarque.objects.filter()
+
+class EntregaRuta(RetrieveAPIView):
+    serializer_class = EntregaRutaSerializer
+    queryset = Entrega.objects.filter()
+       
 
 @api_view(['GET'])  
 def test_view(request):

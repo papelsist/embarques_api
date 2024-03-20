@@ -1,67 +1,43 @@
 [
       {
+            "embarque_documento": 10,
+            "embarque_id": 159,
+            "transporte_id": 2,
+            "descripcion": "FORD TRANSI  VAN",
+            "transporte_capacidad": 4000.0,
+            "destinos": [
+                  11777
+            ],
+            "ocupado": 4528.8,
+            "destinos_coords": [
+                  {
+                        "destino": 11777,
+                        "latitud": 19.401618,
+                        "longitud": -99.052903
+                  }
+            ]
+      },
+      {
             "embarque_documento": 14,
             "embarque_id": 163,
             "transporte_id": 25,
             "descripcion": "FORD F-350",
             "transporte_capacidad": 7000.0,
             "destinos": [
-                  11787,
-                  11773,
                   11781,
-                  11777,
-                  11771
+                  11773
             ],
-            "ocupado": 4939.27,
+            "ocupado": 263.86,
             "destinos_coords": [
-                  {
-                        "destino": 11787,
-                        "latitud": 18.945004,
-                        "longitud": -99.188862
-                  },
-                  {
-                        "destino": 11773,
-                        "latitud": 19.278664,
-                        "longitud": -99.169831
-                  },
                   {
                         "destino": 11781,
                         "latitud": 19.342458,
                         "longitud": -98.946067
                   },
                   {
-                        "destino": 11777,
-                        "latitud": 19.401618,
-                        "longitud": -99.052903
-                  },
-                  {
-                        "destino": 11771,
-                        "latitud": 19.373232,
-                        "longitud": -99.194453
-                  }
-            ]
-      },
-      {
-            "embarque_documento": 15,
-            "embarque_id": 164,
-            "transporte_id": 14,
-            "descripcion": "FORD F350 ",
-            "transporte_capacidad": 7000.0,
-            "destinos": [
-                  11874,
-                  11782
-            ],
-            "ocupado": 1496.46,
-            "destinos_coords": [
-                  {
-                        "destino": 11874,
-                        "latitud": 19.459948,
-                        "longitud": -99.148754
-                  },
-                  {
-                        "destino": 11782,
-                        "latitud": 19.461332,
-                        "longitud": -99.149166
+                        "destino": 11773,
+                        "latitud": 19.278664,
+                        "longitud": -99.169831
                   }
             ]
       }

@@ -1,5 +1,5 @@
 from django.db import models
-from .managers import EnvioManager,EntregaManager, OperadorManager, FolioManager,EmbarqueManager
+from .managers import EnvioManager,EntregaManager, OperadorManager, FolioManager,EmbarqueManager, EntregaIncidenciaManager
 from applications.authentication.models import User
 
 
@@ -332,7 +332,7 @@ class Entrega(models.Model):
     update_user = models.CharField(max_length=255, blank=True, null=True)
     version = models.BigIntegerField(blank=True, null=True)
 
-    objects = EntregaManager
+    objects = EntregaManager()
 
     class Meta:
         managed = False
@@ -414,10 +414,26 @@ class EntregaComision(models.Model):
 
 class EntregaIncidencia(models.Model):
     id = models.BigAutoField(primary_key=True)
-    entrega_det = models.ForeignKey('EntregaDet', models.DO_NOTHING,related_name='incidencia')
-    #area = models.CharField(max_length=255, blank=True, null=True)
-    #reporto_nombre = models.CharField(max_length=255, blank=True, null=True)
-    #reporto_puesto = models.CharField(max_length=255, blank=True, null=True)
+    envio = models.ForeignKey('Envio', models.DO_NOTHING, related_name='incidencias', null=True)
+    #### Datos Embarque
+    embarque = models.CharField(max_length=255, null=True)
+    #### Datos Entrega
+    sucursal = models.CharField(max_length=255, null=True)
+    destinatario = models.CharField(max_length=255, blank=True, null=True)
+    operador = models.CharField(max_length=255, blank=True, null=True)
+    origen = models.CharField(max_length=255, blank=True, null=True)
+    entidad = models.CharField(max_length=255, null=True)
+    realizo = models.CharField(max_length=255, blank=True, null=True)
+    fecha_documento = models.DateTimeField(null=True)
+    documento = models.CharField(max_length=255, null=True)
+    tipo_documento = models.CharField(max_length=255, null=True)
+    #### Datos EntregaDet
+    clave = models.CharField(max_length=255, blank=True, null=True)
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
+    cantidad = models.DecimalField(max_digits=19, decimal_places=2, default=0)
+    valor = models.DecimalField(max_digits=19, decimal_places=2,default=0)
+    comentario = models.CharField(max_length=255, blank=True, null=True)
+    fecha = models.DateField(blank=True, null=True)
     devuelto = models.DecimalField(max_digits=19, decimal_places=2, default=0)
     entregado = models.BooleanField(default= False) 
     incompleto = models.BooleanField(default= False) 
@@ -429,10 +445,31 @@ class EntregaIncidencia(models.Model):
     img1 = models.CharField(max_length=255, blank=True, null=True)
     img2 = models.CharField(max_length=255, blank=True, null=True)
     img3 = models.CharField(max_length=255, blank=True, null=True)
+    create_user = models.CharField(max_length=255, blank=True, null=True)
+    update_user = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    objects= EntregaIncidenciaManager()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'entrega_incidencia'
+
+class EntregaIncidenciaSeguimiento(models.Model):
+
+    id = models.BigAutoField(primary_key=True)
+    incidencia = models.ForeignKey(EntregaIncidencia, models.DO_NOTHING)
+    fecha = models.DateTimeField()
+    comentario = models.CharField(max_length=255, blank=True, null=True)
+    create_user = models.CharField(max_length=255, blank=True, null=True)
+    update_user = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'entrega_incidencia_seguimiento'
 
 
 

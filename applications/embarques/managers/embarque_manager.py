@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, F, Count,Max, Sum, Min
 
 
 class EmbarqueManager(models.Manager):
@@ -22,6 +22,19 @@ class EmbarqueManager(models.Manager):
     
     def regresos_operador(self,fecha_inicial, fecha_final,operador):
         embarques = self.filter( ~Q(or_fecha_hora_salida = None),~Q(regreso = None), fecha__range=[fecha_inicial, fecha_final], operador = operador).order_by('documento')
+        return embarques
+    
+    def embarques_operador_kilos(self,fecha_inicial, fecha_final):
+        embarques = (self.filter( fecha__range=[fecha_inicial, fecha_final])
+                     .values( 'operador__id','operador__nombre')
+                     .annotate(  
+                            fecha_inicial = Min('fecha'),
+                            fecha_final = Max('fecha'),
+                            valor = Sum('partidas__detalles__kilos'),      
+                        )
+
+                     )
+        print(embarques.query)
         return embarques
         
     

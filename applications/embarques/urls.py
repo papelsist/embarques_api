@@ -24,6 +24,10 @@ urlpatterns = [
     path('api/embarques/asignar_evios_pendientes', views.asignar_evios_pendientes, name='asignar_evios_pendientes'),
     path('api/embarques/transito_operador', views.TransitoOperador.as_view(), name='transito_operador'),
     path('api/embarques/regresos_operador', views.RegresosOperador.as_view(), name='regresos_operador'),
+    path('api/embarques/ruta_embarque/<pk>', views.RutaEmbarque.as_view(), name='ruta_embarque'),
+    path('api/embarques/ruta_entrega/<pk>', views.EntregaRuta.as_view(), name='ruta_entrega'),
     path('api/embarques/test', views.test_view, name='test'),
     path('api/embarques/crear_incidencia', views.crear_incidencia_entrega, name='crear_incidencia'),
+    path('api/embarques/entregas_incidencias', views.IncidenciasEntrega.as_view(), name='entregas_incidencias'),
+    path('api/embarques/incidencia/<pk>', views.Incidencia.as_view(), name='incidencia')
 ]

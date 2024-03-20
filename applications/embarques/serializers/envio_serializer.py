@@ -25,5 +25,11 @@ class EnvioSerializer(serializers.ModelSerializer):
         time_lapse = DateUtils.get_time_lapse_now(obj.date_created)
         return time_lapse
     
+class EnvioRutaSerializer(serializers.ModelSerializer):
+    instruccion = InstruccionEnvioSerializer()
+    class Meta:
+        model= Envio
+        fields = ['id','destinatario','detalles','documento','fecha_documento','tipo_documento','sucursal','instruccion']
+    
 
     

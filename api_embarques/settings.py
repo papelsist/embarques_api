@@ -48,12 +48,13 @@ DJANGO_APPS = [
 ]
 
 LOCAL_APPS = [
-     'applications.authentication',
-     'applications.reportes',
-     'applications.embarques',
-     'applications.ruteo',
-     'applications.tableros',
-     'applications.knzl',
+    'applications.authentication',
+    'applications.reportes',
+    'applications.embarques',
+    'applications.ruteo',
+    'applications.tableros',
+    'applications.dashboards',
+    'applications.knzl',
 ]
 
 THIRD_PART_APPS = [
