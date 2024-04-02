@@ -14,7 +14,7 @@ class EntregaDetSerializer(serializers.ModelSerializer):
         model =EntregaDet
         fields= ['id','entrega','envio_det','sx_instruccion_de_envio','almacen','instruccion_de_entrega_parcial','clave'
                  ,'descripcion','cantidad','valor', 'comentario','date_created','last_updated'
-                 ,'version','saldo','cantidad_envio','enviado']
+                 ,'version','saldo','cantidad_envio','enviado','kilos']
 
 class EntregaSerializer(serializers.ModelSerializer):
     detalles = EntregaDetSerializer(many = True)

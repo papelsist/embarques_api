@@ -36,6 +36,8 @@ def salvar_embarque(embarque_dict):
         finally:
             entrega.save()
 
+        kilos_entrega = 0
+        print("Kilos entrega: ", kilos_entrega)
         for det in ent['detalles']:
             envio_det = EnvioDet.objects.get(id = det['id'])
             enviar = Decimal(det['enviar'])
@@ -58,6 +60,11 @@ def salvar_embarque(embarque_dict):
                 )
             finally:
                 entrega_det.save()
+            kilos_entrega += kilos_envio
+            print("Kilos entrega__: ", kilos_entrega)
+        entrega.kilos = kilos_entrega
+        print("Entrega kilos: ", entrega.kilos)
+        entrega.save()
 
 def borrar_entrega_det(entrega_det_dict):
     if entrega_det_dict['entregaDetId'] :
@@ -153,8 +160,14 @@ def crear_embarque_por_ruteo(ruta):
                         origen = envio.tipo_documento
                         )
         entrega.save()
+        kilos_entrega = 0
+        print("Kilos entrega: ", kilos_entrega)
+
         for det in envio.detalles.all():
             if det.clave != 'CORTE':
+                envio_det = EnvioDet.objects.get(pk = det.id)
+                enviar = Decimal(det.me_cantidad)
+                kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
                 entrega_det = EntregaDet(
                         entrega= entrega,
                         envio_det = det,
@@ -164,6 +177,11 @@ def crear_embarque_por_ruteo(ruta):
                         valor = det.valor
                     )
                 entrega_det.save()
+                kilos_entrega += kilos_envio
+                print("Kilos entrega__: ", kilos_entrega)
+        entrega.kilos = kilos_entrega
+        print("Entrega kilos: ", entrega.kilos)
+        entrega.save()
     embarque.save()
 
 
@@ -188,11 +206,15 @@ def asignar_envios_pendientes(data):
                         origen = envio.tipo_documento
                         )
         entrega.save()
+        kilos_entrega = 0
+        print("Kilos entrega: ", kilos_entrega)
         
         for det in envio.detalles.all():
             if det.clave != 'CORTE':
                 print(det)
-              
+                envio_det = EnvioDet.objects.get(pk = det.id)
+                enviar = Decimal(det.me_cantidad)
+                kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
                 entrega_det = EntregaDet(
                         entrega= entrega,
                         envio_det = det,
@@ -200,9 +222,14 @@ def asignar_envios_pendientes(data):
                         descripcion = det.me_descripcion,
                         cantidad = det.saldo,
                         valor = det.valor,
-                        kilos = det.me_kilos
+                        kilos = kilos_envio
                     )
                 entrega_det.save()
+                kilos_entrega += kilos_envio
+                print("Kilos entrega__: ", kilos_entrega)
+        entrega.kilos = kilos_entrega
+        print("Entrega kilos: ", entrega.kilos)
+        entrega.save()
     embarque.save()
 
 
