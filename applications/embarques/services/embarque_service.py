@@ -14,7 +14,9 @@ def salvar_embarque(embarque_dict):
  
     embarque = Embarque.objects.get(id = embarque_dict['embarqueId'])
     embarque.cp = embarque_dict['cp']
+    
     embarque.save()
+    kilos_embarque = 0
     for ent in embarque_dict['partidas']:
         envio = Envio.objects.get(id = ent['envioId'])
 
@@ -37,16 +39,22 @@ def salvar_embarque(embarque_dict):
             entrega.save()
 
         kilos_entrega = 0
+        valor_entrega = 0
         print("Kilos entrega: ", kilos_entrega)
         for det in ent['detalles']:
             envio_det = EnvioDet.objects.get(id = det['id'])
             enviar = Decimal(det['enviar'])
             
             kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
+            valor_envio = Decimal(((envio_det.valor * enviar )/envio_det.me_cantidad))
+            print("Enviar: ", enviar)
+            print("Valor envio: ", valor_envio)
+            print(type(valor_envio))
             try:
                 entrega_det = EntregaDet.objects.get(id = det['entregaDetId'])
                 entrega_det.cantidad = det['enviar']
                 entrega_det.kilos = kilos_envio
+                entrega_det.valor = valor_envio
             except EntregaDet.DoesNotExist as e:
                 print("Tratando de crear un detalle no existente")
                 entrega_det = EntregaDet(
@@ -55,16 +63,22 @@ def salvar_embarque(embarque_dict):
                     clave = det['clave'],
                     descripcion = det['me_descripcion'],
                     cantidad = det['enviar'],
-                    valor = det['valor'],
+                    valor = valor_envio,
                     kilos = kilos_envio
                 )
             finally:
                 entrega_det.save()
             kilos_entrega += kilos_envio
+            valor_entrega += valor_envio
             print("Kilos entrega__: ", kilos_entrega)
         entrega.kilos = kilos_entrega
+        entrega.valor = valor_entrega
         print("Entrega kilos: ", entrega.kilos)
+        print("Entrega valor: ", entrega.valor)
         entrega.save()
+        kilos_embarque += kilos_entrega
+    embarque.kilos = kilos_embarque
+    embarque.save()
 
 def borrar_entrega_det(entrega_det_dict):
     if entrega_det_dict['entregaDetId'] :
@@ -145,6 +159,7 @@ def crear_embarque_por_ruteo(ruta):
     embarque_id = ruta['embarque']['id']
     destinos = ruta['destinos']
     embarque = Embarque.objects.get(pk=embarque_id)
+    kilos_embarque = 0
     for destino in destinos:
         envio = Envio.objects.get(pk=destino['id'])
         entrega = Entrega(
@@ -161,6 +176,7 @@ def crear_embarque_por_ruteo(ruta):
                         )
         entrega.save()
         kilos_entrega = 0
+        valor_entrega = 0
         print("Kilos entrega: ", kilos_entrega)
 
         for det in envio.detalles.all():
@@ -168,20 +184,25 @@ def crear_embarque_por_ruteo(ruta):
                 envio_det = EnvioDet.objects.get(pk = det.id)
                 enviar = Decimal(det.me_cantidad)
                 kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
+                valor_envio = Decimal(((envio_det.valor * enviar )/envio_det.me_cantidad))
                 entrega_det = EntregaDet(
                         entrega= entrega,
                         envio_det = det,
                         clave = det.clave,
                         descripcion = det.me_descripcion,
                         cantidad = det.me_cantidad,
-                        valor = det.valor
+                        valor = valor_envio,
                     )
                 entrega_det.save()
                 kilos_entrega += kilos_envio
+                valor_entrega += valor_envio
                 print("Kilos entrega__: ", kilos_entrega)
         entrega.kilos = kilos_entrega
+        entrega.valor = valor_entrega
         print("Entrega kilos: ", entrega.kilos)
         entrega.save()
+        kilos_embarque += kilos_entrega
+    embarque.kilos = kilos_embarque
     embarque.save()
 
 
@@ -189,6 +210,7 @@ def asignar_envios_pendientes(data):
     print(data)
     embarque = Embarque.objects.get(pk=data['embarque_id'])
     print(embarque)
+    kilos_embarque = 0
     for env in data['envios']:
         print(env)
         envio = Envio.objects.get(pk=env)
@@ -207,6 +229,7 @@ def asignar_envios_pendientes(data):
                         )
         entrega.save()
         kilos_entrega = 0
+        valor_entrega = 0
         print("Kilos entrega: ", kilos_entrega)
         
         for det in envio.detalles.all():
@@ -215,21 +238,27 @@ def asignar_envios_pendientes(data):
                 envio_det = EnvioDet.objects.get(pk = det.id)
                 enviar = Decimal(det.me_cantidad)
                 kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
+                valor_envio = Decimal(((envio_det.valor * enviar )/envio_det.me_cantidad))
                 entrega_det = EntregaDet(
                         entrega= entrega,
                         envio_det = det,
                         clave = det.clave,
                         descripcion = det.me_descripcion,
                         cantidad = det.saldo,
-                        valor = det.valor,
+                        valor = valor_envio,
                         kilos = kilos_envio
                     )
                 entrega_det.save()
                 kilos_entrega += kilos_envio
+                valor_entrega += valor_envio
+
                 print("Kilos entrega__: ", kilos_entrega)
         entrega.kilos = kilos_entrega
+        entrega.valor = valor_entrega
         print("Entrega kilos: ", entrega.kilos)
         entrega.save()
+        kilos_embarque += kilos_entrega
+    embarque.kilos = kilos_embarque
     embarque.save()
 
 
