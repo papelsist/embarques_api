@@ -29,5 +29,7 @@ urlpatterns = [
     path('api/embarques/test', views.test_view, name='test'),
     path('api/embarques/crear_incidencia', views.crear_incidencia_entrega, name='crear_incidencia'),
     path('api/embarques/entregas_incidencias', views.IncidenciasEntrega.as_view(), name='entregas_incidencias'),
-    path('api/embarques/incidencia/<pk>', views.Incidencia.as_view(), name='incidencia')
+    path('api/embarques/incidencia/<pk>', views.Incidencia.as_view(), name='incidencia'),
+    path('api/embarques/validar_cercania', views.validar_cercania, name='validar_cercania'),
+    path('api/embarques/crear_embarque_operador', views.crear_embarque_operador, name='crear_embarque_operador')
 ]

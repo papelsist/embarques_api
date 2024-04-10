@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from datetime import date
 from ..models import Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador, EntregaIncidencia
-from ..serializers import EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer, IncidenciaSerializer,EmbarqueRutaSerializer,EntregaRutaSerializer
+from ..serializers import EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer, IncidenciaSerializer,EmbarqueRutaSerializer,EntregaRutaSerializer,SucursalSerializer
 
 from rest_framework.generics import (ListAPIView, 
                                     CreateAPIView,
@@ -13,6 +13,7 @@ from ..services import (salvar_embarque, borrar_entrega_det, registrar_salida_em
                         eliminar_entrega_embarque, registrar_regreso_embarque, crear_embarque_por_ruteo, asignar_envios_pendientes, get_user_logged,
                         crear_incidencia_entrega_det)
 
+from geopy import distance
 
 
 class PendientesSalida(ListAPIView):
@@ -182,6 +183,15 @@ def crear_incidencia_entrega(request):
  
     return Response({"message":"Complete sucesfully"})
 
+    
+class RutaEmbarque(RetrieveAPIView):
+    serializer_class = EmbarqueRutaSerializer
+    queryset = Embarque.objects.filter()
+
+class EntregaRuta(RetrieveAPIView):
+    serializer_class = EntregaRutaSerializer
+    queryset = Entrega.objects.filter()
+
 class IncidenciasEntrega(ListAPIView):
     serializer_class = IncidenciaSerializer
     def get_queryset(self):
@@ -192,21 +202,50 @@ class IncidenciasEntrega(ListAPIView):
     
 class Incidencia(RetrieveAPIView):
     serializer_class = IncidenciaSerializer
-    queryset = EntregaIncidencia.objects.filter()
-    
-class RutaEmbarque(RetrieveAPIView):
-    serializer_class = EmbarqueRutaSerializer
-    queryset = Embarque.objects.filter()
-
-class EntregaRuta(RetrieveAPIView):
-    serializer_class = EntregaRutaSerializer
-    queryset = Entrega.objects.filter()
-       
+    queryset = EntregaIncidencia.objects.filter()       
 
 @api_view(['GET'])  
 def test_view(request):
     print(request)
     return Response({"Message":"Test"})
-    
+
+@api_view(['GET'])
+def validar_cercania(request):
+    transporte_ubicacion = (request.data['latitud'],request.data['longitud'])
+    sucursales = Sucursal.objects.all()
+    for sucursal in sucursales:
+        sucursal_ubicacion = (sucursal.direccion_latitud,sucursal.direccion_longitud)
+        distancia = distance.distance(transporte_ubicacion,sucursal_ubicacion).km
+        if distancia < .1:
+            print(sucursal.nombre)
+            sucursal_serialized = SucursalSerializer(sucursal)
+            return Response(sucursal_serialized.data)
+        print(distancia)
+
+    return Response({"Message":"Sin sucursal cercana"})
+
+@api_view(['POST'])
+def crear_embarque_operador(request):
+
+    operador_id =request.data['operador']
+    sucursal_id = request.data['sucursal']
+    folio = Folio.objects.get_next_folio('EMBARQUES',sucursal_id)
+    #facturista_id = request.data['facturista']
+    fecha = date.today()
+    operador = Operador.objects.get(id=operador_id)
+    sucursal = Sucursal.objects.get(id = sucursal_id)
+    facturista = FacturistaEmbarques.objects.get(id = operador.facturista.id)
+    comentario = request.data.get('comentario')
+    print(operador.nombre)
+    print(sucursal.nombre)
+    print(facturista.nombre)
+    embarque = Embarque.objects.create(documento = folio, operador = operador,sucursal = sucursal,facturista= facturista,fecha = fecha, comentario = comentario, version = 0)
+    embarque_serialized = EmbarqueSerializer(embarque)
+    Folio.objects.set_next_folio('EMBARQUES', folio,sucursal_id)
+    return Response(embarque_serialized.data)
+
+    #return Response({"Message":"Test"})
+   
+
     
     

@@ -415,6 +415,8 @@ class EntregaComision(models.Model):
 class EntregaIncidencia(models.Model):
     id = models.BigAutoField(primary_key=True)
     envio = models.ForeignKey('Envio', models.DO_NOTHING, related_name='incidencias', null=True)
+    status = models.CharField(max_length=255, blank=True, null=True)
+    folio = models.IntegerField(blank=True, null=True)
     #### Datos Embarque
     embarque = models.CharField(max_length=255, null=True)
     #### Datos Entrega
@@ -459,7 +461,7 @@ class EntregaIncidencia(models.Model):
 class EntregaIncidenciaSeguimiento(models.Model):
 
     id = models.BigAutoField(primary_key=True)
-    incidencia = models.ForeignKey(EntregaIncidencia, models.DO_NOTHING)
+    incidencia = models.ForeignKey(EntregaIncidencia, models.DO_NOTHING, related_name='seguimientos')
     fecha = models.DateTimeField()
     comentario = models.CharField(max_length=255, blank=True, null=True)
     create_user = models.CharField(max_length=255, blank=True, null=True)
