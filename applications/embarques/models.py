@@ -132,7 +132,7 @@ class Operador(models.Model):
     create_user = models.CharField(max_length=100, blank=True, null=True)
     update_user = models.CharField(max_length=100, blank=True, null=True)
     version = models.BigIntegerField()
-    user = models.ForeignKey(User, models.DO_NOTHING, blank=True, null=True)
+    user = models.ForeignKey(User, models.DO_NOTHING, blank=True, null=True, related_name='operador')
 
     objects = OperadorManager()
 

@@ -110,8 +110,8 @@ DATABASES = {
         #'HOST': '10.10.1.121',
         'HOST': 'localhost',
         'PORT': 3306 ,
-        'OPTIONS': {'ssl': False},
         #'OPTIONS': {'ssl_mode': 'DISABLED'},
+        'OPTIONS': {'ssl': False},
     },
 }
 

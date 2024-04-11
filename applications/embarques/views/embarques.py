@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from datetime import date
+from applications.authentication.models import User
 from ..models import Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador, EntregaIncidencia
 from ..serializers import EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer, IncidenciaSerializer,EmbarqueRutaSerializer,EntregaRutaSerializer,SucursalSerializer
 
@@ -233,12 +234,13 @@ def validar_cercania(request):
 @api_view(['POST'])
 def crear_embarque_operador(request):
 
-    operador_id =request.data['operador']
+    user_id =request.data['usuario']
     sucursal_id = request.data['sucursal']
     folio = Folio.objects.get_next_folio('EMBARQUES',sucursal_id)
     #facturista_id = request.data['facturista']
     fecha = date.today()
-    operador = Operador.objects.get(id=operador_id)
+    user = User.objects.get(id=user_id)
+    operador = user.operador.first()
     sucursal = Sucursal.objects.get(id = sucursal_id)
     facturista = FacturistaEmbarques.objects.get(id = operador.facturista.id)
     comentario = request.data.get('comentario')
