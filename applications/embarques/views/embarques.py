@@ -211,7 +211,13 @@ def test_view(request):
 
 @api_view(['GET'])
 def validar_cercania(request):
-    transporte_ubicacion = (request.data['latitud'],request.data['longitud'])
+    print(request.query_params)
+    print(request.query_params['latitud'])
+    print(type(request.query_params['latitud']))
+    print(request.query_params['longitud'])
+    print(type(request.query_params['longitud']))
+
+    transporte_ubicacion = (request.query_params['latitud'],request.query_params['longitud'])
     sucursales = Sucursal.objects.all()
     for sucursal in sucursales:
         sucursal_ubicacion = (sucursal.direccion_latitud,sucursal.direccion_longitud)
@@ -244,7 +250,6 @@ def crear_embarque_operador(request):
     Folio.objects.set_next_folio('EMBARQUES', folio,sucursal_id)
     return Response(embarque_serialized.data)
 
-    #return Response({"Message":"Test"})
    
 
     
