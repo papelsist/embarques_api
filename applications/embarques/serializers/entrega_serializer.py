@@ -1,10 +1,15 @@
 from rest_framework import serializers
-from ..models import Entrega, EntregaDet, EntregaIncidencia
+from ..models import Entrega, EntregaDet, EntregaIncidencia, EntregaIncidenciaSeguimiento
 from .envio_serializer import EnvioRutaSerializer
 
 
+class IncidenciaSeguimientoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EntregaIncidenciaSeguimiento
+        fields = '__all__'
 
 class IncidenciaSerializer(serializers.ModelSerializer):
+    seguimientos = IncidenciaSeguimientoSerializer(many = True)
     class Meta:
         model = EntregaIncidencia
         fields = '__all__'

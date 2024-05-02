@@ -1,10 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from datetime import date
 from applications.authentication.models import User
-from ..models import Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador, EntregaIncidencia
-from ..serializers import EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer, IncidenciaSerializer,EmbarqueRutaSerializer,EntregaRutaSerializer,SucursalSerializer
-
+from ..models import Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador, EntregaIncidencia, EntregaIncidenciaSeguimiento
+from ..serializers import EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer, IncidenciaSerializer,EmbarqueRutaSerializer,EntregaRutaSerializer,SucursalSerializer, IncidenciaSeguimientoSerializer
 from rest_framework.generics import (ListAPIView, 
                                     CreateAPIView,
                                     RetrieveAPIView,
@@ -15,6 +15,8 @@ from ..services import (salvar_embarque, borrar_entrega_det, registrar_salida_em
                         crear_incidencia_entrega_det)
 
 from geopy import distance
+from datetime import date
+
 
 
 class PendientesSalida(ListAPIView):
@@ -203,7 +205,25 @@ class IncidenciasEntrega(ListAPIView):
     
 class Incidencia(RetrieveAPIView):
     serializer_class = IncidenciaSerializer
-    queryset = EntregaIncidencia.objects.filter()       
+    queryset = EntregaIncidencia.objects.filter()   
+
+@api_view(['POST'])
+def crear_seguimiento(request):
+
+    authentication = JWTAuthentication()
+    header = authentication.get_header(request)
+    raw_token = authentication.get_raw_token(header) 
+    validated_token = authentication.get_validated_token(raw_token)
+    user = authentication.get_user(validated_token)
+
+    data = request.data
+    incidencia_id = data['incidencia']
+    incidencia = EntregaIncidencia.objects.get(id = incidencia_id)
+    seguimiento = EntregaIncidenciaSeguimiento.objects.create(incidencia = incidencia,comentario = data['comentario'],create_user = user.username,update_user = user.username,fecha = date.today())
+    seguimiento_serialized = IncidenciaSeguimientoSerializer(seguimiento)
+    return Response(seguimiento_serialized.data)
+    
+  
 
 @api_view(['GET'])  
 def test_view(request):

@@ -5,7 +5,7 @@ from django.db.models import Q, F, Count,Max, Sum, Min
 class EmbarqueManager(models.Manager):
 
     def pendientes_salida(self, sucursal):
-        embarques = self.filter(or_fecha_hora_salida = None, sucursal= sucursal).order_by('-documento')
+        embarques = self.filter(or_fecha_hora_salida = None, sucursal= sucursal).order_by('documento')
         return embarques
     
     def transito(self, sucursal):

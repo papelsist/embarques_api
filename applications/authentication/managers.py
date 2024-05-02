@@ -14,6 +14,7 @@ class UserManager(BaseUserManager, models.Manager):
             **extra_fields
             )
             user.set_password(password)
+            print('user.password: ', user.password)
             #user.password = make_password(user.password)
             #user.save(using=self.db)
             user.save()

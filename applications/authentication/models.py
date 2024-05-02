@@ -32,6 +32,9 @@ class Sucursal(models.Model):
     direccion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     direccion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
 
+    def __str__(self):
+        return self.nombre
+
 
     class Meta:
         managed = False
@@ -73,6 +76,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_fullname(self):
         return f"{self.nombres} {self.apellidos}"
+    
+    ''' def save(self, *args, **kwargs):
+        self.set_password(self.password)
+        super(User, self).save(*args, **kwargs) '''
 
     class Meta:
         managed = True

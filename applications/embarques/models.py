@@ -27,8 +27,8 @@ class Empresa(models.Model):
     direccion_codigo_postal = models.CharField(max_length=255, blank=True, null=True)
     direccion_colonia = models.CharField(max_length=255, blank=True, null=True)
     direccion_estado = models.CharField(max_length=255, blank=True, null=True)
-    direccion_latitud = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
-    direccion_longitud = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
+    direccion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
+    direccion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     direccion_municipio = models.CharField(max_length=255, blank=True, null=True)
     direccion_numero_exterior = models.CharField(max_length=50, blank=True, null=True)
     direccion_numero_interior = models.CharField(max_length=50, blank=True, null=True)
@@ -65,9 +65,15 @@ class Sucursal(models.Model):
     direccion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     direccion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
 
+    def __str__(self):
+        return self.nombre
+
     class Meta:
         managed = False
         db_table = 'sucursal'
+        verbose_name = 'Sucursal'
+        verbose_name_plural = 'Sucursales'
+
 
 class TransporteEmbarques(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -102,8 +108,8 @@ class TransporteForaneo(models.Model):
     direccion_municipio = models.CharField(max_length=255, blank=True, null=True)
     direccion_estado = models.CharField(max_length=255, blank=True, null=True)
     direccion_pais = models.CharField(max_length=100, blank=True, null=True)
-    direccion_latitud = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
-    direccion_longitud = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
+    direccion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
+    direccion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     telefono3 = models.CharField(max_length=255, blank=True, null=True)
     telefono2 = models.CharField(max_length=255, blank=True, null=True)
     telefono1 = models.CharField(max_length=255, blank=True, null=True)
@@ -316,11 +322,11 @@ class Entrega(models.Model):
     comentario = models.CharField(max_length=255, blank=True, null=True)
     salida = models.DateTimeField(blank=True, null=True)
     arribo = models.DateTimeField(blank=True, null=True)
-    arribo_latitud = models.DecimalField(max_digits=19, decimal_places=2, blank=True,null=True)
-    arribo_longitud = models.DecimalField(max_digits=19, decimal_places=2, blank= True, null=True)
+    arribo_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True,null=True)
+    arribo_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank= True, null=True)
     recepcion = models.DateTimeField(blank=True, null=True)
-    recepcion_latitud = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
-    recepcion_longitud = models.DecimalField(max_digits=19, decimal_places=2)
+    recepcion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
+    recepcion_longitud = models.DecimalField(max_digits=19, decimal_places=7)
     regreso = models.DateTimeField(blank=True, null=True)
     recibio = models.CharField(max_length=255, blank=True, null=True)
     area = models.CharField(max_length=255, blank=True, null=True)
@@ -462,7 +468,7 @@ class EntregaIncidenciaSeguimiento(models.Model):
 
     id = models.BigAutoField(primary_key=True)
     incidencia = models.ForeignKey(EntregaIncidencia, models.DO_NOTHING, related_name='seguimientos')
-    fecha = models.DateTimeField()
+    fecha = models.DateField(auto_now_add=True)
     comentario = models.CharField(max_length=255, blank=True, null=True)
     create_user = models.CharField(max_length=255, blank=True, null=True)
     update_user = models.CharField(max_length=255, blank=True, null=True)
