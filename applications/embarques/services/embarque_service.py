@@ -1,4 +1,4 @@
-from ..models import Embarque,Entrega,EntregaDet,Envio,EnvioDet, EntregaIncidencia, ImgEntrega,Folio
+from ..models import Embarque,Entrega,EntregaDet,Envio,EnvioDet, EntregaIncidencia, ImgEntrega, Folio
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from datetime import datetime
 from decimal import Decimal
@@ -272,7 +272,7 @@ def crear_incidencia_entrega_det( entrega_det_id, incidencia_dict, request):
     incidencia = EntregaIncidencia()
     incidencia.envio = envio
     folio = Folio.objects.get_next_folio('INCIDENCIAS', user.sucursal.id)
-    incidencia.documento = folio
+    incidencia.folio = folio
     incidencia.embarque = entrega.embarque.documento
     ####### Informacion Entrega
     incidencia.sucursal = entrega.sucursal
@@ -312,6 +312,7 @@ def crear_incidencia_entrega_det( entrega_det_id, incidencia_dict, request):
     if "img3" in incidencia_dict:
         incidencia.img3 = incidencia_dict['img3']
     incidencia.save()
+    Folio.objects.set_folio('INCIDENCIAS', user.sucursal.id)
     return entrega_det
    
 
