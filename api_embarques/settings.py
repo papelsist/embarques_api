@@ -100,18 +100,7 @@ WSGI_APPLICATION = "api_embarques.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'logistica_papel',
-        'USER': 'admin',
-        #'PASSWORD': 'Paproot_83',
-        'PASSWORD': 'papelrx',
-        'HOST': '198.199.69.63',
-        #'HOST': 'localhost',
-        'PORT': 3306 ,
-        'OPTIONS': {'ssl_mode': 'DISABLED'},
-        #'OPTIONS': {'ssl': False},
-    },
+
 }
 
 
