@@ -269,7 +269,7 @@ def crear_incidencia_entrega_det( entrega_det_id, incidencia_dict):
     entrega = entrega_det.entrega
     incidencia = EntregaIncidencia()
     incidencia.envio = envio
-    folio = Folio.objects.get_next_folio('INCIDENCIAS',sucursal_id)
+    folio = Folio.objects.get_next_folio('INCIDENCIAS',entrega.sucursal.id)
     incidencia.documento = folio
     incidencia.embarque = entrega.embarque.documento
     ####### Informacion Entrega
