@@ -262,14 +262,16 @@ def asignar_envios_pendientes(data):
     embarque.save()
 
 
-def crear_incidencia_entrega_det( entrega_det_id, incidencia_dict):
+def crear_incidencia_entrega_det( entrega_det_id, incidencia_dict, request):
 
+    user = get_user_logged(request)
+    
     entrega_det = EntregaDet.objects.get(pk=entrega_det_id)
     envio = entrega_det.entrega.envio
     entrega = entrega_det.entrega
     incidencia = EntregaIncidencia()
     incidencia.envio = envio
-    folio = Folio.objects.get_next_folio('INCIDENCIAS',entrega.sucursal.id)
+    folio = Folio.objects.get_next_folio('INCIDENCIAS', user.sucursal.id)
     incidencia.documento = folio
     incidencia.embarque = entrega.embarque.documento
     ####### Informacion Entrega

@@ -181,7 +181,7 @@ class RegresosOperador(ListAPIView):
 def crear_incidencia_entrega(request):
     data = request.data
     entrega_det_id= data['entrega_det']
-    entrega_det = crear_incidencia_entrega_det( entrega_det_id,data['incidencia'])
+    entrega_det = crear_incidencia_entrega_det( entrega_det_id,data['incidencia'],request)
     #print(entrega_det)
  
     return Response({"message":"Complete sucesfully"})
