@@ -60,6 +60,8 @@ def get_envios_fecha(sucursal,fecha):
     e.destinatario,e.date_created,e.kilos, i.id as instruccion_id,e.kilos
     from envio e join instruccion_de_envio i on (e.id = i.envio_id) left join entrega n on (e.id = n.envio_id)
     where i.direccion_latitud  <> 0 and n.id is null and e.sucursal = %s and date(i.fecha_de_entrega)  = %s 
+
+ )
             """
     dao = RuteoDao()
     envios = dao.get_data(query,[sucursal,fecha])
@@ -71,22 +73,31 @@ def get_envios(envios):
         params += "%s , " 
 
     params = params[:-2]
+    like1 = 'CDMX'
+    like2 = 'CIUDAD DE MEXICO'
+    like3 = 'ESTADO DE MÉXICO'
+    like4 = 'EDO. DE MEX.'
+    likes = [like1, like2, like3, like4]
+    parametros = envios  
+    print(parametros)
     query = f"""
-             select 
+    select 
     e.id as envio_id,i.direccion_latitud , i.direccion_longitud,
     ifnull(CONCAT(direccion_calle," ",direccion_numero_exterior," ",direccion_colonia ," ",direccion_codigo_postal ," ",direccion_municipio ," ",direccion_estado," ", direccion_pais),"") as direccion,
     destinatario,e.date_created,kilos, i.id as instruccion_id,kilos
     from envio e join instruccion_de_envio i on (e.id = i.envio_id) 
-    where i.direccion_latitud  <> 0 and e.id in ({params})
-            """
+    where   i.direccion_latitud  <> 0 and e.id in ({params})  
+    """ 
+    print(query)
     dao = RuteoDao()
-    envios = dao.get_data(query,envios)
+    envios = dao.get_data(query,parametros)
+    print(envios)
     return envios
     
 
 
 def make_df(data, suc_point):
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(data) 
     df['coord'] = df.apply(lambda row: (row['direccion_latitud'], row['direccion_longitud']), axis=1)
     df['distancia_km'] = df.apply(lambda row: (distance.distance(suc_point, row['coord']).km), axis=1)
     df['sector'] = df.apply(lambda row: (asignar_sector(suc_point,row['coord'])), axis=1)
@@ -404,6 +415,9 @@ def build_ruteo(envios, suc_point, suc_id):
 
 
 def ruteo_dj_orm(rutas):
+
+    if not rutas:
+        return {}
 
     rutas_orm = {
         "no_asignados" :[],

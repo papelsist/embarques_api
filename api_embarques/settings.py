@@ -43,8 +43,7 @@ DJANGO_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
- 
+    "django.contrib.staticfiles"
 ]
 
 LOCAL_APPS = [
@@ -104,14 +103,14 @@ DATABASES = {
      'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'logistica_papel',
-        'USER': 'root',
+        'USER': 'admin',
         #'PASSWORD': 'Paproot_83',
         'PASSWORD': 'papelrx',
-        #'HOST': '10.10.1.121',
-        'HOST': 'localhost',
+        'HOST': '198.199.69.63',
+        #'HOST': 'localhost',
         'PORT': 3306 ,
-        #'OPTIONS': {'ssl_mode': 'DISABLED'},
-        'OPTIONS': {'ssl': False},
+        'OPTIONS': {'ssl_mode': 'DISABLED'},
+        #'OPTIONS': {'ssl': False},
     },
 }
 

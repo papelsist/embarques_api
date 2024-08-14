@@ -5,7 +5,7 @@ from itertools import groupby
 class ReportDao:
 
     def get_data(self, query= None, params_query = None):
-        """Funcion para obtener los datos en un diccionario a partir del query recibido en el init.
+        """Funcion para obtener los datos en un diccionario a partir del query recibido
             Returns: list<dict>
         """
         data= []
@@ -19,13 +19,17 @@ class ReportDao:
                 table_rows= self._dictfetchall(cursor)
                 data = table_rows
         return data
+    
+    def get_fields(self,objeto):
+        fields = []
+        for field in objeto.keys():
+            fields.append(field)
+        return  fields
 
     def _dictfetchall(self,cursor):
         """Retorna las filas obtenidas por el cursor como diccionario.
-
         Args:
             cursor cursor:  recibe el cursor de la base de datos para ejecutar el query.
-
         Returns:
             List: Regreasa una lista de diccionarios
         """

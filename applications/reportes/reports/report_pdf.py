@@ -39,9 +39,17 @@ class ReportPDF(FPDF):
         if self.parametros:
             if(self.parametros.get('fecha')):
                 # Fecha
-                self.set_x(157)
+                if self.orientation == "P":
+                     self.set_x(157)
+                else:
+                    self.set_x(218)
+               
                 self.cell(30, 5,'FECHA: ', 0, 0, 'R')
                 self.cell(20, 5,self.parametros.get('fecha'), 0, 0, 'C')
+
+             
+    
+
         if self.orientation == "P":
             self.line(10,26,206,26)
         else:
@@ -54,11 +62,16 @@ class ReportPDF(FPDF):
         """
         # Position at 1 cm from bottom
         self.set_y(-15)
+
         # helvetica italic 8
         self.set_font('helvetica', 'I', 6)
+        size_footer = 64.5
+        if self.orientation == "L":
+             size_footer = 87  
+   
         # Page number
-        self.cell(64.5, 10, 'SIIPAP', 'T', 0, 'C')
-        self.cell(64.5, 10, 'Pagina ' + str(self.page_no()) + ' de {nb}', 'T', 0, 'C')
-        self.cell(64.5, 10,'IMPRESO: ' + str(datetime.now().strftime("%d/%m/%Y %I:%M%p")), 'T', 0, 'C')
+        self.cell(size_footer, 10, 'SIIPAP', 'T', 0, 'C')
+        self.cell(size_footer, 10, 'Pagina ' + str(self.page_no()) + ' de {nb}', 'T', 0, 'C')
+        self.cell(size_footer, 10,'IMPRESO: ' + str(datetime.now().strftime("%d/%m/%Y %I:%M%p")), 'T', 0, 'C')
 
     

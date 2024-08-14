@@ -36,11 +36,14 @@ def sugerencia_ruta_envios(request):
     ''' print("*"*50)
     print(sucursal)
     print("*"*50) '''
-    rutas = build_ruteo_by_envios(envs, sucursal)  
-    rutas_orm = ruteo_dj_orm(rutas)
-    rutas_serialized = RutasSerializer(rutas_orm)
-    return Response(rutas_serialized.data)
-    #return Response(rutas)
+    rutas = build_ruteo_by_envios(envs, sucursal) 
+    if rutas: 
+        rutas_orm = ruteo_dj_orm(rutas)
+        rutas_serialized = RutasSerializer(rutas_orm)
+        return Response(rutas_serialized.data)
+    else:
+        return Response({})
+
 
 
 @api_view(['GET'])
