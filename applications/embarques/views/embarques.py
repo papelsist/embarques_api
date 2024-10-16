@@ -1,9 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.db.models import Q
 from datetime import date
 from applications.authentication.models import User
-from ..models import Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador, EntregaIncidencia, EntregaIncidenciaSeguimiento
+from ..models import Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador, EntregaIncidencia, EntregaIncidenciaSeguimiento, InstruccionDeEnvio
 from ..serializers import EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer, IncidenciaSerializer,EmbarqueRutaSerializer,EntregaRutaSerializer,SucursalSerializer, IncidenciaSeguimientoSerializer
 from rest_framework.generics import (ListAPIView, 
                                     CreateAPIView,
@@ -11,8 +12,8 @@ from rest_framework.generics import (ListAPIView,
                                     RetrieveUpdateAPIView
                                     )
 from ..services import (salvar_embarque, borrar_entrega_det, registrar_salida_embarque, borrar_embarque, actualizar_bitacora_embarque, 
-                        eliminar_entrega_embarque, registrar_regreso_embarque, crear_embarque_por_ruteo, asignar_envios_pendientes, get_user_logged,
-                        crear_incidencia_entrega_det)
+                        eliminar_entrega_embarque, registrar_regreso_embarque, crear_embarque_por_ruteo, asignar_envios_pend, get_user_logged,
+                        crear_incidencia_entrega_det, asignar_envios_parc, asignar_a_pasan)
 
 from geopy import distance
 from datetime import date
@@ -61,6 +62,16 @@ def search_envio(request):
         data = None
     return Response(data)
 
+
+class GetEnvio(RetrieveAPIView):
+    serializer_class = EnvioSerializerEm
+    def get_queryset(self):
+        print("Get Envio")
+        print(self)
+    
+        queryset = Envio.objects.filter()
+        return queryset
+    
 
 class CrearAsignacion(RetrieveAPIView):
     serializer_class = EmbarqueSerializer
@@ -132,17 +143,37 @@ class Regresos(ListAPIView):
         sucursal = Sucursal.objects.get(id = suc_id)
         queryset = Embarque.objects.regresos(fecha_inicial,fecha_final,sucursal)
         return queryset
+    
+class EmbarquesPasan(ListAPIView):
+    serializer_class = EmbarqueSerializer
+    def get_queryset(self):
+        fecha_inicial = self.request.query_params.get('fecha_inicial')
+        fecha_final = self.request.query_params.get('fecha_final')
+        suc_id = self.request.query_params.get('sucursal')
+        sucursal = Sucursal.objects.get(id = suc_id)
+        queryset = Embarque.objects.embarques_pasan(fecha_inicial,fecha_final,sucursal)
+        return queryset
 
 
 class EnviosPendientes(ListAPIView):
     serializer_class = EnvioSerializerEm
     def get_queryset(self):
+        print (self.request.query_params)
         fecha_inicial = self.request.query_params.get('fecha_inicial')
         fecha_final = self.request.query_params.get('fecha_final')
         sucursal = self.request.query_params.get('sucursal')
         envios = Envio.objects.pendientes_salida(fecha_inicial, fecha_final, sucursal)
-        envios_ser = [env for env in envios if env.saldo > 0  ]
-        return envios_ser
+        
+        return envios
+    
+class EnviosParciales(ListAPIView):
+    serializer_class = EnvioSerializerEm
+    def get_queryset(self):
+        fecha_inicial = self.request.query_params.get('fecha_inicial')
+        fecha_final = self.request.query_params.get('fecha_final')
+        sucursal = self.request.query_params.get('sucursal')
+        envios = Envio.objects.envios_parciales(fecha_inicial, fecha_final, sucursal)
+        return envios
     
 @api_view(['POST'])
 def embarque_por_ruteo(request):
@@ -151,9 +182,15 @@ def embarque_por_ruteo(request):
     return Response({})
 
 @api_view(['POST'])
-def asignar_evios_pendientes(request):
+def asignar_envios_pendientes(request):
     data = request.data
-    asignar_envios_pendientes(data)
+    asignar_envios_pend(data)
+    return Response({})
+
+@api_view(['POST'])
+def asignar_envios_parciales(request):
+    data = request.data
+    asignar_envios_parc(data)
     return Response({})
 
 class TransitoOperador(ListAPIView):
@@ -272,7 +309,83 @@ def crear_embarque_operador(request):
     Folio.objects.set_next_folio('EMBARQUES', folio,sucursal_id)
     return Response(embarque_serialized.data)
 
-   
+@api_view(['POST'])
+def actualizar_fecha_entrega(request):
+    print(request.data)
+    envio_id = request.data['envio_id']
+    fecha_entrega = request.data['fecha_entrega']
+    envio = Envio.objects.get(id = envio_id)
+    instruccion = InstruccionDeEnvio.objects.get(envio = envio)
+    instruccion.fecha_de_entrega = fecha_entrega
+    instruccion.save()
+    envio_serialized= EnvioSerializerEm(envio)
+    return Response(envio_serialized.data)
+    
+@api_view(['POST'])
+def actualizar_pasan_total(request):
+    print(request.data)
+    envio_id = request.data['envio_id']
+    envio = Envio.objects.get(id = envio_id)
+    user = get_user_logged(request)
+    envio.pasan = True
+    envio.usuario_pasan = "Pruebas"
+    envio.save()
+    envio_serialized= EnvioSerializerEm(envio)
+    return Response(envio_serialized.data)
 
+@api_view(['POST'])
+def asignar_pasan(request):
+    envio = asignar_a_pasan(request.data)
+    envio_serialized= EnvioSerializerEm(envio)
+    return Response(envio_serialized.data)
+
+@api_view(['GET'])
+def search_entrega_mtto(request):
+  
+    sucursal = request.query_params.get('sucursal')
+    documento = request.query_params.get('documento')
+    embarque = request.query_params.get('embarque')
+    print(request.query_params)
+    #try:
+    entrega = Entrega.objects.filter( sucursal = sucursal,documento = documento,embarque__documento = embarque, embarque__regreso = None).first()
+    message = "Entrega encontrada"
+    if entrega == None:
+        message = "Entrega no encontrada"
+        
+    entrega_serialized = EntregaSerializer(entrega)
+    data = entrega_serialized.data
+    ##except:
+    #    data = None
+    return Response({"data":data, "message":message}) 
+
+
+@api_view(['PUT'])
+def actualizar_bitacora_entrega(request):
+    entrega = Entrega.objects.get(id = request.data['entrega_id'])
+    cancelar_arribo = request.data.get('cancelar_arribo')
+    cancelar_recepcion = request.data.get('cancelar_recepcion')
+
+    if entrega.embarque.regreso == None:
+
+        if  entrega.recepcion != None and cancelar_recepcion:
+            entrega.recepcion = None
+            entrega.recepcion_latitud = None
+            entrega.recepcion_longitud = None
+            entrega.recibio = None
+
+        if  entrega.recepcion  == None and entrega.arribo != None and cancelar_arribo:
+            entrega.arribo = None
+            entrega.arribo_latitud = None
+            entrega.arribo_longitud = None
+         
+
+        entrega.save()
+
+        entrega_serialized = EntregaSerializer(entrega)
+        return Response({"data":entrega_serialized.data, "message":"Actualizado correctamente"})
     
-    
+    entrega_serialized = EntregaSerializer(entrega)
+    return Response({"data":entrega_serialized.data, "message":"No se puede actualizar la bitacora de una entrega con regreso"})
+
+
+

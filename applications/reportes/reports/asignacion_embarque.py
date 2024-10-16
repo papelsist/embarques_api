@@ -31,11 +31,11 @@ def asignacion_embarque(embarque):
     # Encabezados Reporte
     pdf.set_font('helvetica', 'B', 10)
     pdf.cell(15, 5,'ORIGEN',align="C")
-    pdf.cell(30, 5, 'DOCUMENTO',align="C" )
-    pdf.cell(50, 5, 'CLIENTE',align="C" )
-    pdf.cell(30, 5, 'FECHA',align="C" )
-    pdf.cell(30, 5, 'IMPORTE',align="C" )
-    pdf.cell(30, 5, 'KILOS',align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(25, 5, 'DOCUMENTO',align="C" )
+    pdf.cell(80, 5, 'CLIENTE',align="C" )
+    pdf.cell(20, 5, 'FECHA',align="C" )
+    pdf.cell(20, 5, 'IMPORTE',align="C" )
+    pdf.cell(20, 5, 'KILOS',align="C", new_x="LMARGIN", new_y="NEXT")
 
 
     current_y = pdf.get_y()
@@ -45,17 +45,21 @@ def asignacion_embarque(embarque):
         current_y = pdf.get_y()
         pdf.set_font('helvetica', '', 10)
         pdf.cell(15, 5, entrega['origen'],align="C")
-        pdf.cell(30, 5, str(entrega['documento_envio']),align='C' )
-        pdf.cell(50, 5, entrega['destinatario'],align="C")
-        pdf.cell(50, 5, entrega['fecha_documento'].strftime("%d-%m-%Y"),align="C")
-        pdf.cell(50, 5, str(entrega['valor']),align="C")
-        pdf.cell(30, 5, str(entrega['kilos']),align="C" , new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(25, 5, str(entrega['documento_envio']),align='C' )
+        pdf.cell(80, 5, entrega['destinatario'],align="L")
+        pdf.cell(20, 5, entrega['fecha_documento'].strftime("%d-%m-%Y"),align="C")
+        pdf.cell(20, 5, str(entrega['valor']),align="C")
+        pdf.cell(20, 5, str(entrega['kilos']),align="C" , new_x="LMARGIN", new_y="NEXT")
 
         pdf.cell(15, 5, "PAQUETES= " ,align="L")
         pdf.cell(30, 5, str(entrega['paquetes'] if  entrega['paquetes'] else "0"),align="C" , new_x="LMARGIN", new_y="NEXT")
 
         pdf.cell(23, 5, "DIR_ENVIO= " ,align="L")
-        pdf.cell(60, 5, entrega['direccion'], new_x="LMARGIN", new_y="NEXT")
+        direccion = ''
+        if entrega['direccion'] != None:
+            direccion = entrega['direccion']
+            
+        pdf.cell(60, 5, direccion, new_x="LMARGIN", new_y="NEXT")
 
         pdf.cell(25, 5, "F_ENTREGA= " ,align="L")
         pdf.cell(15, 5, entrega['fecha_de_entrega'].strftime("%d-%m-%Y") ,align="L")

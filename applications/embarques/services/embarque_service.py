@@ -1,6 +1,6 @@
-from ..models import Embarque,Entrega,EntregaDet,Envio,EnvioDet, EntregaIncidencia, ImgEntrega, Folio
+from ..models import Embarque,Entrega,EntregaDet,Envio,EnvioDet, EntregaIncidencia, ImgEntrega, Folio, Operador, Sucursal
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 
 
@@ -97,6 +97,9 @@ def borrar_entrega_det(entrega_det_dict):
 def registrar_salida_embarque(embarque_dict):
     embarque = Embarque.objects.get(id = embarque_dict['id'])
     embarque.or_fecha_hora_salida = datetime.now()
+    for partida in embarque.partidas.all():
+        partida.salida = datetime.now()
+        partida.save()   
     embarque.save()
     return embarque
 
@@ -206,7 +209,7 @@ def crear_embarque_por_ruteo(ruta):
     embarque.save()
 
 
-def asignar_envios_pendientes(data):
+def asignar_envios_pend(data):
     print(data)
     embarque = Embarque.objects.get(pk=data['embarque_id'])
     print(embarque)
@@ -260,6 +263,131 @@ def asignar_envios_pendientes(data):
         kilos_embarque += kilos_entrega
     embarque.kilos = kilos_embarque
     embarque.save()
+
+
+def asignar_envios_parc(data):
+    print(data)
+    embarque = Embarque.objects.get(pk=data['embarque_id'])
+    envio = Envio.objects.get(pk=data['envio_id'])
+
+    entrega = Entrega(
+        envio=envio,
+        embarque=embarque,
+        sucursal = embarque.sucursal.nombre,
+        destinatario = envio.destinatario,
+        operador = embarque.operador.nombre,
+        entidad = envio.entidad,
+        fecha_documento = envio.fecha_documento,
+        documento = envio.documento,
+        tipo_documento = envio.tipo_documento,
+        origen = envio.tipo_documento
+        )
+    entrega.save()
+    kilos_entrega = 0
+    valor_entrega = 0
+
+    for det in  data['detalles']:
+        print("*"*50)
+        print(det)
+        envio_det = EnvioDet.objects.get(pk = det['id'])
+        enviar = Decimal(det['enviar'])
+        kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
+        valor_envio = Decimal(((envio_det.valor * enviar )/envio_det.me_cantidad))
+        entrega_det = EntregaDet(
+                entrega= entrega,
+                envio_det = envio_det,
+                clave = det['clave'],
+                descripcion = det['me_descripcion'],
+                cantidad = enviar,
+                valor = valor_envio,
+                kilos = kilos_envio
+            )
+        entrega_det.save()
+        kilos_entrega += kilos_envio
+        valor_entrega += valor_envio
+
+        print("Kilos entrega__: ", kilos_entrega)
+    entrega.kilos = kilos_entrega
+    entrega.valor = valor_entrega
+    print("Entrega kilos: ", entrega.kilos)
+    entrega.save() 
+    embarque.kilos = kilos_entrega
+    embarque.save()
+
+    return None
+
+
+def asignar_a_pasan(data):
+    print(data)
+    comentario = data['comentario']
+    operador = Operador.objects.get(nombre = 'CLIENTE PASAN')
+    envio = Envio.objects.get(pk=data['envio_id'])
+    sucursal = Sucursal.objects.get(nombre = envio.sucursal)
+    folio = Folio.objects.get_next_folio('EMBARQUES_PASAN',sucursal.id)
+    fecha = date.today()
+    or_fecha_hora_salida = datetime.now()
+    regreso = datetime.now()
+    embarque = Embarque.objects.create(
+        documento = folio, 
+        operador = operador,
+        sucursal = sucursal,
+        facturista= operador.facturista,
+        fecha = fecha, 
+        comentario = comentario, 
+        version = 0,
+        or_fecha_hora_salida = or_fecha_hora_salida,
+        regreso = regreso
+        )
+    Folio.objects.set_next_folio('EMBARQUES_PASAN', folio,sucursal.id)
+    
+    entrega = Entrega(
+        envio=envio,
+        embarque=embarque,
+        sucursal = embarque.sucursal.nombre,
+        destinatario = envio.destinatario,
+        operador = embarque.operador.nombre,
+        entidad = envio.entidad,
+        fecha_documento = envio.fecha_documento,
+        documento = envio.documento,
+        tipo_documento = envio.tipo_documento,
+        origen = envio.tipo_documento,
+        arribo = datetime.now(),
+        recepcion = datetime.now(),
+        recibio = 'CLIENTE PASAN'
+    )
+    entrega.save()
+    kilos_entrega = 0
+    valor_entrega = 0
+
+    for det in  data['detalles']:
+        print("*"*50)
+        print(det)
+        envio_det = EnvioDet.objects.get(pk = det['id'])
+        enviar = Decimal(det['enviar'])
+        kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
+        valor_envio = Decimal(((envio_det.valor * enviar )/envio_det.me_cantidad))
+        entrega_det = EntregaDet(
+                entrega= entrega,
+                envio_det = envio_det,
+                clave = det['clave'],
+                descripcion = det['me_descripcion'],
+                cantidad = enviar,
+                valor = valor_envio,
+                kilos = kilos_envio
+            )
+        entrega_det.save()
+        kilos_entrega += kilos_envio
+        valor_entrega += valor_envio
+
+        print("Kilos entrega__: ", kilos_entrega)
+    entrega.kilos = kilos_entrega
+    entrega.valor = valor_entrega
+    print("Entrega kilos: ", entrega.kilos)
+    entrega.save() 
+    embarque.kilos = kilos_entrega
+    embarque.save()
+
+    return None
 
 
 def crear_incidencia_entrega_det( entrega_det_id, incidencia_dict, request):

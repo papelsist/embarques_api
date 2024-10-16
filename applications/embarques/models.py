@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import  Q
 from .managers import EnvioManager,EntregaManager, OperadorManager, FolioManager,EmbarqueManager, EntregaIncidenciaManager
 from applications.authentication.models import User
 
@@ -114,12 +115,14 @@ class TransporteForaneo(models.Model):
     telefono2 = models.CharField(max_length=255, blank=True, null=True)
     telefono1 = models.CharField(max_length=255, blank=True, null=True)
     sucursal = models.CharField(max_length=255, blank=True, null=True)
-    sx = models.CharField(max_length=255, blank=True, null=True)
+    sx = models.CharField(max_length=255, unique=True, blank=True, null=True)
     version = models.BigIntegerField()
 
     class Meta:
         managed = False
         db_table = 'transporte_foraneo'
+
+
 
 class Operador(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -522,12 +525,25 @@ class Envio(models.Model):
     version = models.BigIntegerField()
     realizo = models.CharField(max_length=255, blank=True, null=True)
     destinatario = models.CharField(max_length=255, blank=True, null=True)
+    pasan = models.BooleanField(default= False) 
+    usuario_pasan = models.CharField(max_length=255, blank=True, null=True)
     
     @property
     def saldo(self):
-        envios = EnvioDet.objects.filter(envio = self)
+        envios = EnvioDet.objects.filter(~Q(clave = 'CORTE'),envio = self)
         saldo = sum(env.saldo for env in envios)
         return saldo 
+    
+    @property
+    def por_enviar(self):
+        envios = EnvioDet.objects.filter(~Q(clave = 'CORTE'),envio = self)
+        por_enviar = sum(env.me_cantidad for env in envios)
+        return por_enviar
+    @property
+    def enviado(self):
+        enviado = self.por_enviar - self.saldo
+        return enviado
+  
 
     objects = EnvioManager()
 
@@ -596,6 +612,7 @@ class InstruccionDeEnvio(models.Model):
     direccion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     direccion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     fecha_de_entrega = models.DateTimeField(blank=True, null=True)
+    sx_transporte = models.ForeignKey(TransporteForaneo,on_delete=models.DO_NOTHING,db_column='sx_transporte', to_field='sx', related_name='transporte_foraneo')
     sx = models.CharField(unique=True, max_length=255, blank=True, null=True)
     distancia = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     sector = models.IntegerField(blank=True, null=True, default= 0)
@@ -603,6 +620,7 @@ class InstruccionDeEnvio(models.Model):
     last_updated = models.DateTimeField()
     create_user = models.CharField(max_length=255, blank=True, null=True)
     update_user = models.CharField(max_length=255, blank=True, null=True)
+
     version = models.BigIntegerField()
 
     class Meta:
@@ -716,3 +734,15 @@ class CpInstruccionDeEnvio(models.Model):
         db_table = 'cp_instruccion_de_envio'
 
 
+class GeolocalizacionTransportes(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    transporte = models.ForeignKey('TransporteForaneo', models.DO_NOTHING,related_name='ubicaciones')
+    latitud = models.DecimalField(max_digits=19, decimal_places=7)
+    longitud = models.DecimalField(max_digits=19, decimal_places=7)
+    sucursal = models.CharField(max_length=255, blank=True, null=True)
+    distancia = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
+    version = models.BigIntegerField(default=0)
+
+    class Meta:
+        managed = True
+        db_table = 'geolocalizacion_transportes'

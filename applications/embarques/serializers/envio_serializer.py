@@ -11,7 +11,7 @@ class EnvioSerializerEm(serializers.ModelSerializer):
     instruccion = InstruccionEnvioSerializer()
     class Meta:
         model= Envio
-        fields= ['id','documento','fecha_documento','sucursal','tipo_documento','destinatario','detalles','saldo', 'kilos','instruccion' ]
+        fields= ['id','documento','fecha_documento','sucursal','tipo_documento','destinatario','detalles','saldo', 'kilos','instruccion','pasan','usuario_pasan','date_created' ]
         #tefields = '__all__'
 
 class EnvioSerializer(serializers.ModelSerializer):

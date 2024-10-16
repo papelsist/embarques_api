@@ -3,6 +3,7 @@ from .report_pdf import ReportPDF
 from .report_dao import ReportDao
 from .report_utils import get_grouped_data
 from datetime import datetime
+from decimal import Decimal
 
 
 
@@ -128,8 +129,8 @@ def reporte_asignacion_embarque(embarque):
     pdf = ReporteAsignacionPDF('L','mm','Letter','PAPEL S.A. DE C.V.',f"CONTROL DE EMBARQUES (ASIGNACIONES) {generales['sucursal']}",parametros= parametros )
     pdf.add_page()
 
-    total_kilos = 0.00
-    total_importe = 0.00
+    total_kilos = Decimal(0.00)
+    total_importe = Decimal(0.00)
 
     for entrega in embarque:
 
