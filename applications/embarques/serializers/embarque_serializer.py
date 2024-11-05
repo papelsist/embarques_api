@@ -26,5 +26,11 @@ class EmbarqueOperadorSerializer(serializers.Serializer):
     fecha_inicial = serializers.DateField()
     fecha_final = serializers.DateField()
     valor = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+class EmbarqueSingleSerializer(serializers.ModelSerializer):
+    operador = OperadorSerializer()
+    class Meta:
+        model= Embarque
+        fields = '__all__'
   
    

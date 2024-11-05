@@ -2,8 +2,10 @@ from django.urls import path
 from . import views 
 
 urlpatterns = [
+    path('api/sucursales/', views.SucursalList.as_view(), name='sucursales'),
     path('api/tableros/pendientes_envio', views.pendientes_envio, name='pendientes_envio'),
     path('api/tableros/transito_envio', views.transito_envio, name='transito_envio'),
+    path('api/embarques/seguimiento_envio', views.get_seguimiento_envio, name='seguimiento_envio'),
 
     path('api/embarques/pendientes_salida', views.PendientesSalida.as_view(), name='pendientes_salida'),
     
@@ -46,4 +48,9 @@ urlpatterns = [
     path('api/embarques/embarques_pasan/', views.EmbarquesPasan.as_view(), name='embarques_pasan'),
     path('api/embarques/search_entrega/', views.search_entrega_mtto, name='search_entrega'),
     path('api/embarques/actualizar_bitacora_entrega/', views.actualizar_bitacora_entrega, name='actualizar_bitacora_entregas'),
+    path('api/embarques/buscar_embarque/', views.search_embarque, name='actualizar_entrega'),
+    path('api/embarques/recepcion_pago/', views.registrar_recepcion_pago, name='registrar_recepcion_pago'),
+    path('api/embarques/recepcion_documentos/', views.registrar_recepcion_documentos, name='registrar_recepcion_documentos'),
+    path('api/embarques/recepcion_pagos_embarque/', views.registrar_recepcion_pago_embarque, name='registrar_recepcion_pago_embarque'),
+    path('api/embarques/recepcion_documentos_embarque/', views.registrar_recepcion_documentos_embarque, name='registrar_recepcion_documentos_embarque'),
 ]

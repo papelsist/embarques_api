@@ -1,11 +1,13 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db.models import Q
-from datetime import date
+from datetime import date, datetime
 from applications.authentication.models import User
 from ..models import Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador, EntregaIncidencia, EntregaIncidenciaSeguimiento, InstruccionDeEnvio
-from ..serializers import EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer, IncidenciaSerializer,EmbarqueRutaSerializer,EntregaRutaSerializer,SucursalSerializer, IncidenciaSeguimientoSerializer
+from ..serializers import (EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer, IncidenciaSerializer,EmbarqueRutaSerializer,EntregaRutaSerializer,SucursalSerializer, 
+                           IncidenciaSeguimientoSerializer, EntregaSeguimientoSerializer)
 from rest_framework.generics import (ListAPIView, 
                                     CreateAPIView,
                                     RetrieveAPIView,
@@ -13,7 +15,7 @@ from rest_framework.generics import (ListAPIView,
                                     )
 from ..services import (salvar_embarque, borrar_entrega_det, registrar_salida_embarque, borrar_embarque, actualizar_bitacora_embarque, 
                         eliminar_entrega_embarque, registrar_regreso_embarque, crear_embarque_por_ruteo, asignar_envios_pend, get_user_logged,
-                        crear_incidencia_entrega_det, asignar_envios_parc, asignar_a_pasan)
+                        crear_incidencia_entrega_det, asignar_envios_parc, asignar_a_pasan, registrar_recepcion_pagos_embarque,registrar_recepcion_docs_embarque)
 
 from geopy import distance
 from datetime import date
@@ -49,7 +51,9 @@ def crear_embarque(request):
     return Response(embarque_serialized.data)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def search_envio(request):
+    permission_classes = [AllowAny]
     sucursal = request.query_params.get('sucursal')
     documento = request.query_params.get('documento')
     tipo = request.query_params.get('tipo')
@@ -61,6 +65,19 @@ def search_envio(request):
     except:
         data = None
     return Response(data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def search_embarque(request):
+    print(request.query_params) 
+    sucursal = Sucursal.objects.get(id = request.query_params.get('sucursal_id'))
+    embarque = Embarque.objects.embarque_by_documento_fecha(request.query_params.get('documento'),request.query_params.get('fecha'),sucursal)
+    print(embarque)
+    if embarque != None:
+        embarque_serialized = EmbarqueSerializer(embarque)
+        return Response(embarque_serialized.data)
+    else:
+        return Response(None)
 
 
 class GetEnvio(RetrieveAPIView):
@@ -269,11 +286,6 @@ def test_view(request):
 
 @api_view(['GET'])
 def validar_cercania(request):
-    print(request.query_params)
-    print(request.query_params['latitud'])
-    print(type(request.query_params['latitud']))
-    print(request.query_params['longitud'])
-    print(type(request.query_params['longitud']))
 
     transporte_ubicacion = (request.query_params['latitud'],request.query_params['longitud'])
     sucursales = Sucursal.objects.all()
@@ -339,6 +351,7 @@ def asignar_pasan(request):
     envio_serialized= EnvioSerializerEm(envio)
     return Response(envio_serialized.data)
 
+
 @api_view(['GET'])
 def search_entrega_mtto(request):
   
@@ -387,5 +400,83 @@ def actualizar_bitacora_entrega(request):
     entrega_serialized = EntregaSerializer(entrega)
     return Response({"data":entrega_serialized.data, "message":"No se puede actualizar la bitacora de una entrega con regreso"})
 
+@api_view(['PUT'])
+def registrar_recepcion_pago(request):
+    entrega = Entrega.objects.get(id = request.data['entrega_id'])
+    if entrega.recepcion != None:
+        entrega.recepcion_pago = datetime.now()
+        entrega.save()
+        entrega_serialized = EntregaSerializer(entrega)
+        return Response({"data":entrega_serialized.data, "message":"Actualizado correctamente"})
+    else :
+        entrega_serialized = EntregaSerializer(entrega)
+        return Response({"data":entrega_serialized.data, "message":"No se puede registrar la recepcion de pago si no se ha registrado la recepcion"})
+
+@api_view(['PUT'])
+def registrar_recepcion_documentos(request):
+    entrega = Entrega.objects.get(id = request.data['entrega_id'])
+    if entrega.recepcion != None:
+        entrega.recepcion_documentos = datetime.now()
+        entrega.save()
+        entrega_serialized = EntregaSerializer(entrega)
+        return Response({"data":entrega_serialized.data, "message":"Actualizado correctamente"})
+    else :
+        entrega_serialized = EntregaSerializer(entrega)
+        return Response({"data":entrega_serialized.data, "message":"No se puede registrar la recepcion de pago si no se ha registrado la recepcion"})
+
+  
+@api_view(['POST'])
+def registrar_recepcion_pago_embarque(request):
+    embarque = registrar_recepcion_pagos_embarque(request.data)
+    embarque_serialized = EmbarqueSerializer(embarque)
+    return Response({"embarque":embarque_serialized.data, "message":"Actualizado correctamente"})
+
+@api_view(['POST'])
+def registrar_recepcion_documentos_embarque(request):
+    embarque = registrar_recepcion_docs_embarque(request.data)
+    embarque_serialized = EmbarqueSerializer(embarque)
+    return Response({"embarque":embarque_serialized.data, "message":"Actualizado correctamente"})
 
 
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_seguimiento_envio(request):
+    documento = request.query_params.get('documento')
+    fecha = request.query_params.get('fecha')
+    sucursal = request.query_params.get('sucursal')
+    entregas = Entrega.objects.filter(envio__documento = documento, envio__sucursal= sucursal, envio__fecha_documento = fecha)
+    entregas_dict = []
+    if entregas:
+        for entrega in entregas:
+            embarque = entrega.embarque
+            operador = embarque.operador
+
+            detalles_dict = []
+            for detalle in entrega.detalles.all():
+                entrega_dict ={
+                    "id": detalle.id,
+                    "clave": detalle.clave,
+                    "descripcion": detalle.descripcion,
+                    "cantidad": detalle.cantidad,
+                }
+                detalles_dict.append(entrega_dict)
+
+            entrega_dict ={
+                "id": entrega.id,
+                "documento": entrega.envio.documento,
+                "fecha": entrega.fecha_documento,
+                "salida": embarque.or_fecha_hora_salida,
+                "arribo": entrega.arribo,
+                "recepcion": entrega.recepcion,
+                "recibio": entrega.recibio,
+                "regreso": embarque.regreso,
+                "embarque": embarque.documento,
+                "embarque_fecha": embarque.fecha,
+                "operador": operador.nombre,
+                "detalles": detalles_dict
+            }
+            entregas_dict.append(entrega_dict)
+        entregas_serialized = EntregaSeguimientoSerializer(entregas_dict, many = True)
+     
+    return Response(entregas_serialized.data)

@@ -335,6 +335,8 @@ class Entrega(models.Model):
     area = models.CharField(max_length=255, blank=True, null=True)
     reporto_nombre = models.CharField(max_length=255, blank=True, null=True)
     reporto_puesto = models.CharField(max_length=255, blank=True, null=True)
+    recepcion_pago = models.DateTimeField(max_length=255, blank=True, null=True)
+    recepcion_documentos = models.DateTimeField(max_length=255, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     create_user = models.CharField(max_length=255, blank=True, null=True)

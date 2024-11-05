@@ -1,4 +1,5 @@
 from ..models import Embarque,Entrega,EntregaDet,Envio,EnvioDet, EntregaIncidencia, ImgEntrega, Folio, Operador, Sucursal
+from django.db.models import Q
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from datetime import datetime, date
 from decimal import Decimal
@@ -135,6 +136,24 @@ def actualizar_bitacora_embarque(embarque_dict):
 
     return embarque
 
+def registrar_recepcion_pagos_embarque(embarque_dict):
+    embarque = Embarque.objects.get(id = embarque_dict['id'])
+    for id in embarque_dict['partidas']:
+        entrega = Entrega.objects.get(id = id)
+        if entrega.recepcion != None:
+            entrega.recepcion_pago = datetime.now()
+            entrega.save()
+    return embarque
+
+def registrar_recepcion_docs_embarque(embarque_dict):
+    embarque = Embarque.objects.get(id = embarque_dict['id'])
+    for id in embarque_dict['partidas']:
+        entrega = Entrega.objects.get(id = id)
+        if entrega.recepcion != None:
+            entrega.recepcion_documentos = datetime.now()
+            entrega.save()
+    return embarque
+
 def eliminar_entrega_embarque(entrega_dict):
     entrega = Entrega.objects.get(id = entrega_dict['entregaId'])
     entrega_deleted = entrega.delete()
@@ -147,7 +166,7 @@ def eliminar_entrega_embarque(entrega_dict):
 def registrar_regreso_embarque(embarque_dict):
     embarque = Embarque.objects.get(id=embarque_dict['id'])
 
-    partidas = embarque.partidas.all().filter(recepcion = None )
+    partidas = embarque.partidas.all().filter(Q(recepcion = None) | Q(recepcion_documentos = None) | Q(recepcion_pago = None))
     print(len(partidas))
     if len(partidas) == 0:
         embarque.regreso=  datetime.now()

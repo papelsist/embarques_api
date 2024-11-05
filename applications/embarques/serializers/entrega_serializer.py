@@ -3,6 +3,7 @@ from ..models import Entrega, EntregaDet, EntregaIncidencia, EntregaIncidenciaSe
 from .envio_serializer import EnvioRutaSerializer
 
 
+
 class IncidenciaSeguimientoSerializer(serializers.ModelSerializer):
     class Meta:
         model = EntregaIncidenciaSeguimiento
@@ -33,6 +34,27 @@ class EntregaRutaSerializer(serializers.ModelSerializer):
     class Meta:
         model=  Entrega
         fields=  '__all__'
+
+
+class EntregaDetsSeguimientoSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    clave = serializers.CharField()
+    descripcion = serializers.CharField()
+    cantidad = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+class EntregaSeguimientoSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    documento = serializers.IntegerField()
+    fecha = serializers.DateTimeField()
+    salida = serializers.DateTimeField()
+    arribo = serializers.DateTimeField()
+    recepcion = serializers.DateTimeField()
+    recibio = serializers.CharField()
+    regreso = serializers.DateTimeField()
+    embarque = serializers.IntegerField()
+    embarque_fecha = serializers.DateField()
+    operador = serializers.CharField()
+    detalles = EntregaDetsSeguimientoSerializer(many = True)
 
 
 

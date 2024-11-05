@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.db.models import Q
+from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import HttpResponse
@@ -10,6 +11,7 @@ from rest_framework.generics import (ListAPIView)
 
 
 class EnviosPendientesAsignacion(ListAPIView):
+    permission_classes = [AllowAny]
     serializer_class = EnvioSerializerEm
     def get_queryset(self):
         sucursal = self.request.query_params.get('sucursal')
@@ -19,6 +21,7 @@ class EnviosPendientesAsignacion(ListAPIView):
 
 
 class EmbarquesPendientesSalida(ListAPIView):
+    permission_classes = [AllowAny]
     serializer_class = EmbarqueSerializer
     def get_queryset(self):
         suc_id = self.request.query_params['sucursal']
@@ -27,6 +30,7 @@ class EmbarquesPendientesSalida(ListAPIView):
         return queryset
         
 class EmbarquesTransito(ListAPIView):
+    permission_classes = [AllowAny]
     serializer_class = EmbarqueSerializer
     def get_queryset(self):
         suc_id = self.request.query_params.get('sucursal')
@@ -35,14 +39,16 @@ class EmbarquesTransito(ListAPIView):
         return queryset
     
 class EnviosTransito(ListAPIView):
+    permission_classes = [AllowAny]
     serializer_class = EntregaSerializer
     def get_queryset(self):
         suc_id = self.request.query_params.get('sucursal')
         sucursal = Sucursal.objects.get(id = suc_id)
-        query_set = Entrega.objects.filter(recepcion = None, embarque__sucursal = sucursal).order_by('salida')
+        query_set = Entrega.objects.filter(~Q(embarque__or_fecha_hora_salida = None),recepcion = None, embarque__sucursal = sucursal).order_by('salida')
         return query_set
     
 class EnviosParciales(ListAPIView):
+    permission_classes = [AllowAny]
     serializer_class = EnvioSerializerEm
     def get_queryset(self):
         suc_id = self.request.query_params.get('sucursal')

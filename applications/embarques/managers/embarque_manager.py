@@ -29,6 +29,10 @@ class EmbarqueManager(models.Manager):
         embarques = self.filter( ~Q(or_fecha_hora_salida = None),~Q(regreso = None), fecha__range=[fecha_inicial, fecha_final], operador = operador).order_by('documento')
         return embarques
     
+    def embarque_by_documento_fecha(self,documento,fecha, sucursal):
+        embarque = self.filter(documento = documento, fecha = fecha, sucursal = sucursal).first()
+        return embarque
+    
     def embarques_operador_kilos(self,fecha_inicial, fecha_final):
         embarques = (self.filter( fecha__range=[fecha_inicial, fecha_final])
                      .values( 'operador__id','operador__nombre')
@@ -37,7 +41,6 @@ class EmbarqueManager(models.Manager):
                             fecha_final = Max('fecha'),
                             valor = Sum('partidas__detalles__kilos'),      
                         )
-
                      )
         print(embarques.query)
         return embarques

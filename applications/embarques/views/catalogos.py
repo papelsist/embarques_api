@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.generics import (ListAPIView, 
@@ -9,9 +9,8 @@ from rest_framework.generics import (ListAPIView,
                                     UpdateAPIView,
                                     RetrieveUpdateAPIView,
                                     RetrieveUpdateDestroyAPIView)
-from ..models import Operador
-from ..serializers import OperadorSerializer
-from ..models import  Operador
+from ..serializers import OperadorSerializer, SucursalSerializer
+from ..models import  Operador, Sucursal
 
 class OperadorList(ListAPIView):
     queryset = Operador.objects.all()
@@ -48,3 +47,7 @@ class SearchOperador(ListAPIView):
         founds = Operador.objects.find_operador(term)
         return   founds
     
+class SucursalList(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = Sucursal.objects.all()
+    serializer_class = SucursalSerializer

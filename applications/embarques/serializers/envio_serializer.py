@@ -30,6 +30,11 @@ class EnvioRutaSerializer(serializers.ModelSerializer):
     class Meta:
         model= Envio
         fields = ['id','destinatario','detalles','documento','fecha_documento','tipo_documento','sucursal','instruccion']
+
+class EnvioSingleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Envio
+        fields = '__all__'
     
 
     
