@@ -166,7 +166,7 @@ def eliminar_entrega_embarque(entrega_dict):
 def registrar_regreso_embarque(embarque_dict):
     embarque = Embarque.objects.get(id=embarque_dict['id'])
 
-    partidas = embarque.partidas.all().filter(Q(recepcion = None) | Q(recepcion_documentos = None) | Q(recepcion_pago = None))
+    partidas = embarque.partidas.all().filter((Q(recepcion = None) | Q(recepcion_documentos = None) | Q(recepcion_pago = None)), tipo_documento = 'COD')
     print(len(partidas))
     if len(partidas) == 0:
         embarque.regreso=  datetime.now()
