@@ -6,4 +6,4 @@ from .embarques import (search_envio,crear_embarque, PendientesSalida,CrearAsign
                         EmbarquesPasan, search_entrega_mtto, actualizar_bitacora_entrega, search_embarque, registrar_recepcion_documentos,registrar_recepcion_pago,
                         registrar_recepcion_pago_embarque, registrar_recepcion_documentos_embarque, get_seguimiento_envio)
 from .tableros import pendientes_envio, transito_envio
-from .catalogos import SearchOperador, SucursalList
+from .catalogos import SearchOperador, SucursalList, SucursalesActivasList

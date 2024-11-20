@@ -51,3 +51,9 @@ class SucursalList(ListAPIView):
     permission_classes = [AllowAny]
     queryset = Sucursal.objects.all()
     serializer_class = SucursalSerializer
+
+
+class SucursalesActivasList(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = Sucursal.objects.filter(activa=True)
+    serializer_class = SucursalSerializer

@@ -2,7 +2,7 @@ from django.urls import path
 from . import views 
 
 urlpatterns = [
-    path('api/sucursales/', views.SucursalList.as_view(), name='sucursales'),
+    path('api/sucursales/', views.SucursalesActivasList.as_view(), name='sucursales'),
     path('api/tableros/pendientes_envio', views.pendientes_envio, name='pendientes_envio'),
     path('api/tableros/transito_envio', views.transito_envio, name='transito_envio'),
     path('api/embarques/seguimiento_envio', views.get_seguimiento_envio, name='seguimiento_envio'),

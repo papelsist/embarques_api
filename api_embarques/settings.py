@@ -54,6 +54,7 @@ LOCAL_APPS = [
     'applications.tableros',
     'applications.dashboards',
     'applications.knzl',
+    'applications.core',
 ]
 
 THIRD_PART_APPS = [
@@ -102,13 +103,13 @@ WSGI_APPLICATION = "api_embarques.wsgi.application"
 DATABASES = {
      'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'logistica_papel',
-        #'USER': 'root',
-        #'PASSWORD': 'Paproot_83',
-        #'HOST': '10.10.1.121',
-        'USER': 'admin',
-        'PASSWORD': 'papelrx',
-        'HOST': '198.199.69.63',
+        'NAME': 'siipap',
+        'USER': 'root',
+        'PASSWORD': 'Paproot_83',
+        'HOST': '10.10.1.121',
+        #'USER': 'admin',
+        #'PASSWORD': 'papelrx',
+        #'HOST': '198.199.69.63',
         'PORT': 3306 ,
         'OPTIONS': {'ssl_mode': 'DISABLED'},
         #'OPTIONS': {'ssl': False},

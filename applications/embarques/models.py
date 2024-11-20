@@ -2,101 +2,15 @@ from django.db import models
 from django.db.models import  Q
 from .managers import EnvioManager,EntregaManager, OperadorManager, FolioManager,EmbarqueManager, EntregaIncidenciaManager
 from applications.authentication.models import User
+from applications.core.models import Sucursal,Empresa
+import uuid
 
 
 
 """ Modelos de Catalogos"""
 
-class Empresa(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    version = models.BigIntegerField()
-    certificado_digital = models.TextField(blank=True, null=True)
-    certificado_digital_pfx = models.TextField(blank=True, null=True)
-    clave = models.CharField(max_length=15)
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
-    llave_privada = models.TextField(blank=True, null=True)
-    nombre = models.CharField(max_length=255)
-    numero_de_certificado = models.CharField(max_length=20, blank=True, null=True)
-    password_pac = models.CharField(max_length=255, blank=True, null=True)
-    password_pfx = models.CharField(max_length=255, blank=True, null=True)
-    regimen = models.CharField(max_length=300)
-    rfc = models.CharField(unique=True, max_length=13)
-    timbrado_de_prueba = models.TextField()  # This field type is a guess.
-    usuario_pac = models.CharField(max_length=255, blank=True, null=True)
-    direccion_calle = models.CharField(max_length=200, blank=True, null=True)
-    direccion_codigo_postal = models.CharField(max_length=255, blank=True, null=True)
-    direccion_colonia = models.CharField(max_length=255, blank=True, null=True)
-    direccion_estado = models.CharField(max_length=255, blank=True, null=True)
-    direccion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
-    direccion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
-    direccion_municipio = models.CharField(max_length=255, blank=True, null=True)
-    direccion_numero_exterior = models.CharField(max_length=50, blank=True, null=True)
-    direccion_numero_interior = models.CharField(max_length=50, blank=True, null=True)
-    direccion_pais = models.CharField(max_length=100, blank=True, null=True)
-    regimen_clave_sat = models.CharField(max_length=255, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'empresa'
-
-class Sucursal(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    activo = models.BooleanField(default= False)
-    clave = models.BigIntegerField(unique=True)
-    nombre = models.CharField(max_length=255)
-    direccion_calle = models.CharField(max_length=200, blank=True, null=True)
-    direccion_numero_exterior = models.CharField(max_length=50, blank=True, null=True)
-    direccion_numero_interior = models.CharField(max_length=50, blank=True, null=True)
-    direccion_codigo_postal = models.CharField(max_length=255, blank=True, null=True)
-    direccion_colonia = models.CharField(max_length=255, blank=True, null=True)
-    direccion_municipio = models.CharField(max_length=255, blank=True, null=True)
-    direccion_estado = models.CharField(max_length=255, blank=True, null=True)
-    direccion_pais = models.CharField(max_length=100, blank=True, null=True)
-    almacen = models.BooleanField(default= False)
-    db_url = models.CharField(max_length=255, blank=True, null=True)
-    sx = models.CharField(max_length=255, blank=True, null=True)
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
-    create_user = models.CharField(max_length=100, blank=True, null=True)
-    update_user = models.CharField(max_length=100, blank=True, null=True)
-    version = models.BigIntegerField()
-    or_municipio = models.CharField(max_length=255, blank=True, null=True)
-    or_estado = models.CharField(max_length=255, blank=True, null=True)
-    direccion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
-    direccion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
-
-    def __str__(self):
-        return self.nombre
-
-    class Meta:
-        managed = False
-        db_table = 'sucursal'
-        verbose_name = 'Sucursal'
-        verbose_name_plural = 'Sucursales'
 
 
-class TransporteEmbarques(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    activo = models.BooleanField(default= False)
-    marca = models.CharField(max_length=255, blank=True, null=True)
-    descripcion = models.CharField(max_length=255, blank=True, null=True)
-    iv_anio_modelo = models.CharField(max_length=255, blank=True, null=True)
-    iv_placa_vm = models.CharField(unique=True, max_length=255)
-    af_nombre_aseg = models.CharField(max_length=255, blank=True, null=True)
-    af_num_poliza_seguro = models.CharField(max_length=255, blank=True, null=True)
-    poliza_vigencia = models.DateField(blank=True, null=True)
-    facturista = models.ForeignKey('FacturistaEmbarques', models.DO_NOTHING)
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
-    create_user = models.CharField(max_length=100, blank=True, null=True)
-    update_user = models.CharField(max_length=100, blank=True, null=True)
-    version = models.BigIntegerField()
-    numero_serie = models.CharField(max_length=255, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'transporte_embarques'
 
 class TransporteForaneo(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -119,60 +33,9 @@ class TransporteForaneo(models.Model):
     version = models.BigIntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'transporte_foraneo'
 
-
-
-class Operador(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    activo = models.BooleanField(default= False)
-    num_licencia = models.CharField(max_length=255, blank=True, null=True)
-    nombre = models.CharField(max_length=255)
-    comision = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
-    precio_tonelada = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
-    celular = models.CharField(max_length=50, blank=True, null=True)
-    email = models.CharField(max_length=255, blank=True, null=True)
-    facturista = models.ForeignKey('FacturistaEmbarques', models.DO_NOTHING, blank=True, null=True)
-    transporte = models.ForeignKey('TransporteEmbarques', models.DO_NOTHING, blank=True, null=True)
-    sx = models.CharField(max_length=255, blank=True, null=True)
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
-    create_user = models.CharField(max_length=100, blank=True, null=True)
-    update_user = models.CharField(max_length=100, blank=True, null=True)
-    version = models.BigIntegerField()
-    user = models.ForeignKey(User, models.DO_NOTHING, blank=True, null=True, related_name='operador')
-
-    objects = OperadorManager()
-
-    class Meta:
-        managed = True
-        db_table = 'operador'
-
-class Propietario(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    activo = models.TextField()  # This field type is a guess.
-    facturista = models.ForeignKey('FacturistaEmbarques', models.DO_NOTHING)
-    rfc = models.CharField(unique=True, max_length=13)
-    nombre = models.CharField(max_length=255)
-    direccion_calle = models.CharField(max_length=200, blank=True, null=True)
-    direccion_numero_exterior = models.CharField(max_length=50, blank=True, null=True)
-    direccion_numero_interior = models.CharField(max_length=50, blank=True, null=True)
-    direccion_codigo_postal = models.CharField(max_length=255, blank=True, null=True)
-    direccion_colonia = models.CharField(max_length=255, blank=True, null=True)
-    direccion_municipio = models.CharField(max_length=255, blank=True, null=True)
-    direccion_estado = models.CharField(max_length=255, blank=True, null=True)
-    direccion_pais = models.CharField(max_length=100, blank=True, null=True)
-    email = models.CharField(max_length=255, blank=True, null=True)
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
-    create_user = models.CharField(max_length=100, blank=True, null=True)
-    update_user = models.CharField(max_length=100, blank=True, null=True)
-    version = models.BigIntegerField()
-
-    class Meta:
-        managed = False
-        db_table = 'propietario'
 
 class FacturistaEmbarques(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -191,12 +54,37 @@ class FacturistaEmbarques(models.Model):
     clave = models.CharField(max_length=6)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'facturista_embarques'
+
+class Propietario(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    activo = models.BooleanField(default= True) 
+    facturista = models.ForeignKey(FacturistaEmbarques, models.DO_NOTHING)
+    rfc = models.CharField(unique=True, max_length=13)
+    nombre = models.CharField(max_length=255)
+    direccion_calle = models.CharField(max_length=200, blank=True, null=True)
+    direccion_numero_exterior = models.CharField(max_length=50, blank=True, null=True)
+    direccion_numero_interior = models.CharField(max_length=50, blank=True, null=True)
+    direccion_codigo_postal = models.CharField(max_length=255, blank=True, null=True)
+    direccion_colonia = models.CharField(max_length=255, blank=True, null=True)
+    direccion_municipio = models.CharField(max_length=255, blank=True, null=True)
+    direccion_estado = models.CharField(max_length=255, blank=True, null=True)
+    direccion_pais = models.CharField(max_length=100, blank=True, null=True)
+    email = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField()
+    last_updated = models.DateTimeField()
+    create_user = models.CharField(max_length=100, blank=True, null=True)
+    update_user = models.CharField(max_length=100, blank=True, null=True)
+    version = models.BigIntegerField()
+
+    class Meta:
+        managed = True
+        db_table = 'propietario'
 
 class CpFacturista(models.Model):
     id = models.BigAutoField(primary_key=True)
-    facturista = models.OneToOneField('FacturistaEmbarques', models.DO_NOTHING)
+    facturista = models.OneToOneField(FacturistaEmbarques, models.DO_NOTHING)
     direccion_calle = models.CharField(max_length=200, blank=True, null=True)
     direccion_numero_exterior = models.CharField(max_length=50, blank=True, null=True)
     direccion_numero_interior = models.CharField(max_length=50, blank=True, null=True)
@@ -219,55 +107,25 @@ class CpFacturista(models.Model):
     version = models.BigIntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'cp_facturista'
 
-class CpOperador(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    activo = models.TextField()  # This field type is a guess.
-    operador = models.OneToOneField('Operador', models.DO_NOTHING)
-    cve_transporte = models.CharField(max_length=255)
-    rfc = models.CharField(max_length=13)
-    direccion_calle = models.CharField(max_length=200, blank=True, null=True)
-    direccion_numero_exterior = models.CharField(max_length=50, blank=True, null=True)
-    direccion_numero_interior = models.CharField(max_length=50, blank=True, null=True)
-    direccion_codigo_postal = models.CharField(max_length=255, blank=True, null=True)
-    direccion_colonia = models.CharField(max_length=255, blank=True, null=True)
-    direccion_municipio = models.CharField(max_length=255, blank=True, null=True)
-    direccion_estado = models.CharField(max_length=255, blank=True, null=True)
-    direccion_pais = models.CharField(max_length=100, blank=True, null=True)
-    version = models.BigIntegerField()
-
-    class Meta:
-        managed = False
-        db_table = 'cp_operador'
 
 
-class CpTransporte(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    transporte = models.OneToOneField('TransporteEmbarques', models.DO_NOTHING)
-    propietario = models.ForeignKey('Propietario', models.DO_NOTHING)
-    iv_config_vehicular = models.CharField(max_length=255, blank=True, null=True)
-    af_perm_sct = models.CharField(max_length=255, blank=True, null=True)
-    af_num_permiso_sct = models.CharField(max_length=255, blank=True, null=True)
-    version = models.BigIntegerField()
 
-    class Meta:
-        managed = False
-        db_table = 'cp_transporte'
 
 class Folio(models.Model):
     id = models.BigAutoField(primary_key=True)
     entidad = models.CharField(max_length=255, blank=True, null=True)
     folio = models.BigIntegerField()
     serie = models.CharField(max_length=255, blank=True, null=True)
-    sucursal = models.ForeignKey("Sucursal",models.DO_NOTHING,null=True)
+    sucursal = models.ForeignKey(Sucursal,models.DO_NOTHING,null=True)
     sucursal_nombre  = models.CharField(max_length=50, blank=True, null=True)
 
     objects = FolioManager()
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'folio'
 
 """ Modelos de  Embarques"""
@@ -276,7 +134,7 @@ class Embarque(models.Model):
     id = models.BigAutoField(primary_key=True)
     documento = models.IntegerField(blank=True, null=True)
     operador = models.ForeignKey('Operador', models.DO_NOTHING)
-    sucursal = models.ForeignKey('Sucursal', models.DO_NOTHING)
+    sucursal = models.ForeignKey(Sucursal, models.DO_NOTHING)
     facturista = models.ForeignKey('FacturistaEmbarques', models.DO_NOTHING)
     fecha = models.DateField()
     or_fecha_hora_salida = models.DateTimeField(blank=True, null=True)
@@ -301,7 +159,7 @@ class Embarque(models.Model):
     objects = EmbarqueManager()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'embarques'
 
 class Entrega(models.Model):
@@ -329,7 +187,7 @@ class Entrega(models.Model):
     arribo_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank= True, null=True)
     recepcion = models.DateTimeField(blank=True, null=True)
     recepcion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
-    recepcion_longitud = models.DecimalField(max_digits=19, decimal_places=7)
+    recepcion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     regreso = models.DateTimeField(blank=True, null=True)
     recibio = models.CharField(max_length=255, blank=True, null=True)
     area = models.CharField(max_length=255, blank=True, null=True)
@@ -346,7 +204,7 @@ class Entrega(models.Model):
     objects = EntregaManager()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'entrega'
 
 class ImgEntrega(models.Model):
@@ -394,7 +252,7 @@ class EntregaDet(models.Model):
         return self.envio_det.me_cantidad
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'entrega_det'
 
 
@@ -419,7 +277,7 @@ class EntregaComision(models.Model):
     version = models.BigIntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'entrega_comision'
 
 
@@ -500,7 +358,7 @@ class EntregaIncidenciaSeguimiento(models.Model):
     recibio = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'entrega_recorrido' '''
 
 
@@ -529,6 +387,13 @@ class Envio(models.Model):
     destinatario = models.CharField(max_length=255, blank=True, null=True)
     pasan = models.BooleanField(default= False) 
     usuario_pasan = models.CharField(max_length=255, blank=True, null=True)
+    #
+    de_rfc_destinatario = models.CharField(max_length=13, blank=True, null=True)
+    de_destino = models.CharField(max_length=100, blank=True, null=True)
+    maniobra = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
+    email_envio = models.CharField(max_length=255, blank=True, null=True)
+
+
     
     @property
     def saldo(self):
@@ -550,7 +415,7 @@ class Envio(models.Model):
     objects = EnvioManager()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'envio'
 
 
@@ -574,6 +439,14 @@ class EnvioDet(models.Model):
     update_user = models.CharField(max_length=255, blank=True, null=True)
     version = models.BigIntegerField()
     cortes = models.CharField(max_length=300, blank=True, null=True)
+    kxmil= models.DecimalField(max_digits=19, decimal_places=3, blank=True, null=True, default=0.000)
+    me_bienes_transp = models.CharField(max_length=255, blank=True, null=True, default='sin variable') 
+    me_clave_unidad = models.CharField(max_length=10, blank=True, null=True, default='no info')
+    me_material_peligroso = models.CharField(max_length=2, blank=True, null=True, default='No')
+
+
+
+
 
     @property
     def saldo(self):
@@ -592,7 +465,7 @@ class EnvioDet(models.Model):
 
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'envio_det'
     
 class InstruccionDeEnvio(models.Model):
@@ -614,7 +487,7 @@ class InstruccionDeEnvio(models.Model):
     direccion_latitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     direccion_longitud = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     fecha_de_entrega = models.DateTimeField(blank=True, null=True)
-    sx_transporte = models.ForeignKey(TransporteForaneo,on_delete=models.DO_NOTHING,db_column='sx_transporte', to_field='sx', related_name='transporte_foraneo')
+    sx_transporte = models.ForeignKey(TransporteForaneo,on_delete=models.DO_NOTHING,db_column='sx_transporte', to_field='sx', related_name='transporte_foraneo', null= True, blank=True)
     sx = models.CharField(unique=True, max_length=255, blank=True, null=True)
     distancia = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
     sector = models.IntegerField(blank=True, null=True, default= 0)
@@ -622,11 +495,17 @@ class InstruccionDeEnvio(models.Model):
     last_updated = models.DateTimeField()
     create_user = models.CharField(max_length=255, blank=True, null=True)
     update_user = models.CharField(max_length=255, blank=True, null=True)
-
-    version = models.BigIntegerField()
+    #
+    origen_sx = models.CharField(max_length=255, blank=True, null=True)
+    version = models.BigIntegerField(default=0)
+    email_envio = models.CharField(max_length=255, blank=True, null=True)
+    tipo_envio = models.CharField(max_length=255, blank=True, null=True)
+    clasificcion_vale = models.CharField(max_length=255, blank=True, null=True)
+    distancia = models.DecimalField(max_digits=19, decimal_places=7, blank=True, null=True)
+    sector = models.IntegerField(blank=True, null=True, default=0)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'instruccion_de_envio'
 
 """ Modelos de carta porte"""
@@ -673,7 +552,7 @@ class CpCfdi(models.Model):
     version = models.BigIntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'cp_cfdi'
 
 
@@ -688,10 +567,10 @@ class CpEmbarques(models.Model):
     or_cliente_remitente = models.CharField(max_length=255, blank=True, null=True)
     me_unidad_peso = models.CharField(max_length=255, blank=True, null=True)
     version = models.BigIntegerField()
-    cliente = models.ForeignKey('Empresa', models.DO_NOTHING)
+    cliente = models.ForeignKey(Empresa, models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'cp_embarques'
 
 
@@ -704,7 +583,7 @@ class CpEnvio(models.Model):
     version = models.BigIntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'cp_envio'
 
 
@@ -717,7 +596,7 @@ class CpEnvioDet(models.Model):
     version = models.BigIntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'cp_envio_det'
 
 
@@ -732,7 +611,7 @@ class CpInstruccionDeEnvio(models.Model):
     version = models.BigIntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'cp_instruccion_de_envio'
 
 
@@ -748,3 +627,84 @@ class GeolocalizacionTransportes(models.Model):
     class Meta:
         managed = True
         db_table = 'geolocalizacion_transportes'
+
+class TransporteEmbarques(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    activo = models.BooleanField(default= False)
+    marca = models.CharField(max_length=255, blank=True, null=True)
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
+    iv_anio_modelo = models.CharField(max_length=255, blank=True, null=True)
+    iv_placa_vm = models.CharField(unique=True, max_length=255)
+    af_nombre_aseg = models.CharField(max_length=255, blank=True, null=True)
+    af_num_poliza_seguro = models.CharField(max_length=255, blank=True, null=True)
+    poliza_vigencia = models.DateField(blank=True, null=True)
+    facturista = models.ForeignKey(FacturistaEmbarques, models.DO_NOTHING)
+    date_created = models.DateTimeField()
+    last_updated = models.DateTimeField()
+    create_user = models.CharField(max_length=100, blank=True, null=True)
+    update_user = models.CharField(max_length=100, blank=True, null=True)
+    version = models.BigIntegerField()
+    numero_serie = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'transporte_embarques'
+
+class Operador(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    activo = models.BooleanField(default= False)
+    num_licencia = models.CharField(max_length=255, blank=True, null=True)
+    nombre = models.CharField(max_length=255)
+    comision = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
+    precio_tonelada = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
+    celular = models.CharField(max_length=50, blank=True, null=True)
+    email = models.CharField(max_length=255, blank=True, null=True)
+    facturista = models.ForeignKey(FacturistaEmbarques, models.DO_NOTHING, blank=True, null=True)
+    transporte = models.ForeignKey(TransporteEmbarques, models.DO_NOTHING, blank=True, null=True)
+    sx = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField()
+    last_updated = models.DateTimeField()
+    create_user = models.CharField(max_length=100, blank=True, null=True)
+    update_user = models.CharField(max_length=100, blank=True, null=True)
+    version = models.BigIntegerField()
+    user = models.ForeignKey(User, models.DO_NOTHING, blank=True, null=True, related_name='operador')
+
+    objects = OperadorManager()
+
+    class Meta:
+        managed = True
+        db_table = 'operador'
+
+class CpOperador(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    activo = models.TextField()  # This field type is a guess.
+    operador = models.OneToOneField(Operador, models.DO_NOTHING)
+    cve_transporte = models.CharField(max_length=255)
+    rfc = models.CharField(max_length=13)
+    direccion_calle = models.CharField(max_length=200, blank=True, null=True)
+    direccion_numero_exterior = models.CharField(max_length=50, blank=True, null=True)
+    direccion_numero_interior = models.CharField(max_length=50, blank=True, null=True)
+    direccion_codigo_postal = models.CharField(max_length=255, blank=True, null=True)
+    direccion_colonia = models.CharField(max_length=255, blank=True, null=True)
+    direccion_municipio = models.CharField(max_length=255, blank=True, null=True)
+    direccion_estado = models.CharField(max_length=255, blank=True, null=True)
+    direccion_pais = models.CharField(max_length=100, blank=True, null=True)
+    version = models.BigIntegerField()
+
+    class Meta:
+        managed = True
+        db_table = 'cp_operador'
+
+
+class CpTransporte(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    transporte = models.OneToOneField(TransporteEmbarques, models.DO_NOTHING)
+    propietario = models.ForeignKey(Propietario, models.DO_NOTHING)
+    iv_config_vehicular = models.CharField(max_length=255, blank=True, null=True)
+    af_perm_sct = models.CharField(max_length=255, blank=True, null=True)
+    af_num_permiso_sct = models.CharField(max_length=255, blank=True, null=True)
+    version = models.BigIntegerField()
+
+    class Meta:
+        managed = True
+        db_table = 'cp_transporte'
