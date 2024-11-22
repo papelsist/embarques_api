@@ -37,7 +37,7 @@ class EnvioManager(models.Manager):
     def envios_parciales_pendientes(self,sucursal):
         fecha_final = date.today()
         fecha_inicial = fecha_final - relativedelta(months=2)
-        envios_list = self.filter(instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final], sucursal=sucursal, pasan= False)   
+        envios_list = self.filter(instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final], sucursal=sucursal.nombre, pasan= False)   
         print(envios_list)
         envios = [x for x in envios_list if x.enviado != 0.00 and x.saldo != 0.00]
         print(envios)
