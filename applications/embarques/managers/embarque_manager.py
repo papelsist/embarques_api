@@ -13,7 +13,7 @@ class EmbarqueManager(models.Manager):
         return embarques
     
     def regresos(self,fecha_inicial, fecha_final,sucursal):
-        embarques = self.filter( ~Q(or_fecha_hora_salida = None), ~Q(operador__nombre = 'CLIENTE PASAN'),~Q(regreso = None), regreso__range=[fecha_inicial, fecha_final], sucursal = sucursal).order_by('documento')
+        embarques = self.filter( ~Q(or_fecha_hora_salida = None), ~Q(operador__nombre = 'CLIENTE PASAN'),~Q(regreso = None), regreso__date__range=[fecha_inicial, fecha_final], sucursal = sucursal).order_by('documento')
 
         return embarques
     

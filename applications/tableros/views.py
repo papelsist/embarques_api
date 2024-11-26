@@ -7,8 +7,20 @@ from django.http import HttpResponse
 from applications.embarques.serializers import EnvioSerializerEm, EmbarqueSerializer, EnvioSerializer, EntregaSerializer
 from applications.embarques.models import Envio, Sucursal, Embarque, Entrega   
 from rest_framework.generics import (ListAPIView)
+from datetime import date, timedelta
 
 
+
+class Regresos(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = EmbarqueSerializer
+    def get_queryset(self):
+        fecha_final = date.today()
+        fecha_inicial = fecha_final - timedelta(days=7)    
+        suc_id = self.request.query_params.get('sucursal')
+        sucursal = Sucursal.objects.get(id = suc_id)
+        queryset = Embarque.objects.regresos(fecha_inicial,fecha_final,sucursal)
+        return queryset
 
 class EnviosPendientesAsignacion(ListAPIView):
     permission_classes = [AllowAny]

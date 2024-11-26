@@ -1,4 +1,4 @@
-from ..reports import asignacion_embarque, sugerencia_ruta, reporte_asignacion_embarque
+from ..reports import asignacion_embarque, sugerencia_ruta, reporte_asignacion_embarque, reporte_entrega_doctos
 
 
 def imprimir_reporte_asignacion(embarque):
@@ -17,4 +17,8 @@ def imprimir_reporte_ruta(ruta):
 
 def imprimir_reporte_asignacion_embarque(embarque):
     reporte = reporte_asignacion_embarque(embarque)
+    return reporte
+
+def imprimir_reporte_entrega(operador_id, sucursal_id, fecha):
+    reporte = reporte_entrega_doctos(operador_id, sucursal_id, fecha)
     return reporte

@@ -3,3 +3,4 @@ from .test_group_report import test_report
 from .asignacion_embarque import asignacion_embarque
 from .sugerencia_ruta import sugerencia_ruta
 from .reporte_asignacion import reporte_asignacion_embarque
+from .reporte_entrega_doctos import reporte_entrega_doctos
