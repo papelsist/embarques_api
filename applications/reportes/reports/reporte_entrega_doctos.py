@@ -116,15 +116,18 @@ def reporte_entrega_doctos(operador_id, sucursal_id, fecha):
     importe_contado = Decimal(0.00)
     
     for entrega in contado:
+        cantidad_envio = sum(det.cantidad for det in entrega.detalles.all())
+        cantidad_entrega = sum(det.cantidad for det in entrega.detalles.all())
         pdf.set_font('helvetica', '', 8)
-        pdf.cell(10, 5, entrega.tipo_documento,align="C")
+        pdf.cell(10, 5, f"{entrega.tipo_documento}      {'#' if cantidad_envio != cantidad_entrega else ''}",align="C")
         pdf.cell(20, 5, str(entrega.embarque.documento),align="C" )
         pdf.cell(20, 5, entrega.documento,align="C" )
         pdf.cell(20, 5, entrega.fecha_documento.strftime("%d/%m/%Y"),align="C" )
         pdf.cell(70, 5, entrega.destinatario,align="L" )
         pdf.cell(10, 5, str(entrega.total_documento),align="C" )
         pdf.cell(20, 5, str(entrega.kilos),align="C" )
-        pdf.cell(30, 5, str(entrega.valor),align="C", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(20, 5, str(entrega.valor),align="C" )
+        pdf.cell(5, 5, f"{'*' if entrega.envio.maniobra != 0  and  entrega.envio.maniobra != None else ''}",align="L", new_x="LMARGIN", new_y="NEXT")
 
         paquetes_contado += 0
         kilos_contado += entrega.kilos
@@ -145,15 +148,18 @@ def reporte_entrega_doctos(operador_id, sucursal_id, fecha):
     pdf.ln()
     
     for entrega in credito:
+        cantidad_envio = sum(det.cantidad for det in entrega.detalles.all())
+        cantidad_entrega = sum(det.cantidad for det in entrega.detalles.all())
         pdf.set_font('helvetica', '', 8)
-        pdf.cell(10, 5, entrega.tipo_documento,align="C")
+        pdf.cell(10, 5, f"{entrega.tipo_documento}      {'#' if cantidad_envio != cantidad_entrega else ''}",align="C")
         pdf.cell(20, 5, str(entrega.embarque.documento),align="C" )
         pdf.cell(20, 5, entrega.documento,align="C" )
         pdf.cell(20, 5, entrega.fecha_documento.strftime("%d/%m/%Y"),align="C" )
         pdf.cell(70, 5, entrega.destinatario,align="L" )
         pdf.cell(10, 5, str(entrega.total_documento),align="C" )
         pdf.cell(20, 5, str(entrega.kilos),align="C" )
-        pdf.cell(30, 5, str(entrega.valor),align="C", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(20, 5, str(entrega.valor),align="C" )
+        pdf.cell(5, 5, f"{'*' if entrega.envio.maniobra != 0  and  entrega.envio.maniobra != None else ''}",align="L", new_x="LMARGIN", new_y="NEXT")
 
         paquetes_credito += 0
         kilos_credito += entrega.kilos

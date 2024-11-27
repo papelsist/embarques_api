@@ -390,7 +390,7 @@ class Envio(models.Model):
     #
     de_rfc_destinatario = models.CharField(max_length=13, blank=True, null=True)
     de_destino = models.CharField(max_length=100, blank=True, null=True)
-    maniobra = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
+    maniobra = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True,default=0.00)
     email_envio = models.CharField(max_length=255, blank=True, null=True)
 
 
