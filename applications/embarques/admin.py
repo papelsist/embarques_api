@@ -3,7 +3,7 @@ from django.contrib import admin
 # Register your models here.
 from django.contrib import admin
 
-from .models import Embarque, Envio, EnvioDet,Entrega, EntregaDet, Sucursal
+from .models import Embarque, Envio, EnvioDet,Entrega, EntregaDet, Sucursal,DireccionEntrega
 
 
 admin.site.register(Embarque)
@@ -12,3 +12,4 @@ admin.site.register(EnvioDet)
 admin.site.register(Entrega)
 admin.site.register(EntregaDet)
 admin.site.register(Sucursal)
+admin.site.register(DireccionEntrega)

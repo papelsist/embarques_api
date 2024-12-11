@@ -12,4 +12,5 @@ urlpatterns = [
     path('api/get_user/', views.get_user, name='get_user'),
     path('api/get_usuario/', views.GetUser.as_view(), name='get_usuario'),
     path('api/auth_test/', views.test, name='test'),
+    path('api/find_by_nip/', views.find_user_by_nip, name='find_by_nip'),
 ]

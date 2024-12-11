@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Entrega, EntregaDet, EntregaIncidencia, EntregaIncidenciaSeguimiento
+from ..models import Entrega, EntregaDet, EntregaIncidencia, EntregaIncidenciaSeguimiento, ImgEntrega
 from .envio_serializer import EnvioRutaSerializer
 
 
@@ -55,6 +55,12 @@ class EntregaSeguimientoSerializer(serializers.Serializer):
     embarque_fecha = serializers.DateField()
     operador = serializers.CharField()
     detalles = EntregaDetsSeguimientoSerializer(many = True)
+
+class ImgEntregaSerializer(serializers.ModelSerializer):
+    entrega = EntregaSerializer()
+    class Meta:
+        model = ImgEntrega
+        fields = '__all__'
 
 
 

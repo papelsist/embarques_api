@@ -63,7 +63,7 @@ THIRD_PART_APPS = [
     'rest_framework.authtoken',
 ]
 
-INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PART_APPS
+INSTALLED_APPS = DJANGO_APPS+ THIRD_PART_APPS + LOCAL_APPS 
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -105,12 +105,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'siipap',
         #
-        #'USER': 'root',
-        #'PASSWORD': 'Paproot_83',
-        #'HOST': '10.10.1.121',
-        'USER': 'admin',
-        'PASSWORD': 'papelrx',
-        'HOST': '198.199.69.63',
+        'USER': 'root',
+        'PASSWORD': 'Paproot_83',
+        'HOST': '10.10.1.121',
+        #'USER': 'admin',
+        #'PASSWORD': 'papelrx',
+        #'HOST': '198.199.69.63',
         'PORT': 3306 ,
         'OPTIONS': {'ssl_mode': 'DISABLED'},
         #'OPTIONS': {'ssl': False},

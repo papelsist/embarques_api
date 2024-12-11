@@ -4,8 +4,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import HttpResponse
-from applications.embarques.serializers import EnvioSerializerEm, EmbarqueSerializer, EnvioSerializer, EntregaSerializer
-from applications.embarques.models import Envio, Sucursal, Embarque, Entrega   
+from applications.embarques.serializers import EnvioSerializerEm, EmbarqueSerializer, EnvioSerializer, EntregaSerializer, ImgEntregaSerializer
+from applications.embarques.models import Envio, Sucursal, Embarque, Entrega, ImgEntrega  
 from rest_framework.generics import (ListAPIView)
 from datetime import date, timedelta
 
@@ -67,6 +67,18 @@ class EnviosParciales(ListAPIView):
         sucursal = Sucursal.objects.get(id = suc_id)
         query_set =  Envio.objects.envios_parciales_pendientes(sucursal)
         return query_set
+
+class CapturasEntregas(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ImgEntregaSerializer
+    def get_queryset(self):
+        print(self.request.query_params)
+        fecha = self.request.query_params.get('fecha')  
+        sucursal = self.request.query_params.get('sucursal')
+        query_set = ImgEntrega.objects.filter(entrega__sucursal = sucursal, entrega__embarque__fecha = fecha).order_by('-id')
+        return query_set
+
+      
 
         
     

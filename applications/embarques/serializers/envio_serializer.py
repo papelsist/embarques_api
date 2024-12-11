@@ -1,17 +1,23 @@
 from rest_framework import serializers
 from datetime import datetime
-from ..models import Envio
+from ..models import Envio, EnvioAnotaciones
 from .envio_det_serializer import EnvioDetSerializer
 from .instruccion_envio_serializer import InstruccionEnvioSerializer
 from applications.shared.utils.date_utils import  DateUtils
 
 
+class AnotacionesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= EnvioAnotaciones
+        fields = '__all__'
+
 class EnvioSerializerEm(serializers.ModelSerializer):
     detalles = EnvioDetSerializer(many= True)
     instruccion = InstruccionEnvioSerializer()
+    anotaciones = AnotacionesSerializer(many=True)
     class Meta:
         model= Envio
-        fields= ['id','documento','fecha_documento','sucursal','tipo_documento','destinatario','detalles','saldo', 'kilos','instruccion','pasan','usuario_pasan','date_created' ]
+        fields= ['id','documento','fecha_documento','sucursal','tipo_documento','destinatario','detalles','saldo', 'kilos','instruccion','pasan','usuario_pasan','date_created','anotaciones','surtido' ]
         #tefields = '__all__'
 
 class EnvioSerializer(serializers.ModelSerializer):
@@ -36,5 +42,14 @@ class EnvioSingleSerializer(serializers.ModelSerializer):
         model= Envio
         fields = '__all__'
     
+
+
+
+class EnvioAnotacionesSerializer(serializers.ModelSerializer):
+    anotaciones = AnotacionesSerializer(many=True)
+    instruccion = InstruccionEnvioSerializer()
+    class Meta:
+        model= Envio
+        fields= ['id','documento','fecha_documento','sucursal','tipo_documento','destinatario','detalles','saldo', 'kilos','instruccion','anotaciones','pasan','usuario_pasan','date_created' ]
 
     

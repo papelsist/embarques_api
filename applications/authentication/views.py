@@ -7,6 +7,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.generics import (RetrieveAPIView,)
 from rest_framework.views import APIView
+from .models import User
 from .serializers import UserSerializer
 
 
@@ -47,7 +48,6 @@ def get_user(request):
 
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
 @permission_classes([AllowAny])
 def test(request):
     return Response({"message":"succesfully"})
@@ -65,3 +65,15 @@ class GetUser(APIView):
         user_serialized = UserSerializer(user)
     
         return Response(user_serialized.data)
+    
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def find_user_by_nip(request):
+    nip = request.query_params.get('nip')
+    user = User.objects.get(nip=nip)
+    user_serialized = UserSerializer(user)
+    return Response(user_serialized.data)
+
+

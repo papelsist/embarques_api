@@ -5,9 +5,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db.models import Q
 from datetime import date, datetime
 from applications.authentication.models import User
-from ..models import Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador, EntregaIncidencia, EntregaIncidenciaSeguimiento, InstruccionDeEnvio
+
+from ..models import (Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador, EntregaIncidencia, EntregaIncidenciaSeguimiento, InstruccionDeEnvio,
+                      EnvioAnotaciones, DireccionEntrega, PreEntrega)
 from ..serializers import (EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer, IncidenciaSerializer,EmbarqueRutaSerializer,EntregaRutaSerializer,SucursalSerializer, 
-                           IncidenciaSeguimientoSerializer, EntregaSeguimientoSerializer)
+                           IncidenciaSeguimientoSerializer, EntregaSeguimientoSerializer, EnvioAnotacionesSerializer, DireccionEntregaSerializer, PreEntregaSerializer)
 from rest_framework.generics import (ListAPIView, 
                                     CreateAPIView,
                                     RetrieveAPIView,
@@ -15,10 +17,11 @@ from rest_framework.generics import (ListAPIView,
                                     )
 from ..services import (salvar_embarque, borrar_entrega_det, registrar_salida_embarque, borrar_embarque, actualizar_bitacora_embarque, 
                         eliminar_entrega_embarque, registrar_regreso_embarque, crear_embarque_por_ruteo, asignar_envios_pend, get_user_logged,
-                        crear_incidencia_entrega_det, asignar_envios_parc, asignar_a_pasan, registrar_recepcion_pagos_embarque,registrar_recepcion_docs_embarque)
+                        crear_incidencia_entrega_det, asignar_envios_parc, asignar_a_pasan, registrar_recepcion_pagos_embarque,registrar_recepcion_docs_embarque, crear_pre_entrega,
+                        asignar_instruccion)
 
 from geopy import distance
-from datetime import date
+from datetime import date, datetime
 
 
 
@@ -60,6 +63,23 @@ def search_envio(request):
     fecha_documento = request.query_params.get('fecha_documento')
     try:
         envio = Envio.objects.find_envio(tipo, documento, fecha_documento,sucursal)
+        envio_serialized = EnvioSerializerEm(envio)
+        data = envio_serialized.data
+    except:
+        data = None
+    return Response(data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def search_envio_surtido(request):
+    permission_classes = [AllowAny]
+    sucursal = request.query_params.get('sucursal')
+    documento = request.query_params.get('documento')
+    tipo = request.query_params.get('tipo')
+    fecha_documento = request.query_params.get('fecha_documento')
+    try:
+        envio = Envio.objects.find_envio_surtido(tipo, documento, fecha_documento,sucursal)
         envio_serialized = EnvioSerializerEm(envio)
         data = envio_serialized.data
     except:
@@ -147,9 +167,9 @@ def eliminar_entrega(request):
 
 @api_view(['POST'])
 def registrar_regreso(request):
-    embarque, actualizado = registrar_regreso_embarque(request.data)
+    embarque, actualizado, mensaje = registrar_regreso_embarque(request.data)
     embarque_serialized = EmbarqueSerializer(embarque)
-    return Response({"embarque":embarque_serialized.data, "actualizado": actualizado})
+    return Response({"embarque":embarque_serialized.data, "actualizado": actualizado, "mensaje": mensaje})  
 
 class Regresos(ListAPIView):
     serializer_class = EmbarqueSerializer
@@ -478,5 +498,158 @@ def get_seguimiento_envio(request):
             }
             entregas_dict.append(entrega_dict)
         entregas_serialized = EntregaSeguimientoSerializer(entregas_dict, many = True)
+    else:
+        envio = Envio.objects.get(documento = documento, fecha_documento = fecha, sucursal = sucursal)
+        entrega_dict ={
+                "id": envio.id,
+                "documento": envio.documento,
+                "fecha": envio.fecha_documento,
+                "salida": None,
+                "arribo": None,
+                "recepcion": None,
+                "recibio": "Sin asignar",
+                "regreso": None,
+                "embarque": 0,
+                "embarque_fecha": date.today(),
+                "operador": "Sin asignar",
+                "detalles": []
+            }
+        entregas_dict.append(entrega_dict)
+        entregas_serialized = EntregaSeguimientoSerializer(entregas_dict, many = True)
      
     return Response(entregas_serialized.data)
+
+
+@api_view(['PUT'])
+@permission_classes([AllowAny])
+def agregar_anotacion_envio(request):
+    print(request.data)
+    envio = Envio.objects.get(id = request.data['envio_id'])
+    anotacion = request.data['anotacion']
+    create_user = request.data['username']
+    anotacion = EnvioAnotaciones.objects.create(envio = envio,anotacion = anotacion,create_user = create_user,fecha = date.today())
+    serializer = EnvioAnotacionesSerializer(envio)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_envio_anotaciones(request):
+
+    sucursal = request.query_params.get('sucursal')
+    documento = request.query_params.get('documento')
+    tipo = request.query_params.get('tipo')
+    fecha_documento = request.query_params.get('fecha_documento')
+    try:
+        envio = Envio.objects.find_envio(tipo, documento, fecha_documento,sucursal)
+        envio_serialized = EnvioAnotacionesSerializer(envio)
+        data = envio_serialized.data
+    except:
+        data = None
+    return Response(data)
+    
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def revisar_anotaciones(request):
+    
+    anotaciones = request.data['anotaciones']
+    for a in anotaciones:
+        anotacion = EnvioAnotaciones.objects.get(id = a)
+        anotacion.revisada = True
+        anotacion.save()
+
+       
+    return Response({"message":"Complete sucesfully"})
+
+@api_view(['POST'])
+def crear_preentrega(request):
+    envio = crear_pre_entrega(request.data)
+    envio_serialized = EnvioSerializerEm(envio)
+    return Response(envio_serialized.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_direcciones_entrega(request):
+    destinatario = request.query_params.get('destinatario')
+    direcciones = DireccionEntrega.objects.filter(destinatario = destinatario)
+    direcciones_serialized = DireccionEntregaSerializer(direcciones, many = True)   
+    return Response(direcciones_serialized.data)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def crear_direccion_por_envio(request):
+
+    envio = Envio.objects.get(id = request.data['envio_id'])
+    clave = request.data['clave']
+    instruccion = envio.instruccion
+    direccion = DireccionEntrega()
+    direccion.clave = clave
+    direccion.principal = True
+    direccion.destinatario = envio.destinatario
+    direccion.calle = instruccion.direccion_calle
+    direccion.numero_exterior = instruccion.direccion_numero_exterior
+    direccion.numero_interior = instruccion.direccion_numero_interior
+    direccion.colonia =  instruccion.direccion_colonia
+    direccion.codigo_postal = instruccion.direccion_codigo_postal
+    direccion.municipio = instruccion.direccion_municipio
+    direccion.estado = instruccion.direccion_estado
+    direccion.pais = instruccion.direccion_pais
+    direccion.latitud = instruccion.direccion_latitud
+    direccion.longitud = instruccion.direccion_longitud
+    direccion.version = 0
+    direccion.save()
+    direccion_serialized = DireccionEntregaSerializer(direccion)  
+    
+    return Response(direccion_serialized.data)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def crear_direccion_entrega(request):
+
+    direccion = DireccionEntrega()
+    direccion.clave = request.data['clave']
+    direccion.principal = False
+    direccion.destinatario = request.data['destinatario']
+    direccion.calle = request.data['calle']
+    direccion.numero_exterior = request.data['numero_exterior']
+    direccion.numero_interior = request.data['numero_interior']
+    direccion.colonia =  request.data['colonia']
+    direccion.codigo_postal = request.data['codigo_postal']
+    direccion.municipio = request.data['municipio']
+    direccion.estado = request.data['estado']
+    direccion.pais = request.data['pais']
+    direccion.latitud = request.data['latitud']
+    direccion.longitud = request.data['longitud']
+    direccion.version = 0
+    direccion.save()
+    direccion_serialized = DireccionEntregaSerializer(direccion) 
+
+    return Response(direccion_serialized.data) 
+
+class InstruccionEntregaListView(ListAPIView):
+    serializer_class = PreEntregaSerializer
+    def get_queryset(self):
+        print(self.request.query_params)
+        sucursal = self.request.query_params.get('sucursal')
+        fecha_inicial = self.request.query_params.get('fecha_inicial')
+        fecha_final = self.request.query_params.get('fecha_final')
+        queryset = PreEntrega.objects.filter( ~Q(surtido = None),entrega=None,sucursal=sucursal,fecha__range =[fecha_inicial,fecha_final]).order_by('folio')
+        return queryset
+
+@api_view(['GET'])   
+def get_instruccion_entrega(request):
+    id = request.query_params.get('id')
+    instruccion = PreEntrega.objects.get(id = id)
+    instruccion_serialized = PreEntregaSerializer(instruccion)
+    return Response(instruccion_serialized.data)
+
+@api_view(['POST'])
+def asignar_instruccion_entrega(request):
+   
+    envio = asignar_instruccion(request.data)
+    envio_serialized= EnvioSerializerEm(envio)
+    return Response(envio_serialized.data)
+    
+

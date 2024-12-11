@@ -8,4 +8,5 @@ urlpatterns = [
     path('api/tableros/embarques_transito', views.EmbarquesTransito.as_view(), name='embarquesTransito'),
     path('api/tableros/envios_transito', views.EnviosTransito.as_view(), name='enviosTransito'),
     path('api/tableros/envios_parciales', views.EnviosParciales.as_view(), name='enviosParciales'),
+    path('api/tableros/capturas_entregas', views.CapturasEntregas.as_view(), name='capturasEntregas'),
 ]

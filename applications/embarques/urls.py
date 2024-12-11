@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('api/sucursales/', views.SucursalesActivasList.as_view(), name='sucursales'),
+ 
     path('api/tableros/pendientes_envio', views.pendientes_envio, name='pendientes_envio'),
     path('api/tableros/transito_envio', views.transito_envio, name='transito_envio'),
     path('api/embarques/seguimiento_envio', views.get_seguimiento_envio, name='seguimiento_envio'),
@@ -11,6 +12,7 @@ urlpatterns = [
     
     path('api/embarques/search_operador', views.SearchOperador.as_view(), name='search_operador'),
     path('api/embarques/search_envio', views.search_envio, name='search_envio'),
+    path('api/embarques/search_envio_surtido', views.search_envio_surtido, name='search_envio_surtido'),
     path('api/embarques/crear_embarque', views.crear_embarque, name='crear_embarque'),
     path('api/embarques/crear_asignacion/<pk>', views.CrearAsignacion.as_view(), name='crear_asignacion'),
     path('api/embarques/actualizar_embarque',views.actualizar_embarque , name='actualizar_embarque'),
@@ -53,4 +55,18 @@ urlpatterns = [
     path('api/embarques/recepcion_documentos/', views.registrar_recepcion_documentos, name='registrar_recepcion_documentos'),
     path('api/embarques/recepcion_pagos_embarque/', views.registrar_recepcion_pago_embarque, name='registrar_recepcion_pago_embarque'),
     path('api/embarques/recepcion_documentos_embarque/', views.registrar_recepcion_documentos_embarque, name='registrar_recepcion_documentos_embarque'),
+    path ('api/embarques/agregar_anotacion/', views.agregar_anotacion_envio,name='agregar_anotacion'),
+    path ('api/embarques/get_anotaciones/', views.get_envio_anotaciones,name='get_anotaciones'),
+    path ('api/embarques/revisar_anotaciones/', views.revisar_anotaciones,name='revisar_anotaciones'),
+    path ('api/embarques/crear_preentrega/', views.crear_preentrega,name='crear_preentrega'),
+    path('api/embarques/get_direcciones_entrega/', views.get_direcciones_entrega, name='get_direcciones_entrega'),
+    path('api/embarques/crear_direccion_envio/', views.crear_direccion_por_envio, name='crear_direcion_envio'),
+    path('api/embarques/crear_direccion_entrega/', views.crear_direccion_entrega, name='crear_direcion_entrega'),
+    path('api/embarques/preentregas_surtido/', views.PreEntregaSurtidoListView.as_view(), name='preentregas'),
+    path('api/embarques/registrar_surtido_preentrega/', views.registrar_surtido_preentrega, name='registrar_surtido_preentrega'),
+    path('api/embarques/envios_surtido/', views.EnviosSurtidoListView.as_view(), name='envios_surtido'),
+    path('api/embarques/registrar_surtido_envio/', views.registrar_surtido_envio, name='registrar_surtido_envio'),
+    path('api/embarques/instruccion_entrega/', views.InstruccionEntregaListView.as_view(), name='instruccion_entrega'),
+    path('api/embarques/get_instruccion_entrega/', views.get_instruccion_entrega, name='get_instruccion_entrega'),
+    path('api/embarques/asignar_instruccion_entrega/', views.asignar_instruccion_entrega, name='asignar_instruccion_entrega')
 ]

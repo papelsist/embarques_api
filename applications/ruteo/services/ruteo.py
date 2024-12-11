@@ -60,9 +60,7 @@ def get_envios_fecha(sucursal,fecha):
     e.destinatario,e.date_created,e.kilos, i.id as instruccion_id,e.kilos
     from envio e join instruccion_de_envio i on (e.id = i.envio_id) left join entrega n on (e.id = n.envio_id)
     where i.direccion_latitud  <> 0 and n.id is null and e.sucursal = %s and date(i.fecha_de_entrega)  = %s 
-
- )
-            """
+    """
     dao = RuteoDao()
     envios = dao.get_data(query,[sucursal,fecha])
     return envios

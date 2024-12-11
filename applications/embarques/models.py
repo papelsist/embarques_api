@@ -392,6 +392,8 @@ class Envio(models.Model):
     de_destino = models.CharField(max_length=100, blank=True, null=True)
     maniobra = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True,default=0.00)
     email_envio = models.CharField(max_length=255, blank=True, null=True)
+    surtido = models.DateTimeField(blank=True, null=True)
+
 
 
     
@@ -443,9 +445,8 @@ class EnvioDet(models.Model):
     me_bienes_transp = models.CharField(max_length=255, blank=True, null=True, default='sin variable') 
     me_clave_unidad = models.CharField(max_length=10, blank=True, null=True, default='no info')
     me_material_peligroso = models.CharField(max_length=2, blank=True, null=True, default='No')
-
-
-
+    surtido = models.DateTimeField(blank=True, null=True)
+    surtidor = models.CharField(max_length=255, blank=True, null=True)
 
 
     @property
@@ -467,6 +468,21 @@ class EnvioDet(models.Model):
     class Meta:
         managed = True
         db_table = 'envio_det'
+
+class EnvioAnotaciones(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    envio = models.ForeignKey(Envio, models.DO_NOTHING, related_name='anotaciones')
+    fecha = models.DateField()
+    anotacion = models.CharField(max_length=600)
+    revisada = models.BooleanField(default= False)
+    create_user = models.CharField(max_length=255, blank=True, null=True)
+    update_user = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True, null= True)
+    last_updated = models.DateTimeField(auto_now=True, null= True)
+
+    class Meta:
+        managed = True
+        db_table = 'envio_anotaciones'
     
 class InstruccionDeEnvio(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -508,7 +524,85 @@ class InstruccionDeEnvio(models.Model):
         managed = True
         db_table = 'instruccion_de_envio'
 
+""" Modelos de Surtido parciales"""
+
+
+class DireccionEntrega (models.Model):
+    id = models.BigAutoField(primary_key=True)
+    clave = models.CharField(max_length=255)
+    principal = models.BooleanField(default= False)
+    destinatario = models.CharField(max_length=255)
+    calle = models.CharField(max_length=255)
+    numero_exterior = models.CharField(max_length=255)
+    numero_interior = models.CharField(max_length=255, blank=True, null=True)
+    colonia = models.CharField(max_length=255)
+    codigo_postal = models.CharField(max_length=255)
+    municipio = models.CharField(max_length=255)
+    estado = models.CharField(max_length=255)
+    pais = models.CharField(max_length=255)
+    latitud = models.DecimalField(max_digits=19, decimal_places=7)
+    longitud = models.DecimalField(max_digits=19, decimal_places=7)
+    version = models.BigIntegerField( default=0)
+    create_user = models.CharField(max_length=255, blank=True, null=True)
+    update_user = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True, null= True)
+    last_updated = models.DateTimeField(auto_now=True, null= True)
+
+    class Meta:
+        managed = True
+        db_table = 'direccion_entrega'
+
+
+class PreEntrega(models.Model): 
+    id = models.BigAutoField(primary_key=True)
+    fecha = models.DateField(blank=True, null=True)
+    envio = models.ForeignKey(Envio, models.DO_NOTHING, related_name='preentregas')
+    sucursal = models.CharField(max_length=255)
+    destinatario = models.CharField(max_length=255, blank=True, null=True)
+    documento = models.CharField(max_length=255)
+    tipo_documento = models.CharField(max_length=5, blank=True, null=True)
+    fecha_documento = models.DateTimeField()
+    surtido = models.DateTimeField(blank=True, null=True)
+    enviado = models.DateTimeField(blank=True, null=True)
+    direccion_entrega = models.ForeignKey(DireccionEntrega, models.DO_NOTHING, blank=True, null=True )
+    fecha_entrega = models.DateField(blank=True, null=True)
+    entrega = models.ForeignKey(Entrega, models.DO_NOTHING, blank=True, null=True)
+    folio =  models.CharField(max_length=255, blank=True, null=True)
+    comentario = models.CharField(max_length=255, blank=True, null=True)
+    create_user = models.CharField(max_length=255, blank=True, null=True)
+    update_user = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True, null= True)
+    last_updated = models.DateTimeField(auto_now=True, null= True)
+
+    
+
+    class Meta:
+        managed = True
+        db_table = 'pre_entrega'
+
+class PreEntregaDet(models.Model):
+    id= models.BigAutoField(primary_key=True)
+    preentrega = models.ForeignKey(PreEntrega, models.DO_NOTHING, related_name='detalles')
+    envio_det = models.ForeignKey(EnvioDet, models.DO_NOTHING, related_name='preentregas')
+    cantidad = models.DecimalField(max_digits=19, decimal_places=2, default=0)
+    cortes = models.CharField(max_length=255, blank=True, null=True)
+    clave = models.CharField(max_length=255, blank=True, null=True)
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
+    surtido = models.DateTimeField(blank=True, null=True)
+    surtidor = models.CharField(max_length=255, blank=True, null=True)
+    create_user = models.CharField(max_length=255, blank=True, null=True)
+    update_user = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True, null= True)
+    last_updated = models.DateTimeField(auto_now=True, null= True)
+
+
+    class Meta:
+        managed = True
+        db_table = 'pre_entrega_det'
+
 """ Modelos de carta porte"""
+
+
 
 class CpCfdi(models.Model):
     id = models.BigAutoField(primary_key=True)

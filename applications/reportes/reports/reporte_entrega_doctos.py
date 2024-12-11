@@ -116,15 +116,16 @@ def reporte_entrega_doctos(operador_id, sucursal_id, fecha):
     importe_contado = Decimal(0.00)
     
     for entrega in contado:
-        cantidad_envio = sum(det.cantidad for det in entrega.detalles.all())
+        cantidad_envio = sum(det.me_cantidad for det in entrega.envio.detalles.all())
         cantidad_entrega = sum(det.cantidad for det in entrega.detalles.all())
+
         pdf.set_font('helvetica', '', 8)
         pdf.cell(10, 5, f"{entrega.tipo_documento}      {'#' if cantidad_envio != cantidad_entrega else ''}",align="C")
         pdf.cell(20, 5, str(entrega.embarque.documento),align="C" )
         pdf.cell(20, 5, entrega.documento,align="C" )
         pdf.cell(20, 5, entrega.fecha_documento.strftime("%d/%m/%Y"),align="C" )
         pdf.cell(70, 5, entrega.destinatario,align="L" )
-        pdf.cell(10, 5, str(entrega.total_documento),align="C" )
+        pdf.cell(10, 5, str(entrega.envio.total_documento),align="C" )
         pdf.cell(20, 5, str(entrega.kilos),align="C" )
         pdf.cell(20, 5, str(entrega.valor),align="C" )
         pdf.cell(5, 5, f"{'*' if entrega.envio.maniobra != 0  and  entrega.envio.maniobra != None else ''}",align="L", new_x="LMARGIN", new_y="NEXT")
@@ -133,12 +134,12 @@ def reporte_entrega_doctos(operador_id, sucursal_id, fecha):
         kilos_contado += entrega.kilos
         importe_contado += entrega.valor
     
-   
-    pdf.set_font('helvetica', 'B', 8)
-    pdf.set_x(150)
-    pdf.cell(10, 5, "CONTADO: ",align="C")
-    pdf.cell(20, 5, str(kilos_contado),align="C", border="T" )
-    pdf.cell(30, 5, str(importe_contado),align="C", border="T", new_x="LMARGIN", new_y="NEXT")
+    if kilos_contado > 0:
+        pdf.set_font('helvetica', 'B', 8)
+        pdf.set_x(150)
+        pdf.cell(10, 5, "CONTADO: ",align="C")
+        pdf.cell(20, 5, str(kilos_contado),align="C", border="T" )
+        pdf.cell(30, 5, str(importe_contado),align="C", border="T", new_x="LMARGIN", new_y="NEXT")
 
 
     paquetes_credito = 0
@@ -148,7 +149,7 @@ def reporte_entrega_doctos(operador_id, sucursal_id, fecha):
     pdf.ln()
     
     for entrega in credito:
-        cantidad_envio = sum(det.cantidad for det in entrega.detalles.all())
+        cantidad_envio = sum(det.me_cantidad for det in entrega.envio.detalles.all())
         cantidad_entrega = sum(det.cantidad for det in entrega.detalles.all())
         pdf.set_font('helvetica', '', 8)
         pdf.cell(10, 5, f"{entrega.tipo_documento}      {'#' if cantidad_envio != cantidad_entrega else ''}",align="C")
@@ -156,7 +157,7 @@ def reporte_entrega_doctos(operador_id, sucursal_id, fecha):
         pdf.cell(20, 5, entrega.documento,align="C" )
         pdf.cell(20, 5, entrega.fecha_documento.strftime("%d/%m/%Y"),align="C" )
         pdf.cell(70, 5, entrega.destinatario,align="L" )
-        pdf.cell(10, 5, str(entrega.total_documento),align="C" )
+        pdf.cell(10, 5, str(entrega.envio.total_documento),align="C" )
         pdf.cell(20, 5, str(entrega.kilos),align="C" )
         pdf.cell(20, 5, str(entrega.valor),align="C" )
         pdf.cell(5, 5, f"{'*' if entrega.envio.maniobra != 0  and  entrega.envio.maniobra != None else ''}",align="L", new_x="LMARGIN", new_y="NEXT")
@@ -166,17 +167,18 @@ def reporte_entrega_doctos(operador_id, sucursal_id, fecha):
         importe_credito += entrega.valor
     
    
-    pdf.set_font('helvetica', 'B', 8)
-    pdf.set_x(150)
-    pdf.cell(10, 5, "CREDITO : ",align="C")
-    pdf.cell(20, 5, str(kilos_credito),align="C", border="T" )
-    pdf.cell(30, 5, str(importe_credito),align="C", border="T" , new_x="LMARGIN", new_y="NEXT")
+    if kilos_credito > 0:
+        pdf.set_font('helvetica', 'B', 8)
+        pdf.set_x(150)
+        pdf.cell(10, 5, "CREDITO : ",align="C")
+        pdf.cell(20, 5, str(kilos_credito),align="C", border="T" )
+        pdf.cell(30, 5, str(importe_credito),align="C", border="T" , new_x="LMARGIN", new_y="NEXT")
 
-    pdf.ln()
-    pdf.set_x(150)
-    pdf.cell(10, 5, "TOTAL : ",align="C")
-    pdf.cell(20, 5, str(kilos_credito + kilos_contado),align="C", border="T" )
-    pdf.cell(30, 5, str(importe_credito + importe_contado),align="C",border="T", new_x="LMARGIN", new_y="NEXT")
+        pdf.ln()
+        pdf.set_x(150)
+        pdf.cell(10, 5, "TOTAL : ",align="C")
+        pdf.cell(20, 5, str(kilos_credito + kilos_contado),align="C", border="T" )
+        pdf.cell(30, 5, str(importe_credito + importe_contado),align="C",border="T", new_x="LMARGIN", new_y="NEXT")
 
 
 
