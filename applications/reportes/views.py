@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from django.http import HttpResponse
 
 #Importacion de Reportes
-from .services import imprimir_reporte_asignacion, imprimir_reporte_test_group,imprimir_reporte_ruta, imprimir_reporte_asignacion_embarque, imprimir_reporte_entrega
-
+from .services import (imprimir_reporte_asignacion, imprimir_reporte_test_group,imprimir_reporte_ruta, imprimir_reporte_asignacion_embarque, imprimir_reporte_entrega
+,imprimir_reporte_pendientes_pago, imprimir_reporte_pendientes_doctos)
 
 
 @api_view(['GET'])
@@ -45,4 +45,19 @@ def imprimirReporteEntregaDoctos(request):
     print(request.query_params)
     reporte = imprimir_reporte_entrega(operador_id, sucursal_id, fecha)
     return HttpResponse(reporte, content_type='application/pdf')
-    
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def imprimirReportePendientesPago(request):   
+    sucursal = request.query_params['sucursal']
+    reporte = imprimir_reporte_pendientes_pago(sucursal)
+    return HttpResponse(reporte, content_type='application/pdf')
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def imprimirReportePendientesDoctos(request):   
+    sucursal = request.query_params['sucursal']
+    reporte = imprimir_reporte_pendientes_doctos(sucursal)
+    return HttpResponse(reporte, content_type='application/pdf')

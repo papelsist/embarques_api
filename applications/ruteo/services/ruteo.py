@@ -121,6 +121,7 @@ def drop_outliers(df):
     df_sin_outliers = df.drop(list(outliers.index))  
     return df_sin_outliers, indices
 
+
 def make_df_work(df):
     # Creamos dataframe de trabajo para calcular distancias y costos
     df_coord = df[['envio_id','coord','distancia_km']]
