@@ -68,5 +68,8 @@ urlpatterns = [
     path('api/embarques/registrar_surtido_envio/', views.registrar_surtido_envio, name='registrar_surtido_envio'),
     path('api/embarques/instruccion_entrega/', views.InstruccionEntregaListView.as_view(), name='instruccion_entrega'),
     path('api/embarques/get_instruccion_entrega/', views.get_instruccion_entrega, name='get_instruccion_entrega'),
-    path('api/embarques/asignar_instruccion_entrega/', views.asignar_instruccion_entrega, name='asignar_instruccion_entrega')
+    path('api/embarques/asignar_instruccion_entrega/', views.asignar_instruccion_entrega, name='asignar_instruccion_entrega'),
+    path('api/embarques/get_envio_uuid/', views.get_envio_by_uuid, name='get_envio_uuid'),
+    path('api/embarques/recepcion_pago_envio/', views.registrar_recepcion_pago_envio, name='registrar_recepcion_pago_envio'),
+    path('api/embarques/recepcion_pagos_envios/', views.registrar_recepcion_pagos_envios, name='registrar_recepcion_pagos_envios'),
 ]

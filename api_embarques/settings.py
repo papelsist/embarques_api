@@ -55,6 +55,7 @@ LOCAL_APPS = [
     'applications.dashboards',
     'applications.knzl',
     'applications.core',
+    'applications.localizacion_gps',
 ]
 
 THIRD_PART_APPS = [

@@ -390,6 +390,7 @@ class Envio(models.Model):
     maniobra = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True,default=0.00)
     email_envio = models.CharField(max_length=255, blank=True, null=True)
     surtido = models.DateTimeField(blank=True, null=True)
+    uuid = models.CharField(max_length=50, blank=True, null=True)
 
 
 
@@ -736,6 +737,8 @@ class TransporteEmbarques(models.Model):
     update_user = models.CharField(max_length=100, blank=True, null=True)
     version = models.BigIntegerField()
     numero_serie = models.CharField(max_length=255, blank=True, null=True)
+    imei = models.CharField(max_length=50, blank=True, null=True)
+    sucursal = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         managed = True

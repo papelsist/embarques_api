@@ -423,7 +423,15 @@ def actualizar_bitacora_entrega(request):
 @api_view(['PUT'])
 def registrar_recepcion_pago(request):
     entrega = Entrega.objects.get(id = request.data['entrega_id'])
-    if entrega.recepcion != None:
+    if entrega.recepcion != None and entrega.envio.pagado == False:
+        entrega.recepcion_pago = datetime.now()
+        envio = entrega.envio
+        envio.pagado = True
+        entrega.save()
+        envio.save()
+        entrega_serialized = EntregaSerializer(entrega)
+        return Response({"data":entrega_serialized.data, "message":"Actualizado correctamente"})
+    elif entrega.recepcion != None and entrega.envio.pagado == True:
         entrega.recepcion_pago = datetime.now()
         entrega.save()
         entrega_serialized = EntregaSerializer(entrega)
@@ -431,6 +439,8 @@ def registrar_recepcion_pago(request):
     else :
         entrega_serialized = EntregaSerializer(entrega)
         return Response({"data":entrega_serialized.data, "message":"No se puede registrar la recepcion de pago si no se ha registrado la recepcion"})
+        
+
 
 @api_view(['PUT'])
 def registrar_recepcion_documentos(request):
@@ -635,7 +645,8 @@ class InstruccionEntregaListView(ListAPIView):
         sucursal = self.request.query_params.get('sucursal')
         fecha_inicial = self.request.query_params.get('fecha_inicial')
         fecha_final = self.request.query_params.get('fecha_final')
-        queryset = PreEntrega.objects.filter( ~Q(surtido = None),entrega=None,sucursal=sucursal,fecha__range =[fecha_inicial,fecha_final]).order_by('folio')
+        #queryset = PreEntrega.objects.filter( ~Q(surtido = None),entrega=None,sucursal=sucursal,fecha__range =[fecha_inicial,fecha_final]).order_by('folio')
+        queryset = PreEntrega.objects.filter( entrega=None,sucursal=sucursal,fecha__range =[fecha_inicial,fecha_final]).order_by('folio')
         return queryset
 
 @api_view(['GET'])   
@@ -651,5 +662,64 @@ def asignar_instruccion_entrega(request):
     envio = asignar_instruccion(request.data)
     envio_serialized= EnvioSerializerEm(envio)
     return Response(envio_serialized.data)
-    
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_envio_by_uuid(request):
+    uuid = request.query_params.get('uuid')
+    envio = Envio.objects.get(uuid = uuid)
+    envio_serialized = EnvioSerializerEm(envio)
+    return Response(envio_serialized.data)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def registrar_recepcion_pago_envio(request):
+
+    envio = Envio.objects.get(id = request.data['envio_id'])
+    if envio.pagado == False:
+        print("Registrando pago para envio")
+        envio.pagado = True
+        envio.save()
+        for entrega in envio.entregas.all():
+            if entrega.recepcion != None and entrega.recepcion_pago == None:
+                print("Registrando pago para entrega")
+                entrega.recepcion_pago = datetime.now()
+                entrega.save()
+    else:
+        print("No se puede registrar el pago")
+        print("El envio no tienen recepcion o ya esta pagado")
+     
+    envio_serialized = EnvioSerializerEm(envio)
+    return Response(envio_serialized.data)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def registrar_recepcion_pagos_envios(request):
+
+    envios = request.data['envios']
+
+    print(envios)
+    for e in envios:
+        envio = Envio.objects.get(id = e)
+        if envio.pagado == False:
+            print("Registrando pago para envio")
+            envio.pagado = True
+            envio.save()
+            for entrega in envio.entregas.all():
+                if entrega.recepcion != None and entrega.recepcion_pago == None:
+                    print("Registrando pago para entrega")
+                    entrega.recepcion_pago = datetime.now()
+                    entrega.save()
+        else:
+            print("No se puede registrar el pago")
+            print("El envio no tienen recepcion o ya esta pagado")
+            
+
+    return Response({"message":"Complete sucesfully"})
+
+
+
+        
+        
 

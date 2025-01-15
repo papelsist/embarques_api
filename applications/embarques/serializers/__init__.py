@@ -1,5 +1,5 @@
 from .envio_serializer import EnvioSerializer, EnvioSerializerEm, EnvioAnotacionesSerializer
-from .catalogos_serializer import OperadorSerializer,SucursalSerializer, DireccionEntregaSerializer
+from .catalogos_serializer import OperadorSerializer,SucursalSerializer, DireccionEntregaSerializer,TransporteSerializer
 from .envio_det_serializer import EnvioDetSerializer
 from .entrega_serializer import EntregaSerializer, EntregaDetSerializer, IncidenciaSerializer,EntregaRutaSerializer,IncidenciaSeguimientoSerializer, EntregaSeguimientoSerializer, ImgEntregaSerializer
 from .embarque_serializer import EmbarqueSerializer,EmbarqueRutaSerializer, EmbarqueOperadorSerializer

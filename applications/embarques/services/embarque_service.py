@@ -106,6 +106,8 @@ def registrar_salida_embarque(embarque_dict):
     embarque.or_fecha_hora_salida = datetime.now()
     for partida in embarque.partidas.all():
         partida.salida = datetime.now()
+        if partida.envio.pagado:
+            partida.recepcion_pago = datetime.now()
         partida.save()   
     embarque.save()
     return embarque
@@ -150,6 +152,8 @@ def registrar_recepcion_pagos_embarque(embarque_dict):
             entrega.recepcion_pago = datetime.now()
             entrega.save()
     return embarque
+
+
 
 def registrar_recepcion_docs_embarque(embarque_dict):
     embarque = Embarque.objects.get(id = embarque_dict['id'])

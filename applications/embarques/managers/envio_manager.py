@@ -14,6 +14,7 @@ class EnvioManager(models.Manager):
         return envios
     
     def find_envio_surtido(self,tipo,documento,fecha,sucursal):
+        
         envios = self.get(
             entidad = tipo, documento=documento, fecha_documento = fecha, sucursal = sucursal, surtido__isnull = False
         )
@@ -21,7 +22,8 @@ class EnvioManager(models.Manager):
     
     def pendientes_salida(self,fecha_inicial, fecha_final, sucursal):
         print("Buscando los pendientes de salida")
-        envios_list = self.filter(~Q(surtido = None),instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final], sucursal=sucursal, pasan= False)
+        #envios_list = self.filter(~Q(surtido = None),instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final], sucursal=sucursal, pasan= False)
+        envios_list = self.filter(instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final], sucursal=sucursal, pasan= False)
         envios = [x for x in envios_list if x.enviado == 0.00]
         return envios  
  

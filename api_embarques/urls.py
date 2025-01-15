@@ -14,4 +14,5 @@ urlpatterns = [
     path('',include('applications.knzl.urls')),
     path('',include('applications.dashboards.urls')),
     path('',include('applications.core.urls')),
+    path('',include('applications.localizacion_gps.urls')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
