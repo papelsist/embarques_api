@@ -9,14 +9,10 @@ import requests
 
 
 
-password = "Chino2025@gps"
-user = "gpspapelsa"
 
-
-
-def calculate_signature(password, salt):
-    md5_password = hashlib.md5(password.encode('utf-8')).hexdigest()
-    concatenated = md5_password + salt
+def calculate_signature(salt):
+    md5_text = hashlib.md5("Chino2025@gps".encode('utf-8')).hexdigest()
+    concatenated = md5_text + salt
     signature = hashlib.md5(concatenated.encode('utf-8')).hexdigest()
     return signature
 
@@ -26,8 +22,8 @@ def get_timestamp():
 
 def get_token_gps():
     current_timestamp = str(get_timestamp())
-    signature = calculate_signature(password, current_timestamp)
-    url = url = f"http://api.protrack365.com/api/authorization?time={current_timestamp}&account={user}&signature={signature}"
+    signature = calculate_signature(current_timestamp)
+    url = f"http://api.protrack365.com/api/authorization?time={current_timestamp}&account=gpspapelsa&signature={signature}"
     response = requests.get(url)
     token = response.json()['record']['access_token']
     found = Tokens.objects.get(servicio = 'gps')
