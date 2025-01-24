@@ -504,7 +504,8 @@ def get_seguimiento_envio(request):
                 "embarque": embarque.documento,
                 "embarque_fecha": embarque.fecha,
                 "operador": operador.nombre,
-                "detalles": detalles_dict
+                "detalles": detalles_dict,
+                "destinatario": entrega.destinatario
             }
             entregas_dict.append(entrega_dict)
         entregas_serialized = EntregaSeguimientoSerializer(entregas_dict, many = True)
@@ -514,6 +515,7 @@ def get_seguimiento_envio(request):
                 "id": envio.id,
                 "documento": envio.documento,
                 "fecha": envio.fecha_documento,
+                "destinatario": envio.destinatario,
                 "salida": None,
                 "arribo": None,
                 "recepcion": None,
@@ -718,6 +720,50 @@ def registrar_recepcion_pagos_envios(request):
 
     return Response({"message":"Complete sucesfully"})
 
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_envio_pendiente(request):
+    sucursal = request.query_params.get('sucursal')
+    documento = request.query_params.get('documento')
+    tipo = request.query_params.get('origen')
+
+    envios = Envio.objects.filter(documento=documento, tipo_documento = tipo, sucursal = sucursal)
+    if envios:
+        envio = envios[0]
+        if envio.enviado == 0.00:
+            envio_serialized = EnvioSerializerEm(envio)
+            return Response({"message":"OK", "envio":envio_serialized.data})
+        else:
+            envio= None
+            envio_serialized = EnvioSerializerEm(envio)
+            return Response({"message":"No encontrado", "envio":envio_serialized.data})
+    else:
+        envio = None
+        envio_serialized = EnvioSerializerEm(envio)
+        return Response({"message":"No encontrado", "envio":envio_serialized.data})
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_envio_parcial(request):
+    sucursal = request.query_params.get('sucursal')
+    documento = request.query_params.get('documento')
+    tipo = request.query_params.get('origen')
+    envios = Envio.objects.filter(documento=documento, tipo_documento = tipo, sucursal = sucursal, pasan= False)
+    if envios:
+        envio = envios[0]
+        if envio.enviado != 0.00 and envio.saldo != 0.00:
+            envio_serialized = EnvioSerializerEm(envio)
+            return Response({"message":"OK", "envio":envio_serialized.data})
+        else:
+            envio= None
+            envio_serialized = EnvioSerializerEm(envio)
+            return Response({"message":"No encontrado", "envio":envio_serialized.data})
+    else:
+        envio = None
+        envio_serialized = EnvioSerializerEm(envio)
+        return Response({"message":"No encontrado", "envio":envio_serialized.data})
 
 
         

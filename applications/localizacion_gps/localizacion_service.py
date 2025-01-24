@@ -58,4 +58,8 @@ def get_entregas():
             print(ubicacion)
 
       
-
+def get_ubicacion(imei):
+    token = Tokens.objects.get(servicio = 'gps')
+    url =f"http://api.protrack365.com/api/track?access_token={token}&imeis={imei}"
+    response = requests.get(url)
+    return response.json()

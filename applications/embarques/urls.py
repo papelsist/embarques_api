@@ -72,4 +72,6 @@ urlpatterns = [
     path('api/embarques/get_envio_uuid/', views.get_envio_by_uuid, name='get_envio_uuid'),
     path('api/embarques/recepcion_pago_envio/', views.registrar_recepcion_pago_envio, name='registrar_recepcion_pago_envio'),
     path('api/embarques/recepcion_pagos_envios/', views.registrar_recepcion_pagos_envios, name='registrar_recepcion_pagos_envios'),
+    path('api/embarques/get_envio_pendiente/', views.get_envio_pendiente, name='get_envio_pendiente'),
+     path('api/embarques/get_envio_parcial/', views.get_envio_parcial, name='get_envio_parcial'),
 ]

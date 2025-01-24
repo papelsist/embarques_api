@@ -61,8 +61,10 @@ def get_ubicacion_transportes(suc):
 
     sucursal = Sucursal.objects.get(nombre = suc)
     
-    en_transito = Embarque.objects.filter( ~Q(or_fecha_hora_salida = None),regreso = None, sucursal= sucursal ).order_by('documento')
     entregas_transito = []
+
+    en_transito = Embarque.objects.filter( ~Q(or_fecha_hora_salida = None),regreso = None, sucursal= sucursal ).order_by('documento')
+    
     for embarque in en_transito:
         imei = embarque.operador.transporte.imei if embarque.operador.transporte.imei is not None else ""
         entrega = {
@@ -76,14 +78,17 @@ def get_ubicacion_transportes(suc):
             "course": None
         }
         
-        entregas_transito.append(entrega)   
+        entregas_transito.append(entrega)    
    
+    sin_asignacion  = []
 
     imeis = [entrega['imei'] for entrega in entregas_transito]
     transportes = TransporteEmbarques.objects.filter(~Q(imei = None), sucursal = suc)
     sin_asignacion  = []
     for transporte in transportes:
+        print(transporte.imei)
         if transporte.imei not in imeis:
+         
             operador = Operador.objects.get(transporte = transporte)
             entrega = {
                 "imei":  transporte.imei,
@@ -95,8 +100,7 @@ def get_ubicacion_transportes(suc):
                 "speed": None,
                 "course": None
                 }
-            sin_asignacion.append(entrega)
-    
+            sin_asignacion.append(entrega) 
     imeis_sa = [entrega['imei'] for entrega in sin_asignacion]
     imeis = imeis + imeis_sa
     imeis_str = ",".join(imeis)
@@ -116,6 +120,8 @@ def get_ubicacion_transportes(suc):
 
     ubicaciones = entregas_transito + sin_asignacion
 
+    print(response.json())
+
     for ubicacion in response.json()['record']:
         for ubi in ubicaciones:
             if ubi['imei'] == ubicacion['imei']:
@@ -125,3 +131,18 @@ def get_ubicacion_transportes(suc):
                 ubi['course'] = ubicacion['course']
     
     return ubicaciones
+
+def get_ubicacion(imei):
+    token = Tokens.objects.get(servicio = 'gps')
+    url =f"http://api.protrack365.com/api/track?access_token={token.token}&imeis={imei}"
+    response = requests.get(url)
+
+    if response.json()['code'] == 10012:
+        print('Token expirado')
+        get_token_gps()
+        token = Tokens.objects.get(servicio = 'gps')
+        url =f"http://api.protrack365.com/api/track?access_token={token.token}&imeis={imei}"
+        response = requests.get(url)
+
+
+    return response.json()['record'][0]

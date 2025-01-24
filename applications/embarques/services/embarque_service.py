@@ -3,6 +3,7 @@ from django.db.models import Q
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from datetime import datetime, date
 from decimal import Decimal
+from applications.localizacion_gps.services import get_ubicacion
 
 
 
@@ -132,7 +133,6 @@ def actualizar_bitacora_embarque(embarque_dict):
         entrega.recepcion_latitud = partida["recepcion_latitud"] if "recepcion_latitud" in partida else None
         entrega.recepcion_longitud = partida["recepcion_longitud"] if  "recepcion_longitud" in partida else None
         entrega.recibio = partida["recibio"] if "recibio" in partida else None
-
         if 'imagenes' in partida:
             imagenes = partida['imagenes']
             for imagen in imagenes:
@@ -142,7 +142,33 @@ def actualizar_bitacora_embarque(embarque_dict):
                 img.save()
         entrega.save()
 
+        if entrega.arribo_latitud == None or entrega.recepcion_latitud == None:
+            transporte = entrega.embarque.operador.transporte
+            ubicacion = get_ubicacion(transporte.imei)
+
     return embarque
+
+ 
+   
+    
+
+
+
+    if entrega.arribo and  entrega.arribo_latitud == None:
+        entrega.arribo_latitud = ubicacion['latitude']
+        entrega.arribo_longitud = ubicacion['longitude']
+        entrega.save()
+
+    if entrega.recepcion and  entrega.recepcion_latitud == None:
+        entrega.recepcion_latitud = ubicacion['latitude']
+        entrega.recepcion_longitud = ubicacion['longitude']
+        entrega.save()
+    
+
+
+
+
+
 
 def registrar_recepcion_pagos_embarque(embarque_dict):
     embarque = Embarque.objects.get(id = embarque_dict['id'])

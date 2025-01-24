@@ -54,6 +54,7 @@ class EntregaSeguimientoSerializer(serializers.Serializer):
     embarque = serializers.IntegerField()
     embarque_fecha = serializers.DateField()
     operador = serializers.CharField()
+    destinatario = serializers.CharField()
     detalles = EntregaDetsSeguimientoSerializer(many = True)
 
 class ImgEntregaSerializer(serializers.ModelSerializer):
