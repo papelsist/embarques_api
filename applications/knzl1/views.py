@@ -18,9 +18,9 @@ def knzl_view(request):
             sys.stdout = sys.__stdout__
             captured_output = output.getvalue()
             captured_output = captured_output.strip().replace('\n', '\n')
-            return render(request, 'knzl1.html', {'out': captured_output, 'code':code})
+            return render(request, 'knzl.html', {'out': captured_output, 'code':code})
         else:
-             return render(request, 'knzl1.html')
+             return render(request, 'knzl.html')
     else:
         print("La aplicación está en entorno de producción.")
         return render(request, 'notWorking.html')

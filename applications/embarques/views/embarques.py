@@ -764,6 +764,27 @@ def get_envio_parcial(request):
         envio = None
         envio_serialized = EnvioSerializerEm(envio)
         return Response({"message":"No encontrado", "envio":envio_serialized.data})
+    
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def aplicacion_pago_cod_pos(request):
+
+    print(request.query_params)
+    print("Aplicando pago")
+
+    try:
+        envio = Envio.objects.get(sx = request.query_params.get('cxcId'))
+        if envio and envio.pagado == False:
+            envio.pagado = True
+            envio.save()
+            print("Pago aplicado")
+            return Response({"message":"envio pagado"})
+    except Exception as e:
+        print(e)
+
+    print("Pago no aplicado")
+    return Response({"message":"envio no encontrado o ya pagado"})
 
 
         

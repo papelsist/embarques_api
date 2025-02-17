@@ -1,14 +1,15 @@
-body {
+body{
     background-color: lightgray;
 }
 
-.titulo {
+.titulo{
     font-size: 2rem;
     color: gray;
     text-align: center;
-}
+} 
 
-.editor {
+.editor{
+    
     width: 100%;
     border: 2px solid gray;
     padding: 1rem;
@@ -17,11 +18,12 @@ body {
     overflow-y: scroll;
 }
 
-.editor:focus {
+.editor:focus{
     outline: none;
+  
 }
 
-.results {
+.results{
     width: 100%;
     border: 2px solid gray;
     padding: 1rem;
@@ -29,18 +31,18 @@ body {
     height: 40vh;
     margin-top: 2rem;
     overflow-y: scroll;
-    background-color: white;
+    background-color: white; 
 }
 
-.btn {
+.btn  {
     color: #FFF;
 }
 
-.btn:hover {
+.btn:hover  {
     color: #FFF;
 }
 
-.loader {
+.loader{
     text-align: center;
     display: none;
     font-size: 1rem;

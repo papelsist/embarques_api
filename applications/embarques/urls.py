@@ -3,13 +3,10 @@ from . import views
 
 urlpatterns = [
     path('api/sucursales/', views.SucursalesActivasList.as_view(), name='sucursales'),
- 
     path('api/tableros/pendientes_envio', views.pendientes_envio, name='pendientes_envio'),
     path('api/tableros/transito_envio', views.transito_envio, name='transito_envio'),
     path('api/embarques/seguimiento_envio', views.get_seguimiento_envio, name='seguimiento_envio'),
-
     path('api/embarques/pendientes_salida', views.PendientesSalida.as_view(), name='pendientes_salida'),
-    
     path('api/embarques/search_operador', views.SearchOperador.as_view(), name='search_operador'),
     path('api/embarques/search_envio', views.search_envio, name='search_envio'),
     path('api/embarques/search_envio_surtido', views.search_envio_surtido, name='search_envio_surtido'),
@@ -25,9 +22,7 @@ urlpatterns = [
     path('api/embarques/eliminar_entrega', views.eliminar_entrega, name='eliminar_entrega'),
     path('api/embarques/registrar_regreso', views.registrar_regreso, name='registrar_regreso'),
     path('api/embarques/regresos', views.Regresos.as_view(), name='regresos'),
-
     path('api/embarques/envios_pendientes', views.EnviosPendientes.as_view(), name='envios_pendientes'),
-
     path('api/embarques/embarque_ruteo', views.embarque_por_ruteo, name='embarque_por_ruteo'),
     path('api/embarques/asignar_envios_pendientes', views.asignar_envios_pendientes, name='asignar_evios_pendientes'),
     path('api/embarques/asignar_envios_parciales', views.asignar_envios_parciales, name='asignar_envios_parciales'),
@@ -73,5 +68,7 @@ urlpatterns = [
     path('api/embarques/recepcion_pago_envio/', views.registrar_recepcion_pago_envio, name='registrar_recepcion_pago_envio'),
     path('api/embarques/recepcion_pagos_envios/', views.registrar_recepcion_pagos_envios, name='registrar_recepcion_pagos_envios'),
     path('api/embarques/get_envio_pendiente/', views.get_envio_pendiente, name='get_envio_pendiente'),
-     path('api/embarques/get_envio_parcial/', views.get_envio_parcial, name='get_envio_parcial'),
+    path('api/embarques/get_envio_parcial/', views.get_envio_parcial, name='get_envio_parcial'),
+    path('api/catalogos/operador/create/', views.OperadorCreate.as_view(), name='create_operador'),
+    path('api/embarques/pagar_cod', views.aplicacion_pago_cod_pos, name='aplicar_pago_cod_pos'),
 ]

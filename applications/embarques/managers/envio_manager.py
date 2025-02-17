@@ -16,7 +16,7 @@ class EnvioManager(models.Manager):
     def find_envio_surtido(self,tipo,documento,fecha,sucursal):
         
         envios = self.get(
-            entidad = tipo, documento=documento, fecha_documento = fecha, sucursal = sucursal, surtido__isnull = False
+            entidad = tipo, documento=documento, fecha_documento = fecha, sucursal = sucursal
         )
         return envios
     

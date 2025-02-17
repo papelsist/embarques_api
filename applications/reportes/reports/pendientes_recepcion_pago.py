@@ -2,7 +2,7 @@ from fpdf import FPDF
 from django.db.models import Q
 from datetime import datetime
 from decimal import Decimal
-from applications.embarques.models import Entrega
+from applications.embarques.models import Entrega, Envio
 
 
 
@@ -89,15 +89,33 @@ def reporte_pendientes_recepcion_pago(sucursal):
     pdf = ReportPDF('P','mm','Letter','PAPEL S.A. DE C.V',f"FACTURAS COD PENDIENTES DE RECEPCION DE PAGO ( {sucursal} )" )
     pdf.add_page()
 
-    for pendiente in pendientes:
-        pdf.set_font('helvetica', '', 8)
-        pdf.cell(20, 5, str(pendiente.documento),align="C")
-        pdf.cell(20, 5, str(pendiente.fecha_documento.strftime("%d/%m/%Y")),align="C")
-        pdf.cell(20, 5, str(pendiente.embarque.documento),align="C")
-        pdf.cell(50, 5, str(pendiente.operador),align="L")
-        pdf.cell(35, 5, str(pendiente.salida.strftime("%d/%m/%Y %H:%M:%S") if pendiente.salida != None else '' ),align="C")
-        pdf.cell(35, 5, str(pendiente.recepcion.strftime("%d/%m/%Y %H:%M:%S") if pendiente.recepcion != None else ''),align="C")
-        pdf.cell(15, 5, str(pendiente.envio.total_documento),align="R", new_x="LMARGIN", new_y="NEXT")
+    if pendientes.count() > 0:
+        for pendiente in pendientes:
+            pdf.set_font('helvetica', '', 8)
+            pdf.cell(20, 5, str(pendiente.documento),align="C")
+            pdf.cell(20, 5, str(pendiente.fecha_documento.strftime("%d/%m/%Y")),align="C")
+            pdf.cell(20, 5, str(pendiente.embarque.documento),align="C")
+            pdf.cell(50, 5, str(pendiente.operador),align="L")
+            pdf.cell(35, 5, str(pendiente.salida.strftime("%d/%m/%Y %H:%M:%S") if pendiente.salida != None else '' ),align="C")
+            pdf.cell(35, 5, str(pendiente.recepcion.strftime("%d/%m/%Y %H:%M:%S") if pendiente.recepcion != None else ''),align="C")
+            pdf.cell(15, 5, "{:,.2f}".format(pendiente.envio.total_documento),align="R", new_x="LMARGIN", new_y="NEXT")
+
+
+    pendientes_asignacion = Envio.objects.filter(pagado=False, tipo_documento='COD', sucursal=sucursal , fecha_documento__gte = '2025-02-12').order_by('documento')
+    
+    if pendientes_asignacion.count() > 0:
+        pdf.cell(15, 5,"PENDIENTES DE ASIGNAR",align="L", new_x="LMARGIN", new_y="NEXT")
+        current_y = pdf.get_y()
+        pdf.line(10,current_y,206,current_y)
+        for pendiente in pendientes_asignacion:
+            pdf.set_font('helvetica', '', 8)
+            pdf.cell(20, 5, str(pendiente.documento),align="C")
+            pdf.cell(20, 5, str(pendiente.fecha_documento.strftime("%d/%m/%Y")),align="C")
+            pdf.cell(20, 5, "",align="C")
+            pdf.cell(50, 5,"",align="L")
+            pdf.cell(35, 5, "",align="C")
+            pdf.cell(35, 5, "",align="C")
+            pdf.cell(15, 5, "{:,.2f}".format(pendiente.total_documento),align="R", new_x="LMARGIN", new_y="NEXT")
 
         
 

@@ -531,7 +531,7 @@ class DireccionEntrega (models.Model):
     principal = models.BooleanField(default= False)
     destinatario = models.CharField(max_length=255)
     calle = models.CharField(max_length=255)
-    numero_exterior = models.CharField(max_length=255)
+    numero_exterior = models.CharField(max_length=255, blank=True, null=True)
     numero_interior = models.CharField(max_length=255, blank=True, null=True)
     colonia = models.CharField(max_length=255)
     codigo_postal = models.CharField(max_length=255)
@@ -739,6 +739,10 @@ class TransporteEmbarques(models.Model):
     numero_serie = models.CharField(max_length=255, blank=True, null=True)
     imei = models.CharField(max_length=50, blank=True, null=True)
     sucursal = models.CharField(max_length=100, blank=True, null=True)
+    capacidad_kilos = models.DecimalField(max_digits=19, decimal_places=2, default= 0.00, blank=True, null=True)
+    capacidad_volumen = models.DecimalField(max_digits=19, decimal_places=2, default= 0.00, blank=True, null=True)
+    capacidad_max_kilos = models.DecimalField(max_digits=19, decimal_places=2, default= 0.00, blank=True, null=True)
+    capacidad_max_volumen = models.DecimalField(max_digits=19, decimal_places=2, default= 0.00, blank=True, null=True)
 
     class Meta:
         managed = True

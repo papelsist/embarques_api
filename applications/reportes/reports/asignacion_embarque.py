@@ -2,7 +2,7 @@ from .report_pdf import ReportPDF
 from .report_dao import ReportDao
 from .report_utils import get_grouped_data
 from datetime import date
-
+from decimal import Decimal
 
 def asignacion_embarque(embarque):
     query = """
@@ -41,15 +41,19 @@ def asignacion_embarque(embarque):
     current_y = pdf.get_y()
     pdf.line(10,current_y,205,current_y)
 
+    total_kilos = Decimal(0.00)
+    total_importe = Decimal(0.00)
+
     for entrega in embarque:
         current_y = pdf.get_y()
         pdf.set_font('helvetica', '', 10)
         pdf.cell(15, 5, entrega['origen'],align="C")
         pdf.cell(25, 5, str(entrega['documento_envio']),align='C' )
-        pdf.cell(80, 5, entrega['destinatario'],align="L")
+        pdf.truncated_cell(80, 5, entrega['destinatario'],align="L")
         pdf.cell(20, 5, entrega['fecha_documento'].strftime("%d-%m-%Y"),align="C")
-        pdf.cell(20, 5, str(entrega['valor']),align="C")
-        pdf.cell(20, 5, str(entrega['kilos']),align="C" , new_x="LMARGIN", new_y="NEXT")
+        
+        pdf.cell(20, 5, "{:,.2f}".format(entrega['valor']),align="C")
+        pdf.cell(20, 5, "{:,.2f}".format(entrega['kilos']),align="C" , new_x="LMARGIN", new_y="NEXT")
 
         pdf.cell(15, 5, "PAQUETES= " ,align="L")
         pdf.cell(30, 5, str(entrega['paquetes'] if  entrega['paquetes'] else "0"),align="C" , new_x="LMARGIN", new_y="NEXT")
@@ -66,6 +70,14 @@ def asignacion_embarque(embarque):
         pdf.cell(30, 5, "",align="C" , new_x="LMARGIN", new_y="NEXT")
 
         pdf.line(10,current_y+20,205,current_y+20)
+
+        total_kilos += 0 if entrega.get('kilos') == None else entrega.get('kilos')
+        total_importe += 0 if entrega.get('valor') == None else entrega.get('valor')
+    
+    pdf.set_x(130)
+    pdf.cell(20, 5,'TOTAL: ', align='R',border=0)
+    pdf.cell(20, 5, "{:,.2f}".format(total_importe), align='C',border=0)
+    pdf.cell(15, 5, "{:,.2f}".format(total_kilos), align='C',border=0, new_x="LMARGIN", new_y="NEXT")
  
     reporte = bytes(pdf.output())
     return reporte

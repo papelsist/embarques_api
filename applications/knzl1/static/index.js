@@ -1,5 +1,4 @@
 let openScript;
-
 let results = document.getElementById("results")
 let form = document.querySelector('form');
 let editor = document.getElementById("editor");
@@ -9,6 +8,7 @@ let buttonClear = document.getElementById("button-clear")
 let buttonClean = document.getElementById("button-clean")
 
 document.addEventListener("DOMContentLoaded",(event)=>{
+  console.log("Calculando");
       if(openScript){
         results.innerHTML = ""
       }
@@ -48,7 +48,7 @@ buttonSave.addEventListener("click",(e)=>{
       console.log("Name",name)
       const blob = new Blob([content], { type: 'text/plain' });
       const anchor = document.createElement('a');
-      anchor.download = `${name}.py`;
+      anchor.download = `${name}.txt`;
       anchor.href = URL.createObjectURL(blob);
       anchor.click();
 
@@ -60,7 +60,7 @@ buttonSave.addEventListener("click",(e)=>{
 buttonOpen.addEventListener("click",(e)=>{
   const input = document.createElement('input');
   input.type = 'file';
-  input.accept = '.py'; 
+  input.accept = '.txt'; 
   input.onchange = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();

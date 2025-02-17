@@ -55,6 +55,15 @@ class ReportPDF(FPDF):
         else:
             self.line(10,26,272,26)
         self.set_y(26)
+
+    def truncated_cell(self, width, height, text, border=1, ln=0, align="L"):
+        """
+        Crea una celda con texto truncado si excede el ancho de la celda.
+        """
+        while self.get_string_width(text) > width:
+            text = text[:-1]  # Elimina el último carácter
+
+        self.cell(width, height, text , 0, ln, align)
   
     # Page footer
     def footer(self):

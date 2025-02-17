@@ -83,7 +83,7 @@ class ReportPDF(FPDF):
 
 def reporte_pendientes_recepcion_doctos(sucursal):
     
-    pendientes = Entrega.objects.filter(~Q(operador = 'CLIENTE PASAN'),recepcion_documentos__isnull = True, sucursal='TACUBA').order_by('documento')
+    pendientes = Entrega.objects.filter(~Q(operador = 'CLIENTE PASAN'),recepcion_documentos__isnull = True, sucursal=sucursal).order_by('documento')
 
 
     pdf = ReportPDF('P','mm','Letter','PAPEL S.A. DE C.V',f"PENDIENTES RECEPCION DE DOCUMENTOS( {sucursal} )" )

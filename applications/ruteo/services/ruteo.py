@@ -5,6 +5,7 @@ import numpy as np
 import json 
 from .ruteo_dao import RuteoDao
 from applications.embarques.models import Embarque,Envio,Sucursal
+from applications.commons.sql_dao import fix_id_to_sql
 
 
 
@@ -173,12 +174,15 @@ def get_intersection(valores,df_coord):
     return puntos
 
 def get_transportes(suc_id):
+    print("Sucursal")
+    print(suc_id)
+    sucursal_id = fix_id_to_sql(str(suc_id))
     query = """
             select e.id as embarque_id,e.documento as embarque_documento,te.* 
             from embarques e join operador o  on (e.operador_id  = o.id) join transporte_embarques te  on (o.transporte_id  = te.id) left join entrega n on (e.id = n.embarque_id)
-            where or_fecha_hora_salida is NULL and n.id is null and sucursal_id =%s order by date_created"""
+            where or_fecha_hora_salida is NULL and n.id is null and sucursal_id =%s order by e.date_created"""
     dao = RuteoDao()
-    transportes = dao.get_data(query,[suc_id])
+    transportes = dao.get_data(query,[sucursal_id])
 
     return transportes
 
@@ -362,25 +366,29 @@ def build_ruteo(envios, suc_point, suc_id):
    
     
     df = make_df(envios, suc_point)
-    print(df)
+    #print(df)
     df_sin_outliers, outliers = drop_outliers(df)
-    print(outliers)
+    #print(outliers)
     df_coord, asignables = make_df_work(df_sin_outliers)
-    print(df_coord)
+    #print(df_coord)
     df_distancias = get_matriz_distancias(df_coord)
-    print(df_distancias)
+    #print(df_distancias)
     df_costos = get_matriz_costos(df_distancias)
-    print(df_costos)
+    #print(df_costos)
     df_costos_work = set_cero_matriz_costos(df_costos)
-    print(df_costos_work)
+    #print(df_costos_work)
     valores = order_costos(df_costos_work)
     print("*"*50)
-    print(valores)
+    #print(valores)
     puntos = get_intersection(valores, df_costos_work )
     print("*"*50)
-    print(puntos)
+    #print(puntos)
     transportes = get_transportes(suc_id)
+    print("Transportes")
+    print(transportes)
     rutas = make_rutas(transportes)
+    print("Rutas")
+    print(rutas)
     capacidad_total = get_capacidad_total(rutas)
     demanda = get_demanda(puntos, df_sin_outliers, capacidad_total)
     rutas, no_asignados = build_rutas(puntos, asignables, rutas, df_sin_outliers)

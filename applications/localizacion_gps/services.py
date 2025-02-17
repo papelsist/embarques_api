@@ -102,8 +102,14 @@ def get_ubicacion_transportes(suc):
                 }
             sin_asignacion.append(entrega) 
     imeis_sa = [entrega['imei'] for entrega in sin_asignacion]
+
+    #print(imeis)
+    #print(imeis_sa)
+
     imeis = imeis + imeis_sa
     imeis_str = ",".join(imeis)
+
+    #print(imeis_str)
 
     token = Tokens.objects.get(servicio = 'gps')
 

@@ -145,24 +145,20 @@ def actualizar_bitacora_embarque(embarque_dict):
         if entrega.arribo_latitud == None or entrega.recepcion_latitud == None:
             transporte = entrega.embarque.operador.transporte
             ubicacion = get_ubicacion(transporte.imei)
+            if entrega.arribo and  entrega.arribo_latitud == None:
+                entrega.arribo_latitud = ubicacion['latitude']
+                entrega.arribo_longitud = ubicacion['longitude']
+                entrega.save()
+
+            if entrega.recepcion and  entrega.recepcion_latitud == None:
+                entrega.recepcion_latitud = ubicacion['latitude']
+                entrega.recepcion_longitud = ubicacion['longitude']
+                entrega.save()
 
     return embarque
 
- 
+
    
-    
-
-
-
-    if entrega.arribo and  entrega.arribo_latitud == None:
-        entrega.arribo_latitud = ubicacion['latitude']
-        entrega.arribo_longitud = ubicacion['longitude']
-        entrega.save()
-
-    if entrega.recepcion and  entrega.recepcion_latitud == None:
-        entrega.recepcion_latitud = ubicacion['latitude']
-        entrega.recepcion_longitud = ubicacion['longitude']
-        entrega.save()
     
 
 

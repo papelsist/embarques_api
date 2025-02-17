@@ -106,7 +106,7 @@ def reporte_asignacion_embarque(embarque):
                 e.documento ,o.nombre as operador, e.or_fecha_hora_salida as salida,n.arribo, n.recepcion , n.recibio, e.regreso, n.tipo_documento ,n.documento as docto_envio ,n.destinatario,
                 n.kilos, n.total_documento,n.comentario, s.nombre as sucursal,e.fecha, n.fecha_documento, i.fecha_de_entrega, i.tipo as tipo_envio,
                 concat(i.direccion_calle,' ',ifnull(i.direccion_numero_exterior,''),' ',ifnull(i.direccion_numero_interior,''),', ',ifnull(i.direccion_colonia,''), ', ', ifnull(i.direccion_municipio,''),' ',ifnull(i.direccion_estado,'')) as direccion_entrega
-                ,e.comentario as comentario_embarque
+                ,e.comentario as comentario_embarque, n.valor
                 from embarques e join entrega n  on ( e.id = n.embarque_id ) join instruccion_de_envio i on ( n.envio_id = i.envio_id ) 
                 join operador o  on ( o.id = e.operador_id )  join sucursal s on ( e.sucursal_id = s.id )
                 where e.id = %s 
@@ -135,7 +135,6 @@ def reporte_asignacion_embarque(embarque):
     for entrega in embarque:
 
         altura_disponible = pdf.h - pdf.get_y()
-        print(altura_disponible)
         if altura_disponible < 30:
             print('Nueva pagina')
             pdf.add_page()
@@ -145,8 +144,8 @@ def reporte_asignacion_embarque(embarque):
         pdf.cell(25, 5, entrega.get('docto_envio'), align='C',border=0)
         pdf.cell(20, 5, entrega.get('fecha_documento').strftime("%d-%m-%Y"), align='C',border=0)
         pdf.cell(60, 5, entrega.get('destinatario'), align='L',border=0)
-        pdf.cell(20, 5, str( 0 if entrega.get('total') == None else entrega.get('total')), align='C',border=0)
-        pdf.cell(15, 5, str(0 if entrega.get('kilos') == None else entrega.get('kilos') ), align='C',border=0)
+        pdf.cell(20, 5, "{:,.2f}".format( 0 if entrega.get('valor') == None else entrega.get('valor')), align='C',border=0)
+        pdf.cell(15, 5, "{:,.2f}".format(0 if entrega.get('kilos') == None else entrega.get('kilos') ), align='C',border=0)
         pdf.cell(30, 5, entrega.get('arribo').strftime("%d-%m-%Y %H:%M"), align='C',border=0)
         pdf.cell(30, 5, entrega.get('recepcion').strftime("%d-%m-%Y %H:%M"), align='C',border=0)
         pdf.cell(35, 5, 'COMENTARIO', align='C',border=0, new_x="LMARGIN", new_y="NEXT")
@@ -161,12 +160,13 @@ def reporte_asignacion_embarque(embarque):
         pdf.line(10,pdf.get_y(),270,pdf.get_y())
 
         total_kilos += 0 if entrega.get('kilos') == None else entrega.get('kilos')
-        total_importe += 0 if entrega.get('total') == None else entrega.get('total')
+        
+        total_importe += 0 if entrega.get('valor') == None else entrega.get('valor')
 
     pdf.cell(20, 5,'TOTAL: ', align='R',border=0)
     pdf.set_x(140)
-    pdf.cell(20, 5, str(total_importe), align='C',border=0)
-    pdf.cell(15, 5, str(total_kilos), align='C',border=0, new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(20, 5, "{:,.2f}".format(total_importe), align='C',border=0)
+    pdf.cell(15, 5, "{:,.2f}".format(total_kilos), align='C',border=0, new_x="LMARGIN", new_y="NEXT")
 
     pdf.cell(20, 5, "COMENTARIOS: ", align='C',border=0)
     pdf.cell(15, 5, ("" if entrega.get('comentario') == None else entrega.get('comentario')), align='C',border=0, new_x="LMARGIN", new_y="NEXT")

@@ -33,8 +33,8 @@ class EmbarqueManager(models.Manager):
         embarque = self.filter(documento = documento, fecha = fecha, sucursal = sucursal).first()
         return embarque
     
-    def embarques_operador_kilos(self,fecha_inicial, fecha_final):
-        embarques = (self.filter( fecha__range=[fecha_inicial, fecha_final])
+    def embarques_operador_kilos(self,fecha_inicial, fecha_final,sucursal):
+        embarques = (self.filter( fecha__range=[fecha_inicial, fecha_final],sucursal= sucursal)
                      .values( 'operador__id','operador__nombre')
                      .annotate(  
                             fecha_inicial = Min('fecha'),
