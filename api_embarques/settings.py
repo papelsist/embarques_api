@@ -64,7 +64,7 @@ THIRD_PART_APPS = [
     'rest_framework.authtoken',
 ]
 
-INSTALLED_APPS = DJANGO_APPS+ THIRD_PART_APPS + LOCAL_APPS 
+INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PART_APPS
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -108,6 +108,7 @@ DATABASES = {
         #'USER': 'root',
         #'PASSWORD': 'Paproot_83',
         #'HOST': '10.10.1.121',
+        #
         'USER': 'admin',
         'PASSWORD': 'papelrx',
         'HOST': '198.199.69.63',

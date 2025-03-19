@@ -13,6 +13,8 @@ def salvar_embarque(embarque_dict):
     Args:
         embarque_dict (_type_): _description_
     """
+
+    print("Salvando y actualizando embarque")
  
     embarque = Embarque.objects.get(id = embarque_dict['embarqueId'])
     embarque.cp = embarque_dict['cp']
@@ -96,7 +98,16 @@ def borrar_entrega_det(entrega_det_dict):
                     instruccion.save()
                 except PreEntrega.DoesNotExist as e:
                     pass
-                entrega.delete() 
+                entrega.delete()
+            else:
+                kilos_entrega = 0
+                valor_entrega = 0
+                for det in detalles:
+                    kilos_entrega += det.kilos
+                    valor_entrega += det.valor
+                entrega.kilos = kilos_entrega
+                entrega.valor = valor_entrega
+                
         return entrega_det_deleted[0] 
     else: 
         return 0
@@ -141,29 +152,25 @@ def actualizar_bitacora_embarque(embarque_dict):
                 img.entrega = entrega
                 img.save()
         entrega.save()
-
+       
         if entrega.arribo_latitud == None or entrega.recepcion_latitud == None:
             transporte = entrega.embarque.operador.transporte
-            ubicacion = get_ubicacion(transporte.imei)
-            if entrega.arribo and  entrega.arribo_latitud == None:
-                entrega.arribo_latitud = ubicacion['latitude']
-                entrega.arribo_longitud = ubicacion['longitude']
-                entrega.save()
+            try:
+                ubicacion = get_ubicacion(transporte.imei)
+                if entrega.arribo and  entrega.arribo_latitud == None:
+                    entrega.arribo_latitud = ubicacion['latitude']
+                    entrega.arribo_longitud = ubicacion['longitude']
+                    entrega.save()
 
-            if entrega.recepcion and  entrega.recepcion_latitud == None:
-                entrega.recepcion_latitud = ubicacion['latitude']
-                entrega.recepcion_longitud = ubicacion['longitude']
-                entrega.save()
+                if entrega.recepcion and  entrega.recepcion_latitud == None:
+                    entrega.recepcion_latitud = ubicacion['latitude']
+                    entrega.recepcion_longitud = ubicacion['longitude']
+                    entrega.save()
+            except Exception as e:
+                print("El operdor no tiene imei asignado")
+                print(e)
 
     return embarque
-
-
-   
-    
-
-
-
-
 
 
 def registrar_recepcion_pagos_embarque(embarque_dict):
@@ -174,7 +181,6 @@ def registrar_recepcion_pagos_embarque(embarque_dict):
             entrega.recepcion_pago = datetime.now()
             entrega.save()
     return embarque
-
 
 
 def registrar_recepcion_docs_embarque(embarque_dict):

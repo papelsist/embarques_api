@@ -71,4 +71,5 @@ urlpatterns = [
     path('api/embarques/get_envio_parcial/', views.get_envio_parcial, name='get_envio_parcial'),
     path('api/catalogos/operador/create/', views.OperadorCreate.as_view(), name='create_operador'),
     path('api/embarques/pagar_cod', views.aplicacion_pago_cod_pos, name='aplicar_pago_cod_pos'),
+    path('api/embarques/crear_entrega_traslado/', views.crear_entrega_traslado, name='crear_entrega_traslado'),
 ]

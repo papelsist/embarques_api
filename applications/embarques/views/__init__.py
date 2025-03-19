@@ -11,3 +11,4 @@ from .embarques import (search_envio,crear_embarque, PendientesSalida,CrearAsign
 from .tableros import pendientes_envio, transito_envio
 from .catalogos import SearchOperador, SucursalList, SucursalesActivasList,OperadorCreate
 from .surtido import PreEntregaSurtidoListView, registrar_surtido_preentrega, EnviosSurtidoListView,registrar_surtido_envio
+from .traslados import crear_entrega_traslado
