@@ -6,3 +6,4 @@ from .reporte_asignacion import reporte_asignacion_embarque
 from .reporte_entrega_doctos import reporte_entrega_doctos
 from .pendientes_recepcion_pago import reporte_pendientes_recepcion_pago
 from .pendientes_recepcion_documentos import reporte_pendientes_recepcion_doctos
+from .reporte_envios_callcenter import reporte_envios_callcenter

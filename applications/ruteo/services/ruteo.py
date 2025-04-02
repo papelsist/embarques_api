@@ -119,6 +119,7 @@ def drop_outliers(df):
 
     indices = list(outliers['envio_id'])
     # Quitando valores atipicos para eliminar ruido en el ruteo
+    """TODO - Evaluar si es correcta esta forma de eliminar los valores atipicos, al parecer esta borrando por indice y  no por valor"""
     df_sin_outliers = df.drop(list(outliers.index))  
     return df_sin_outliers, indices
 

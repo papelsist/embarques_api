@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.db.models import Q
 from rest_framework.permissions import AllowAny
+from rest_framework.decorators import permission_classes
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import HttpResponse
@@ -80,5 +81,17 @@ class CapturasEntregas(ListAPIView):
 
       
 
-        
+
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def whatsapp(request):
+
+    print(request.query_params)
+    print(request.data)
+    if 'hub.challenge' in request.query_params:
+        challenge = int(request.query_params.get('hub.challenge'))
+        print(challenge)
+
+        return Response(challenge)
     
+    return Response('ok')

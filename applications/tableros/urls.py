@@ -9,4 +9,5 @@ urlpatterns = [
     path('api/tableros/envios_transito', views.EnviosTransito.as_view(), name='enviosTransito'),
     path('api/tableros/envios_parciales', views.EnviosParciales.as_view(), name='enviosParciales'),
     path('api/tableros/capturas_entregas', views.CapturasEntregas.as_view(), name='capturasEntregas'),
+    path('api/tableros/whatsapp/', views.whatsapp, name='ubicacionTransportes'),
 ]

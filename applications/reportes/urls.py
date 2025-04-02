@@ -8,5 +8,7 @@ urlpatterns = [
     path('api/embarques/reporte_asignacion_embarque', views.imprimirReporteAsignacionEmbarque, name='imprimirReporteAsignacionEmbarque'),
     path('api/embarques/reporte_entrega_doctos', views.imprimirReporteEntregaDoctos, name='imprimirReporteEntregaDoctos'),
     path('api/embarques/reporte_pendientes_pago', views.imprimirReportePendientesPago, name='imprimirReportePendientesPago'),
-    path('api/embarques/reporte_pendientes_doctos', views.imprimirReportePendientesDoctos, name='imprimirReportePendientesDoctos')
+    path('api/embarques/reporte_pendientes_doctos', views.imprimirReportePendientesDoctos, name='imprimirReportePendientesDoctos'),
+    path('api/embarques/reporte_envios_callcenter', views.imprimirReporteEnviosCallcenter, name='imprimirReporteCallcenter'),
+
 ]

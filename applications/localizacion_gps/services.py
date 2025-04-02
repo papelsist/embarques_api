@@ -113,7 +113,9 @@ def get_ubicacion_transportes(suc):
 
     token = Tokens.objects.get(servicio = 'gps')
 
+    print(token.token)
     url =f"http://api.protrack365.com/api/track?access_token={token.token}&imeis={imeis_str}"
+    print(url)
 
     response = requests.get(url)
 

@@ -1,5 +1,5 @@
 from ..reports import (asignacion_embarque, sugerencia_ruta, reporte_asignacion_embarque, reporte_entrega_doctos, reporte_pendientes_recepcion_pago,
-                          reporte_pendientes_recepcion_doctos)
+                          reporte_pendientes_recepcion_doctos, reporte_envios_callcenter)
 
 
 def imprimir_reporte_asignacion(embarque):
@@ -30,4 +30,8 @@ def imprimir_reporte_pendientes_pago(sucursal):
 
 def imprimir_reporte_pendientes_doctos(sucursal):
     reporte = reporte_pendientes_recepcion_doctos(sucursal)
+    return reporte
+
+def imprimir_reporte_callcenter(fecha_inicial, fecha_final):
+    reporte = reporte_envios_callcenter(fecha_inicial, fecha_final)
     return reporte
