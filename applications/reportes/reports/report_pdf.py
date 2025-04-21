@@ -31,9 +31,6 @@ class ReportPDF(FPDF):
         self.cell(0, 5, self.empresa, 0, 1, 'R')
         # Parametros Izquierda
         self.set_font('helvetica', '', 10)
-        # Titulo Reporte
-        #width_titulo = self.get_string_width(self.titulo.upper())
-        #self.set_x(206 - width_titulo )
         self.cell(0, 5,self.titulo, 0, 1, 'R')
         # Paramteros
         if self.parametros:
@@ -43,18 +40,15 @@ class ReportPDF(FPDF):
                      self.set_x(157)
                 else:
                     self.set_x(218)
-               
+                
                 self.cell(30, 5,'FECHA: ', 0, 0, 'R')
-                self.cell(20, 5,self.parametros.get('fecha'), 0, 0, 'C')
-
-             
-    
-
-        if self.orientation == "P":
-            self.line(10,26,206,26)
-        else:
-            self.line(10,26,272,26)
-        self.set_y(26)
+                self.cell(20, 5,self.parametros.get('fecha'), 0, 1, 'C')
+               
+            if(self.parametros.get('operador')):
+                self.set_x(126)
+                self.cell(30, 5,'OPERADOR: ', 0, 0, 'R')
+                self.cell(20, 5,self.parametros.get('operador'), 0, 1, 'L')
+     
 
     def truncated_cell(self, width, height, text, border=1, ln=0, align="L"):
         """

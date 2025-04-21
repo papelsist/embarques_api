@@ -24,13 +24,13 @@ def asignacion_embarque(embarque):
     fecha_embarque = embarque[0]['fecha']
     parametros = {
         'fecha' : fecha_embarque.strftime("%d-%m-%Y"),
-        'sucursal1':'BOLIVAR',
-        'sucursal3':'BOLIVAR',
-        'sucursal2':'BOLIVAR',    
+        'operador':embarque[0]['nombre'], 
     }
     pdf = ReportPDF('P','mm','Letter','PAPEL S.A. DE C.V','Reporte de Asignación',parametros= parametros )
     pdf.add_page()
     # Encabezados Reporte
+    current_y = pdf.get_y()
+    pdf.line(10,current_y,205,current_y)
     pdf.set_font('helvetica', 'B', 10)
     pdf.cell(15, 5,'ORIGEN',align="C")
     pdf.cell(25, 5, 'DOCUMENTO',align="C" )
@@ -51,7 +51,7 @@ def asignacion_embarque(embarque):
         pdf.set_font('helvetica', '', 10)
         pdf.cell(15, 5, entrega['origen'],align="C")
         pdf.cell(25, 5, str(entrega['documento_envio']),align='C' )
-        pdf.truncated_cell(80, 5, entrega['destinatario'],align="L")
+        pdf.cell(80, 5, entrega['destinatario'],align="L")
         pdf.cell(20, 5, entrega['fecha_documento'].strftime("%d-%m-%Y"),align="C")
         
         pdf.cell(20, 5, "{:,.2f}".format(entrega['valor']),align="C")

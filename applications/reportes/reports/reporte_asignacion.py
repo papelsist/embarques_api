@@ -146,8 +146,15 @@ def reporte_asignacion_embarque(embarque):
         pdf.cell(60, 5, entrega.get('destinatario'), align='L',border=0)
         pdf.cell(20, 5, "{:,.2f}".format( 0 if entrega.get('valor') == None else entrega.get('valor')), align='C',border=0)
         pdf.cell(15, 5, "{:,.2f}".format(0 if entrega.get('kilos') == None else entrega.get('kilos') ), align='C',border=0)
-        pdf.cell(30, 5, entrega.get('arribo').strftime("%d-%m-%Y %H:%M"), align='C',border=0)
-        pdf.cell(30, 5, entrega.get('recepcion').strftime("%d-%m-%Y %H:%M"), align='C',border=0)
+        if entrega.get('arribo') is not None:
+            pdf.cell(30, 5, entrega.get('arribo').strftime("%d-%m-%Y %H:%M"), align='C',border=0)
+        else:
+            pdf.cell(30, 5, "", align='C',border=0)
+        if entrega.get('recepcion') is not None:
+            pdf.cell(20, 5, entrega.get('recepcion').strftime("%d-%m-%Y"), align='C',border=0)
+        else:
+            pdf.cell(20, 5, "", align='C',border=0)
+     
         pdf.cell(35, 5, 'COMENTARIO', align='C',border=0, new_x="LMARGIN", new_y="NEXT")
 
         pdf.cell(18, 5,'DIR_ENVIO: ', align='R',border=0)
