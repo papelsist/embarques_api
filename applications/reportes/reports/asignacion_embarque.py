@@ -54,8 +54,10 @@ def asignacion_embarque(embarque):
         pdf.cell(80, 5, entrega['destinatario'],align="L")
         pdf.cell(20, 5, entrega['fecha_documento'].strftime("%d-%m-%Y"),align="C")
         
-        pdf.cell(20, 5, "{:,.2f}".format(entrega['valor']),align="C")
-        pdf.cell(20, 5, "{:,.2f}".format(entrega['kilos']),align="C" , new_x="LMARGIN", new_y="NEXT")
+        #pdf.cell(20, 5, "{:,.2f}".format(entrega['valor']),align="C")
+        pdf.cell(20, 5, "{:,.2f}".format(entrega['valor'] if  entrega['valor'] else 0.00),align="C")
+        #pdf.cell(20, 5, "{:,.2f}".format(entrega['kilos']),align="C" , new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(20, 5, "{:,.2f}".format(entrega['kilos'] if  entrega['kilos'] else 0.00),align="C" , new_x="LMARGIN", new_y="NEXT")
 
         pdf.cell(15, 5, "PAQUETES= " ,align="L")
         pdf.cell(30, 5, str(entrega['paquetes'] if  entrega['paquetes'] else "0"),align="C" , new_x="LMARGIN", new_y="NEXT")

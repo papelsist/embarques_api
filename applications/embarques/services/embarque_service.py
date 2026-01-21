@@ -1,5 +1,6 @@
 from ..models import Embarque,Entrega,EntregaDet,Envio,EnvioDet, EntregaIncidencia, ImgEntrega, Folio, Operador, Sucursal, PreEntrega, PreEntregaDet, DireccionEntrega
-from django.db.models import Q
+from django.db.models import Q, Sum, DecimalField, Prefetch
+from django.db.models.functions import Coalesce
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from datetime import datetime, date
 from decimal import Decimal
@@ -44,23 +45,19 @@ def salvar_embarque(embarque_dict):
 
         kilos_entrega = 0
         valor_entrega = 0
-        print("Kilos entrega: ", kilos_entrega)
         for det in ent['detalles']:
             envio_det = EnvioDet.objects.get(id = det['id'])
             enviar = Decimal(det['enviar'])
             
             kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
             valor_envio = Decimal(((envio_det.valor * enviar )/envio_det.me_cantidad))
-            print("Enviar: ", enviar)
-            print("Valor envio: ", valor_envio)
-            print(type(valor_envio))
+
             try:
                 entrega_det = EntregaDet.objects.get(id = det['entregaDetId'])
                 entrega_det.cantidad = det['enviar']
                 entrega_det.kilos = kilos_envio
                 entrega_det.valor = valor_envio
             except EntregaDet.DoesNotExist as e:
-                print("Tratando de crear un detalle no existente")
                 entrega_det = EntregaDet(
                     entrega= entrega,
                     envio_det = envio_det,
@@ -74,11 +71,10 @@ def salvar_embarque(embarque_dict):
                 entrega_det.save()
             kilos_entrega += kilos_envio
             valor_entrega += valor_envio
-            print("Kilos entrega__: ", kilos_entrega)
+           
         entrega.kilos = kilos_entrega
         entrega.valor = valor_entrega
-        print("Entrega kilos: ", entrega.kilos)
-        print("Entrega valor: ", entrega.valor)
+
         entrega.save()
         kilos_embarque += kilos_entrega
     embarque.kilos = kilos_embarque
@@ -133,10 +129,16 @@ def borrar_embarque(embarque_dict):
         return 0
     
 def actualizar_bitacora_embarque(embarque_dict):
-    embarque = Embarque.objects.get(id = embarque_dict['id'])
+
+    prefetch_partidas = Prefetch('partidas', queryset=Entrega.objects.prefetch_related('detalles').all())
+    embarque = Embarque.objects.select_related('operador','operador__transporte').prefetch_related(prefetch_partidas).get(id = embarque_dict['id'])
     partidas_dict = embarque_dict['partidas']
+    entregas_list = embarque.partidas.all()
     for partida in partidas_dict:
-        entrega = Entrega.objects.get(id = partida['entregaId'])
+        #entrega = Entrega.objects.get(id = partida['entregaId'])
+        #entrega = entregas_list.(id = partida['entregaId'])
+        entrega = next(filter(lambda e: e.id == partida['entregaId'], entregas_list), None)
+        print("Actualizando entrega id: ", entrega)
         entrega.arribo = partida["arribo"] if "arribo" in partida else None
         entrega.arribo_latitud = partida["arribo_latitud"] if "arribo_latitud" in partida else None
         entrega.arribo_longitud = partida["arribo_longitud"] if "arribo_longitud" in partida else None
@@ -285,13 +287,12 @@ def crear_embarque_por_ruteo(ruta):
 
 def asignar_envios_pend(data):
     print(data)
-    embarque = Embarque.objects.get(pk=data['embarque_id'])
-    print(embarque)
+    embarque = Embarque.objects.select_related('operador','sucursal').get(pk=data['embarque_id'])
     kilos_embarque = 0
     for env in data['envios']:
-        print(env)
-        envio = Envio.objects.get(pk=env)
-        print(envio)
+        detalles_prefetch = Prefetch('detalles', queryset=EnvioDet.objects.all())
+        envio = Envio.objects.prefetch_related(detalles_prefetch).get(pk=env)
+        #Se crea la entrega
         entrega = Entrega(
                         envio=envio,
                         embarque=embarque,
@@ -304,15 +305,18 @@ def asignar_envios_pend(data):
                         tipo_documento = envio.tipo_documento,
                         origen = envio.tipo_documento
                         )
+        
         entrega.save()
         kilos_entrega = 0
         valor_entrega = 0
         print("Kilos entrega: ", kilos_entrega)
-        
+        #Agregar partidas
         for det in envio.detalles.all():
             if det.clave != 'CORTE':
-                print(det)
                 envio_det = EnvioDet.objects.get(pk = det.id)
+                total_entregado = envio_det.entregas.all().aggregate(
+                    total_entregado = Coalesce(Sum('cantidad'), 0, output_field=DecimalField())
+                )
                 enviar = Decimal(det.me_cantidad)
                 kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
                 valor_envio = Decimal(((envio_det.valor * enviar )/envio_det.me_cantidad))
@@ -321,18 +325,15 @@ def asignar_envios_pend(data):
                         envio_det = det,
                         clave = det.clave,
                         descripcion = det.me_descripcion,
-                        cantidad = det.saldo,
+                        cantidad = det.me_cantidad - total_entregado['total_entregado'],
                         valor = valor_envio,
                         kilos = kilos_envio
                     )
                 entrega_det.save()
                 kilos_entrega += kilos_envio
                 valor_entrega += valor_envio
-
-                print("Kilos entrega__: ", kilos_entrega)
         entrega.kilos = kilos_entrega
         entrega.valor = valor_entrega
-        print("Entrega kilos: ", entrega.kilos)
         entrega.save()
         kilos_embarque += kilos_entrega
     embarque.kilos = kilos_embarque

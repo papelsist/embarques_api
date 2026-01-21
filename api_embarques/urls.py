@@ -15,4 +15,5 @@ urlpatterns = [
     path('',include('applications.dashboards.urls')),
     path('',include('applications.core.urls')),
     path('',include('applications.localizacion_gps.urls')),
+    path('silk/', include('silk.urls', namespace='silk')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

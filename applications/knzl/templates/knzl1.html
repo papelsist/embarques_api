@@ -13,49 +13,684 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs/editor/editor.main.css">
 
     <style>
+        /* CSS Variables for themes */
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #0c0c0c;
+            --bg-quaternary: #1e1e1e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #00ff00;
+            --text-tertiary: #ffff00;
+            --border-color: #444;
+            --border-light: #ddd;
+            --scripts-bg: #f8f9fa;
+            --script-item-bg: #f8f9fa;
+            --script-item-selected: #495057;
+            --script-text: #6c757d;
+            --script-date: #adb5bd;
+            --panel-header-bg: #343a40;
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #ffffff;
+            --bg-quaternary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #28a745;
+            --text-tertiary: #ffc107;
+            --border-color: #dee2e6;
+            --border-light: #dee2e6;
+            --scripts-bg: #ffffff;
+            --script-item-bg: #ffffff;
+            --script-item-selected: #007bff;
+            --script-text: #495057;
+            --script-date: #6c757d;
+            --panel-header-bg: #495057;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+        
+        .main-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .title-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .title-bar h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .theme-switcher {
+            display: flex;
+        }
+        
+        .theme-switcher .btn {
+            padding: 4px 8px;
+            font-size: 0.9rem;
+            min-width: 40px;
+        }
+        
+        .language-switcher {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .language-switcher .btn {
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            min-width: 35px;
+        }
+        
+        .language-switcher .btn.active,
+        .theme-switcher .btn.active {
+            background-color: white;
+            color: #667eea;
+            border-color: white;
+        }
+        
+        .content-area {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .editor-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background-color: var(--bg-primary);
+            transition: background-color 0.3s ease;
+        }
+        
+        .editor-container {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+        }
+        
         #editor {
-            height: 40vh;
+            height: 100%;
             width: 100%;
-            border: 1px solid gray;
-            font-size: .8rem;
+            border: none;
+            font-size: 14px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .editor_knzl {
+            display: none;
+        }
+        
+        .controls {
+            background-color: var(--bg-secondary);
+            padding: 8px;
+            border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .controls-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .buttons-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            flex: 1;
+        }
+        
+        .controls .btn {
+            margin: 2px 4px;
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            border-radius: 3px;
+        }
+        
+        .loading-section {
+            flex-shrink: 0;
+            margin-left: 15px;
+        }
+        
+        .inline-loader {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+        
+        .inline-loader.show {
+            display: flex;
+        }
+        
+        .inline-loader i {
+            font-size: 0.9rem;
+        }
+        
+        .inline-loader span {
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        /* Developer-oriented button theme */
+        .btn-success {
+            background-color: #28a745 !important;
+            border-color: #28a745 !important;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838 !important;
+            border-color: #1e7e34 !important;
+        }
+        
+        .btn-primary {
+            background-color: #007bff !important;
+            border-color: #007bff !important;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3 !important;
+            border-color: #004085 !important;
+        }
+        
+        .btn-info {
+            background-color: #17a2b8 !important;
+            border-color: #17a2b8 !important;
+        }
+        
+        .btn-info:hover {
+            background-color: #138496 !important;
+            border-color: #117a8b !important;
+        }
+        
+        .btn-warning {
+            background-color: #ffc107 !important;
+            border-color: #ffc107 !important;
+            color: #212529 !important;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800 !important;
+            border-color: #d39e00 !important;
+            color: #212529 !important;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62 !important;
+            border-color: #4e555b !important;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333 !important;
+            border-color: #bd2130 !important;
+        }
+        
+        .results-section {
+            flex: 1;
+            background-color: var(--bg-tertiary);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .results-header {
+            background-color: var(--bg-quaternary);
+            color: var(--text-secondary);
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .results-content {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .results-scroll-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: -17px; /* Hide scrollbar by pushing it outside */
+            bottom: 0;
+            overflow-y: auto;
+            padding-right: 17px; /* Compensate for hidden scrollbar */
+        }
+        
+        .results {
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+            border: none;
+            height: 100%;
+        }
+        
+        .results pre {
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+            padding: 12px;
+            margin: 0;
+            border: none;
+            border-radius: 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        .console-prompt {
+            color: var(--text-tertiary);
+            font-weight: bold;
+            margin: 0;
+            padding: 12px 12px 0 12px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            background-color: var(--bg-tertiary);
+            transition: all 0.3s ease;
+        }
+        
+        .results pre {
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+            padding: 0 12px 12px 12px;
+            margin: 0;
+            border: none;
+            border-radius: 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        .scripts-panel {
+            width: 280px;
+            background-color: var(--scripts-bg);
+            border-left: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .panel-header {
+            background-color: var(--panel-header-bg);
+            color: white;
+            padding: 8px 12px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        .panel-header h5 {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        
+        .search-container {
+            padding: 8px;
+            border-bottom: 1px solid var(--border-light);
+            flex-shrink: 0;
+            transition: border-color 0.3s ease;
+        }
+        
+        #script-search {
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        #scripts-panel {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            overflow: hidden;
+            background-color: var(--scripts-bg);
+            transition: background-color 0.3s ease;
+        }
+        
+        .scripts-scroll-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: -17px; /* Hide scrollbar by pushing it outside */
+            bottom: 0;
+            overflow-y: auto;
+            padding-right: 17px; /* Compensate for hidden scrollbar */
+        }
+        
+        .script-tree {
+            padding: 8px;
+        }
+        
+        .script-item {
+            padding: 6px 8px;
+            margin: 1px 0;
+            border-radius: 3px;
+            cursor: pointer;
+            background-color: var(--script-item-bg);
+            border: 1px solid var(--border-light);
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+        
+        .script-item:hover {
+            background-color: var(--bg-quaternary);
+            transform: translateX(3px);
+        }
+        
+        .script-item.selected {
+            background-color: var(--script-item-selected);
+            color: white;
+        }
+        
+        .script-name {
+            font-weight: bold;
+            display: block;
+            font-size: 0.8rem;
+            color: var(--script-text);
+            transition: color 0.3s ease;
+        }
+        
+        .script-item.selected .script-name {
+            color: white;
+        }
+        
+        .script-date {
+            font-size: 0.7em;
+            color: var(--script-date);
+            transition: color 0.3s ease;
+        }
+        
+        .script-item.selected .script-date {
+            color: #cce7ff;
+        }
+        
+        .script-actions {
+            float: right;
+        }
+        
+        .script-actions button {
+            padding: 2px 5px;
+            margin-left: 3px;
+            border: none;
+            border-radius: 2px;
+            font-size: 0.7em;
+            opacity: 0.8;
+        }
+        
+        .script-actions .btn-outline-primary {
+            color: #007bff;
+            border: 1px solid #007bff;
+            background-color: transparent;
+        }
+        
+        .script-actions .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .script-actions .btn-outline-danger {
+            color: #dc3545;
+            border: 1px solid #dc3545;
+            background-color: transparent;
+        }
+        
+        .script-actions .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .script-item:hover .script-actions button {
+            opacity: 1;
+        }
+        
+        .no-scripts {
+            text-align: center;
+            color: #6c757d;
+            margin-top: 20px;
+            font-style: italic;
+            font-size: 0.8rem;
+        }
+        
+        .bottom-controls {
+            padding: 8px;
+            border-top: 1px solid var(--border-light);
+            flex-shrink: 0;
+            transition: border-color 0.3s ease;
+        }
+        
+        .keyboard-shortcuts {
+            font-size: 0.7em;
+            color: #6c757d;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+        }
+        
+        .keyboard-shortcuts kbd {
+            font-size: 0.7em;
+            padding: 1px 3px;
+        }
+        
+        
+        @media (max-width: 768px) {
+            .scripts-panel {
+                width: 240px;
+            }
+            
+            .controls-wrapper {
+                flex-direction: column;
+                gap: 8px;
+                align-items: stretch;
+            }
+            
+            .buttons-section {
+                justify-content: center;
+            }
+            
+            .loading-section {
+                margin-left: 0;
+                text-align: center;
+            }
+            
+            .controls .btn {
+                margin: 1px 2px;
+                padding: 3px 6px;
+                font-size: 0.8rem;
+            }
         }
     </style>
 
 </head>
 
 <body>
-    <div class="container">
-        <h1 class="titulo">DJANGO-KNZL-SHELL</h1>
-        <div id="editor"></div>
-        <form method="POST" action="{% url 'knzl' %}">
-            {% csrf_token %}
-            <div class="mb-3">
-                <textarea class="editor_knzl" id="editor_knzl" name="code" autofocus>{{code}}</textarea>
-            </div>
-            <div class="text-center">
-                <button type="submit" class="btn btn-success col-2">Run...</button>
-                <button type="button" class="btn btn-primary col-2" id="button-save">Save...</button>
-                <button type="button" class="btn btn-info col-2" id="button-open" color="#FFF">Open...</button>
-                <button type="button" class="btn btn-secondary col-2" id="button-clear" color="#FFF">Clear...</button>
-                <button type="button" class="btn btn-secondary col-2" id="button-clean" color="#FFF">Clean...</button>
-            </div>
-        </form>
-        <div class="results">
-            <div id="results">
-                {% if out %}
-                <pre>
-                        {% autoescape off %}
-                            <p>{{ out }}</p>
-                        {% endautoescape %}
-                    </pre> {% endif %}
-            </div>
-            <div id="loader" class="loader">
-                Loading... <i class="fa-solid fa-cog fa-spin"></i>
+    <div class="main-container">
+        <!-- Title Bar -->
+        <div class="title-bar">
+            <h1>DJANGO-KNZL-SHELL</h1>
+            <div class="header-controls">
+                <div class="theme-switcher">
+                    <button class="btn btn-sm btn-outline-light" id="theme-toggle" title="Toggle Theme">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+                <div class="language-switcher">
+                    <button class="btn btn-sm btn-outline-light" id="lang-en">EN</button>
+                    <button class="btn btn-sm btn-outline-light" id="lang-es">ES</button>
+                </div>
             </div>
         </div>
-
-
-
+        
+        <!-- Main Content Area -->
+        <div class="content-area">
+            <!-- Editor Section -->
+            <div class="editor-section">
+                <!-- Code Editor -->
+                <div class="editor-container">
+                    <div id="editor"></div>
+                </div>
+                
+                <!-- Controls -->
+                <div class="controls">
+                    <div class="controls-wrapper">
+                        <form method="POST" action="{% url 'knzl' %}">
+                            {% csrf_token %}
+                            <textarea class="editor_knzl" id="editor_knzl" name="code">{{code}}</textarea>
+                            <div class="buttons-section">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="fas fa-play"></i> Run
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm" id="button-save">
+                                    <i class="fas fa-download"></i> Save File
+                                </button>
+                                <button type="button" class="btn btn-info btn-sm" id="button-open">
+                                    <i class="fas fa-folder-open"></i> Open File
+                                </button>
+                                <button type="button" class="btn btn-warning btn-sm" id="button-save-local">
+                                    <i class="fas fa-save"></i> Save to Storage
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="button-clear">
+                                    <i class="fas fa-eraser"></i> Clear Output
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="button-clean">
+                                    <i class="fas fa-trash"></i> Clean Editor
+                                </button>
+                            </div>
+                        </form>
+                        <div class="loading-section">
+                            <div id="loader" class="inline-loader">
+                                <i class="fas fa-cog fa-spin"></i> <span id="loading-text">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results Section -->
+                <div class="results-section">
+                    <div class="results-header">
+                        <i class="fas fa-terminal"></i> Console Output
+                    </div>
+                    <div class="results-content">
+                    <div class="results-scroll-wrapper">
+                        <div class="results">
+                            <div class="console-prompt">django-knzl:~$</div>
+                            <div id="results">
+                                {% if out %}
+                                <pre>{% autoescape off %}{{ out }}{% endautoescape %}</pre>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+            
+            <!-- Scripts Panel -->
+            <div class="scripts-panel">
+                <div class="panel-header">
+                    <h5>
+                        <i class="fas fa-code-branch"></i> Scripts
+                        <button class="btn btn-sm btn-outline-light float-end" id="button-refresh-scripts">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </h5>
+                </div>
+                
+                <div class="search-container">
+                    <input type="text" class="form-control form-control-sm" id="script-search" placeholder="Search scripts..." />
+                </div>
+                
+                <div id="scripts-panel">
+                    <div class="scripts-scroll-wrapper">
+                        <div class="script-tree" id="script-tree">
+                            <div class="no-scripts" id="no-scripts-message">
+                                No scripts stored yet.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bottom-controls">
+                    <button class="btn btn-sm btn-danger btn-block" id="button-clear-storage">
+                        <i class="fas fa-trash-alt"></i> Clear All
+                    </button>
+                    
+                    <div class="keyboard-shortcuts mt-2">
+                        <strong>Shortcuts:</strong><br>
+                        <kbd>Ctrl+Enter</kbd> Run<br>
+                        <kbd>Ctrl+S</kbd> Save<br>
+                        <kbd>Ctrl+O</kbd> Open<br>
+                        <kbd>Ctrl+K</kbd> Clear<br>
+                        <kbd>Esc</kbd> Deselect
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 

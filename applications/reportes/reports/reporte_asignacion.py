@@ -101,18 +101,22 @@ class ReporteAsignacionPDF(FPDF):
         self.cell(size_footer, 10,'IMPRESO: ' + str(datetime.now().strftime("%d/%m/%Y %I:%M%p")), 'T', 0, 'C')
 
 
-def reporte_asignacion_embarque(embarque):
+def reporte_asignacion_embarque(embarque_id):
+    print(embarque_id)
     query = """ select 
                 e.documento ,o.nombre as operador, e.or_fecha_hora_salida as salida,n.arribo, n.recepcion , n.recibio, e.regreso, n.tipo_documento ,n.documento as docto_envio ,n.destinatario,
                 n.kilos, n.total_documento,n.comentario, s.nombre as sucursal,e.fecha, n.fecha_documento, i.fecha_de_entrega, i.tipo as tipo_envio,
                 concat(i.direccion_calle,' ',ifnull(i.direccion_numero_exterior,''),' ',ifnull(i.direccion_numero_interior,''),', ',ifnull(i.direccion_colonia,''), ', ', ifnull(i.direccion_municipio,''),' ',ifnull(i.direccion_estado,'')) as direccion_entrega
                 ,e.comentario as comentario_embarque, n.valor
-                from embarques e join entrega n  on ( e.id = n.embarque_id ) join instruccion_de_envio i on ( n.envio_id = i.envio_id ) 
+                from embarques e join entrega n  on ( e.id = n.embarque_id ) left join instruccion_de_envio i on ( n.envio_id = i.envio_id ) 
                 join operador o  on ( o.id = e.operador_id )  join sucursal s on ( e.sucursal_id = s.id )
                 where e.id = %s 
             """
     dao = ReportDao()
-    embarque = dao.get_data(query,[embarque])
+    embarque = dao.get_data(query,[embarque_id])
+
+    print("Embarque")
+    print(embarque)
 
     generales = embarque[0]
 
@@ -158,10 +162,12 @@ def reporte_asignacion_embarque(embarque):
         pdf.cell(35, 5, 'COMENTARIO', align='C',border=0, new_x="LMARGIN", new_y="NEXT")
 
         pdf.cell(18, 5,'DIR_ENVIO: ', align='R',border=0)
-        pdf.cell(150, 5, entrega.get('direccion_entrega'), align='L',border=0, new_x="LMARGIN", new_y="NEXT")
+        #pdf.cell(150, 5, entrega.get('direccion_entrega'), align='L',border=0, new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(150, 5, ("" if entrega.get('direccion_entrega') == None else entrega.get('direccion_entrega')), align='L',border=0, new_x="LMARGIN", new_y="NEXT")
         
         pdf.cell(20, 5,'F_ENTREGA: ', align='R',border=0)
-        pdf.cell(13, 5, entrega.get('fecha_de_entrega').strftime("%d-%m-%Y"), align='C',border=0)
+        #pdf.cell(13, 5, entrega.get('fecha_de_entrega').strftime("%d-%m-%Y"), align='C',border=0)
+        pdf.cell(13, 5, ("" if entrega.get('fecha_de_entrega') == None else entrega.get('fecha_de_entrega').strftime("%d-%m-%Y")), align='C',border=0)
         pdf.cell(10, 5,'Tipo: ', align='R',border=0)
         pdf.cell(15, 5, ("" if entrega.get('tipo_envio')== None else entrega.get('tipo_envio')) , align='C',border=0, new_x="LMARGIN", new_y="NEXT")
         pdf.line(10,pdf.get_y(),270,pdf.get_y())

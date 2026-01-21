@@ -236,7 +236,7 @@ class EntregaDet(models.Model):
     version = models.BigIntegerField(blank=True, null=True)
     kilos = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
 
-    @property
+    ''' @property
     def saldo(self): 
         return self.envio_det.saldo
     
@@ -246,7 +246,7 @@ class EntregaDet(models.Model):
     
     @property
     def cantidad_envio(self):
-        return self.envio_det.me_cantidad
+        return self.envio_det.me_cantidad '''
 
     class Meta:
         managed = True
@@ -364,6 +364,7 @@ class Envio(models.Model):
     sucursal = models.CharField(max_length=255)
     origen = models.CharField(max_length=255)
     entidad = models.CharField(max_length=255)
+    folio = models.IntegerField(blank=True, null=True, default=0)
     # Este dato debe ser de tipo Date no DateT
     fecha_documento = models.DateTimeField()
     documento = models.CharField(max_length=255)
@@ -395,7 +396,7 @@ class Envio(models.Model):
 
 
     
-    @property
+    ''' @property
     def saldo(self):
         envios = EnvioDet.objects.filter(~Q(clave = 'CORTE'),envio = self)
         saldo = sum(env.saldo for env in envios)
@@ -409,7 +410,7 @@ class Envio(models.Model):
     @property
     def enviado(self):
         enviado = self.por_enviar - self.saldo
-        return enviado
+        return enviado '''
   
 
     objects = EnvioManager()
@@ -447,7 +448,7 @@ class EnvioDet(models.Model):
     surtidor = models.CharField(max_length=255, blank=True, null=True)
 
 
-    @property
+    ''' @property
     def saldo(self):
         entrega = EntregaDet.objects.filter(envio_det = self)
         enviado = sum(ent.cantidad for ent in entrega)
@@ -459,7 +460,7 @@ class EnvioDet(models.Model):
         entrega = EntregaDet.objects.filter(envio_det = self)
         enviado = sum(ent.cantidad for ent in entrega)
        
-        return enviado
+        return enviado '''
 
 
 

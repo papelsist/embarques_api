@@ -5,6 +5,7 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 
 
+
 class EnvioManager(models.Manager):
     
     def find_envio(self,tipo,documento,fecha,sucursal):
@@ -22,6 +23,7 @@ class EnvioManager(models.Manager):
     
     def pendientes_salida(self,fecha_inicial, fecha_final, sucursal):
         print("Buscando los pendientes de salida")
+        
         #envios_list = self.filter(~Q(surtido = None),instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final], sucursal=sucursal, pasan= False)
         envios_list = self.filter(instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final], sucursal=sucursal, pasan= False)
         envios = [x for x in envios_list if x.enviado == 0.00]

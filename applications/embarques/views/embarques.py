@@ -2,14 +2,16 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.db.models import Q
+from django.db.models import Q, Prefetch, OuterRef, Subquery, Sum, DecimalField, F
+from django.db.models.functions import Coalesce
 from datetime import date, datetime
 from applications.authentication.models import User
 
 from ..models import (Envio, Entrega,EntregaDet,Embarque,Folio, Operador, Sucursal,FacturistaEmbarques, Operador, EntregaIncidencia, EntregaIncidenciaSeguimiento, InstruccionDeEnvio,
-                      EnvioAnotaciones, DireccionEntrega, PreEntrega)
+                      EnvioAnotaciones, DireccionEntrega, PreEntrega, PreEntregaDet, EnvioDet)
 from ..serializers import (EnvioSerializerEm, EntregaSerializer, EmbarqueSerializer, IncidenciaSerializer,EmbarqueRutaSerializer,EntregaRutaSerializer,SucursalSerializer, 
-                           IncidenciaSeguimientoSerializer, EntregaSeguimientoSerializer, EnvioAnotacionesSerializer, DireccionEntregaSerializer, PreEntregaSerializer)
+                           IncidenciaSeguimientoSerializer, EntregaSeguimientoSerializer, EnvioAnotacionesSerializer, DireccionEntregaSerializer, PreEntregaSerializer,
+                           EnvioInstruccionSerializer, EmbarqueBasicSerializer,EnvioSaldoSerializer, EmbarqueSaldoSerializer)
 from rest_framework.generics import (ListAPIView, 
                                     CreateAPIView,
                                     RetrieveAPIView,
@@ -22,6 +24,8 @@ from ..services import (salvar_embarque, borrar_entrega_det, registrar_salida_em
 
 from geopy import distance
 from datetime import date, datetime
+from decimal import Decimal
+
 
 
 
@@ -31,8 +35,9 @@ class PendientesSalida(ListAPIView):
    
     def get_queryset(self):
         suc_id = self.request.query_params['sucursal']
-        sucursal = Sucursal.objects.get(id = suc_id) 
-        queryset = Embarque.objects.pendientes_salida(sucursal)
+        sucursal = Sucursal.objects.get(id = suc_id)    
+        prefetch_partidas = Prefetch('partidas', queryset=Entrega.objects.prefetch_related('detalles').all())
+        queryset = Embarque.objects.select_related('operador').prefetch_related(prefetch_partidas).filter(or_fecha_hora_salida = None, sucursal= sucursal).order_by('documento')
         return queryset
         
 
@@ -101,18 +106,44 @@ def search_embarque(request):
 
 
 class GetEnvio(RetrieveAPIView):
-    serializer_class = EnvioSerializerEm
+    serializer_class = EnvioSaldoSerializer
     def get_queryset(self):
         print("Get Envio")
         print(self)
+
+        enviado = Subquery(EntregaDet.objects.filter(envio_det__id = OuterRef('pk')).values('envio_det__id').annotate(
+            env = Sum('cantidad')
+        ).values('env'))
+
+        detalles_prefetch = Prefetch(
+            'detalles', 
+            queryset = EnvioDet.objects.select_related('envio').annotate(
+                asignado = Coalesce(enviado, 0, output_field=DecimalField()), 
+                saldo = F('me_cantidad') - Coalesce(enviado, 0, output_field=DecimalField()), 
+            )
+        )
+        envio = Envio.objects.prefetch_related(
+            detalles_prefetch
+        ).filter()
     
-        queryset = Envio.objects.filter()
+        queryset = envio
         return queryset
     
 
 class CrearAsignacion(RetrieveAPIView):
-    serializer_class = EmbarqueSerializer
-    queryset = Embarque.objects.filter()
+    serializer_class = EmbarqueSaldoSerializer
+    def get_queryset(self):
+        enviado = Subquery(EntregaDet.objects.filter(envio_det__id = OuterRef('pk')).values('envio_det__id').annotate(
+            env = Sum('cantidad')
+        ).values('env'))
+        detalles_prefetch = Prefetch('detalles', queryset=EntregaDet.objects.all().annotate(
+            enviado = Sum('cantidad'),
+            saldo = F('envio_det__me_cantidad') - Sum('cantidad'),
+            cantidad_envio = F('envio_det__me_cantidad')
+        ))   
+        entregas_prefetch = Prefetch('partidas', queryset=Entrega.objects.prefetch_related(detalles_prefetch).all())
+        queryset = Embarque.objects.select_related('operador').prefetch_related(entregas_prefetch).filter()
+        return queryset
 
 
 @api_view(['POST'])
@@ -143,21 +174,23 @@ class Transito(ListAPIView):
     def get_queryset(self):
         suc_id = self.request.query_params.get('sucursal')
         sucursal = Sucursal.objects.get(id = suc_id)
-        queryset = Embarque.objects.transito(sucursal)
+        prefetch_partidas = Prefetch('partidas', queryset=Entrega.objects.prefetch_related('detalles').all())
+        queryset = Embarque.objects.select_related('operador').prefetch_related(prefetch_partidas).filter(~Q(or_fecha_hora_salida = None), regreso = None, sucursal = sucursal).order_by('documento')
         return queryset
    
 
 class ActualizarEntregas(RetrieveAPIView):
     serializer_class = EmbarqueSerializer
-    queryset = Embarque.objects.filter()
+    prefetch_partidas = Prefetch('partidas', queryset=Entrega.objects.prefetch_related('detalles').all())
+    queryset = Embarque.objects.select_related('operador').prefetch_related(prefetch_partidas).filter()
 
 
 @api_view(['POST'])
 def actualizar_bitacora(request):
 
     embarque = actualizar_bitacora_embarque(request.data)
-    embarque_serialized = EmbarqueSerializer(embarque)
-    return Response(embarque_serialized.data)
+    #embarque_serialized = EmbarqueSerializer(embarque)
+    return Response({}, status=200)
 
 @api_view(['POST'])
 def eliminar_entrega(request):
@@ -193,24 +226,83 @@ class EmbarquesPasan(ListAPIView):
 
 
 class EnviosPendientes(ListAPIView):
-    serializer_class = EnvioSerializerEm
+    serializer_class = EnvioInstruccionSerializer
     def get_queryset(self):
+        print("Envios Pendientes")
         print (self.request.query_params)
         fecha_inicial = self.request.query_params.get('fecha_inicial')
         fecha_final = self.request.query_params.get('fecha_final')
         sucursal = self.request.query_params.get('sucursal')
-        envios = Envio.objects.pendientes_salida(fecha_inicial, fecha_final, sucursal)
+        #prefetch_detalles = Prefetch('detalles', queryset=EnvioDet.objects.all())
+        #envios= Envio.objects.prefetch_related(prefetch_detalles).filter(instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final], sucursal=sucursal, pasan= False)
+        #envios = [x for x in envios_list if x.enviado == 0.00]
+        #envios = Envio.objects.pendientes_salida(fecha_inicial, fecha_final, sucursal)
+
+        enviado = Subquery(EntregaDet.objects.filter(envio_det__id = OuterRef('pk')).values('envio_det__id').annotate(
+            env = Sum('cantidad')
+        ).values('env'))
+
+        data = EnvioDet.objects.select_related('envio').filter(
+                envio__instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final] ,
+                envio__sucursal=sucursal,
+                envio__pasan=False
+            ).annotate(
+                asignado = Coalesce(enviado, 0, output_field=DecimalField()), 
+            ).filter(asignado = 0).values('envio_id').distinct()
         
+        prefetch_detalles = Prefetch(
+            'detalles',
+            queryset = EnvioDet.objects.all()
+        )
+
+        prefetch_instruccion = Prefetch(
+            'instruccion',
+            queryset = InstruccionDeEnvio.objects.all()
+        )
+
+        prefetch_anotaciones = Prefetch(
+            'anotaciones',
+            queryset = EnvioAnotaciones.objects.all()
+        )
+
+        envios = Envio.objects.prefetch_related(prefetch_detalles, prefetch_instruccion, prefetch_anotaciones).filter(id__in = data)
+
         return envios
-    
+
 class EnviosParciales(ListAPIView):
-    serializer_class = EnvioSerializerEm
+    serializer_class = EnvioSaldoSerializer
     def get_queryset(self):
         fecha_inicial = self.request.query_params.get('fecha_inicial')
         fecha_final = self.request.query_params.get('fecha_final')
         sucursal = self.request.query_params.get('sucursal')
-        envios = Envio.objects.envios_parciales(fecha_inicial, fecha_final, sucursal)
-        return envios
+
+        enviado = Subquery(EntregaDet.objects.filter(envio_det__id = OuterRef('pk')).values('envio_det__id').annotate(
+            env = Sum('cantidad')
+        ).values('env'))
+
+        detalles_prefetch = Prefetch(
+            'detalles', 
+            queryset = EnvioDet.objects.select_related('envio').annotate(
+                enviado = Coalesce(enviado, 0, output_field=DecimalField()), 
+                saldo = F('me_cantidad') - Coalesce(enviado, 0, output_field=DecimalField()), 
+            )
+        )
+        envios = Envio.objects.prefetch_related(
+            detalles_prefetch,
+            'instruccion',
+            'anotaciones'
+        ).filter(instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final], sucursal=sucursal, pasan= False)
+
+        envios_parciales = []
+        for envio in envios:
+            acc = Decimal(0.00)
+            for det in envio.detalles.all():
+                if det.saldo >0:
+                    acc += det.enviado
+            if acc > Decimal(0.00):
+                envios_parciales.append(envio)
+
+        return envios_parciales
     
 @api_view(['POST'])
 def embarque_por_ruteo(request):
@@ -647,8 +739,8 @@ class InstruccionEntregaListView(ListAPIView):
         sucursal = self.request.query_params.get('sucursal')
         fecha_inicial = self.request.query_params.get('fecha_inicial')
         fecha_final = self.request.query_params.get('fecha_final')
-        #queryset = PreEntrega.objects.filter( ~Q(surtido = None),entrega=None,sucursal=sucursal,fecha__range =[fecha_inicial,fecha_final]).order_by('folio')
-        queryset = PreEntrega.objects.filter( entrega=None,sucursal=sucursal,fecha__range =[fecha_inicial,fecha_final]).order_by('folio')
+        detalles_prefetch = Prefetch('detalles', queryset=PreEntregaDet.objects.all())
+        queryset = PreEntrega.objects.select_related('direccion_entrega').prefetch_related(detalles_prefetch).filter( entrega=None,sucursal=sucursal,fecha__range =[fecha_inicial,fecha_final]).order_by('folio')
         return queryset
 
 @api_view(['GET'])   

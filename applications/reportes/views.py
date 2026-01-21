@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 #Importacion de Reportes
 from .services import (imprimir_reporte_asignacion, imprimir_reporte_test_group,imprimir_reporte_ruta, imprimir_reporte_asignacion_embarque, imprimir_reporte_entrega
-,imprimir_reporte_pendientes_pago, imprimir_reporte_pendientes_doctos, imprimir_reporte_callcenter)
+,imprimir_reporte_pendientes_pago, imprimir_reporte_pendientes_doctos, imprimir_reporte_callcenter, imprimir_reporte_embarques_chofer)
 
 
 @api_view(['GET'])
@@ -69,4 +69,14 @@ def imprimirReporteEnviosCallcenter(request):
     fecha_final = request.query_params['fecha_final']
 
     reporte = imprimir_reporte_callcenter(fecha_inicial, fecha_final)
+    return HttpResponse(reporte, content_type='application/pdf')
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def imprimirReporteEmbarquesChofer(request):   
+    operador_id= request.query_params['operador_id']
+    sucursal_id = request.query_params['sucursal_id']
+    fecha = request.query_params['fecha']
+    print(request.query_params)
+    reporte = imprimir_reporte_embarques_chofer(operador_id, sucursal_id, fecha)
     return HttpResponse(reporte, content_type='application/pdf')

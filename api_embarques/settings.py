@@ -48,12 +48,12 @@ DJANGO_APPS = [
 
 LOCAL_APPS = [
     'applications.authentication',
+    'applications.knzl',
     'applications.reportes',
     'applications.embarques',
     'applications.ruteo',
     'applications.tableros',
     'applications.dashboards',
-    'applications.knzl',
     'applications.core',
     'applications.localizacion_gps',
 ]
@@ -62,6 +62,7 @@ THIRD_PART_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
+    'silk',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PART_APPS
@@ -75,6 +76,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'silk.middleware.SilkyMiddleware',
 ]
 
 ROOT_URLCONF = "api_embarques.urls"
@@ -105,10 +107,17 @@ DATABASES = {
      'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'siipap',
+        #'USER': 'root',
+        #'PASSWORD': 'Paproot_83',
+        #'HOST': '10.10.1.121',
+        #
+        #'USER': 'root',
+        #'PASSWORD': 'Pap315a',
+        #'HOST': '192.168.100.50',
         'USER': 'root',
         'PASSWORD': 'Paproot_83',
         'HOST': '10.10.1.121',
-        
+        #'OPTIONS': {'ssl': False},
         'PORT': 3306 ,
         'OPTIONS': {'ssl_mode': 'DISABLED'},
         
@@ -169,6 +178,7 @@ SIMPLE_JWT = {
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_URL = "media/"
 MEDIA_ROOT =os.path.join(BASE_DIR, 'media').replace('\\', '/')
 

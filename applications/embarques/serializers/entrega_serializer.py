@@ -20,13 +20,29 @@ class EntregaDetSerializer(serializers.ModelSerializer):
         model =EntregaDet
         fields= ['id','entrega','envio_det','sx_instruccion_de_envio','almacen','instruccion_de_entrega_parcial','clave'
                  ,'descripcion','cantidad','valor', 'comentario','date_created','last_updated'
-                 ,'version','saldo','cantidad_envio','enviado','kilos']
+                 ,'version','kilos']
+        
+class EntregaDetSaldoSerializer(serializers.ModelSerializer):
+    saldo = serializers.DecimalField(max_digits=10, decimal_places=2)
+    cantidad_envio = serializers.DecimalField(max_digits=10, decimal_places=2)
+    enviado = serializers.DecimalField(max_digits=10, decimal_places=2)
+    class Meta:
+        model =EntregaDet
+        fields= '__all__'
+        read_only_fields = ['saldo','cantidad_envio','enviado']
 
 class EntregaSerializer(serializers.ModelSerializer):
     detalles = EntregaDetSerializer(many = True)
     class Meta:
         model=  Entrega
         fields=  '__all__'
+
+    
+class EntregaSaldoSerializer(serializers.ModelSerializer):
+    detalles = EntregaDetSaldoSerializer(many = True)
+    class Meta:
+        model = Entrega
+        fields = '__all__'
 
 class EntregaRutaSerializer(serializers.ModelSerializer):
     envio = EnvioRutaSerializer()

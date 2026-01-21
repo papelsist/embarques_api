@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from datetime import datetime
 from ..models import Envio, EnvioAnotaciones
-from .envio_det_serializer import EnvioDetSerializer
+from .envio_det_serializer import EnvioDetSerializer, EnvioDetSaldoSerializer
 from .instruccion_envio_serializer import InstruccionEnvioSerializer
 from applications.shared.utils.date_utils import  DateUtils
 
@@ -17,7 +17,16 @@ class EnvioSerializerEm(serializers.ModelSerializer):
     anotaciones = AnotacionesSerializer(many=True)
     class Meta:
         model= Envio
-        fields= ['id','documento','fecha_documento','sucursal','tipo_documento','destinatario','detalles','saldo', 'kilos','instruccion','pasan','usuario_pasan','date_created','anotaciones','surtido','pagado' ]
+        fields= ['id','documento','fecha_documento','sucursal','tipo_documento','destinatario','detalles', 'kilos','instruccion','pasan','usuario_pasan','date_created','anotaciones','surtido','pagado' ]
+        #tefields = '__all__'
+
+class EnvioInstruccionSerializer(serializers.ModelSerializer):
+
+    instruccion = InstruccionEnvioSerializer()
+    anotaciones = AnotacionesSerializer(many=True) 
+    class Meta:
+        model= Envio
+        fields= ['id','documento','fecha_documento','sucursal','tipo_documento','destinatario','detalles', 'kilos','instruccion','pasan','usuario_pasan','date_created','anotaciones','surtido','pagado' ]
         #tefields = '__all__'
 
 class EnvioSerializer(serializers.ModelSerializer):
@@ -30,6 +39,14 @@ class EnvioSerializer(serializers.ModelSerializer):
     def get_retraso(self,obj):
         time_lapse = DateUtils.get_time_lapse_now(obj.date_created)
         return time_lapse
+    
+class EnvioSaldoSerializer(serializers.ModelSerializer):
+    detalles = EnvioDetSaldoSerializer(many= True)
+    instruccion = InstruccionEnvioSerializer()
+    anotaciones = AnotacionesSerializer(many=True)
+    class Meta:
+        model= Envio
+        fields = '__all__'
     
 class EnvioRutaSerializer(serializers.ModelSerializer):
     instruccion = InstruccionEnvioSerializer()

@@ -10,5 +10,6 @@ urlpatterns = [
     path('api/embarques/reporte_pendientes_pago', views.imprimirReportePendientesPago, name='imprimirReportePendientesPago'),
     path('api/embarques/reporte_pendientes_doctos', views.imprimirReportePendientesDoctos, name='imprimirReportePendientesDoctos'),
     path('api/embarques/reporte_envios_callcenter', views.imprimirReporteEnviosCallcenter, name='imprimirReporteCallcenter'),
+    path('api/embarques/reporte_embarques_chofer', views.imprimirReporteEmbarquesChofer, name='imprimirReporteEmbarquesChofer'),
 
 ]

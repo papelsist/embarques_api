@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from ..models import Embarque
 from .operador_serializer import OperadorSerializer
-from .entrega_serializer import EntregaSerializer,EntregaRutaSerializer
+from .entrega_serializer import EntregaSerializer,EntregaRutaSerializer, EntregaSaldoSerializer
 
 
 class EmbarqueSerializer(serializers.ModelSerializer):
@@ -10,6 +10,22 @@ class EmbarqueSerializer(serializers.ModelSerializer):
     class Meta:
         model= Embarque
         fields = '__all__'
+
+class EmbarqueSaldoSerializer(serializers.ModelSerializer):
+    operador = OperadorSerializer()
+    partidas = EntregaSaldoSerializer(many = True)
+    class Meta:
+        model = Embarque
+        fields = '__all__'
+
+
+class EmbarqueBasicSerializer(serializers.ModelSerializer):
+    operador = OperadorSerializer()
+    
+    class Meta:
+        model= Embarque
+        fields = ['id', 'documento', 'fecha', 'operador', 'sucursal', 'facturista', 'comentario', 'or_fecha_hora_salida', 'regreso','partidas']
+        fields
 
 
 class EmbarqueRutaSerializer(serializers.ModelSerializer):
