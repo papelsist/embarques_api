@@ -15,6 +15,10 @@ from django.core.exceptions import ImproperlyConfigured
 import json
 from datetime import timedelta
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,14 +28,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-ii0&9pue56%44abdjt8ya+!b1pc3kszktofgxb-40q(vibqi6t"
+SECRET_KEY = os.getenv('SECRET_KEY')
+MAIL_JET_USER = os.getenv('MAIL_JET_USER')
+MAIL_JET_PASSWORD = os.getenv('MAIL_JET_PASSWORD')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = [
-    '*'
-]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
+
 
 
 # Application definition
@@ -106,21 +111,15 @@ WSGI_APPLICATION = "api_embarques.wsgi.application"
 DATABASES = {
      'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'siipap',
-        #'USER': 'root',
-        #'PASSWORD': 'Paproot_83',
-        #'HOST': '10.10.1.121',
-        #
-        #'USER': 'root',
-        #'PASSWORD': 'Pap315a',
-        #'HOST': '192.168.100.50',
-        'USER': 'root',
-        'PASSWORD': 'Paproot_83',
-        'HOST': '10.10.1.121',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT') ,
+        # PARA CLOUD
         #'OPTIONS': {'ssl': False},
-        'PORT': 3306 ,
+        # PARA LOCAL
         'OPTIONS': {'ssl_mode': 'DISABLED'},
-        
     },
 }
 

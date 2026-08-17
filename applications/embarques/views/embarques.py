@@ -701,6 +701,11 @@ def crear_direccion_por_envio(request):
     direccion.pais = instruccion.direccion_pais
     direccion.latitud = instruccion.direccion_latitud
     direccion.longitud = instruccion.direccion_longitud
+    direccion.contacto = request.data.get('contacto','')
+    direccion.telefono_contacto = request.data.get('telefono_contacto','')
+    direccion.horario_recepcion = request.date.get('horario_recepcion','')
+    direccion.horario_recepcion_inicio = request.data.get('horario_recepcion_inicio','')
+    direccion.horario_recepcion_fin = request.data.get('horario_recepcion_fin','')
     direccion.version = 0
     direccion.save()
     direccion_serialized = DireccionEntregaSerializer(direccion)  
@@ -726,6 +731,11 @@ def crear_direccion_entrega(request):
     direccion.pais = request.data['pais']
     direccion.latitud = request.data['latitud']
     direccion.longitud = request.data['longitud']
+    direccion.contacto = request.data.get('contacto','')
+    direccion.telefono_contacto = request.data.get('telefono_contacto','')
+    direccion.horario_recepcion = request.date.get('horario_recepcion','')
+    direccion.horario_recepcion_inicio = request.data.get('horario_recepcion_inicio','')
+    direccion.horario_recepcion_fin = request.data.get('horario_recepcion_fin','')
     direccion.version = 0
     direccion.save()
     direccion_serialized = DireccionEntregaSerializer(direccion) 

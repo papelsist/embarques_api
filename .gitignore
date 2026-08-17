@@ -3,7 +3,8 @@
 *.pyc
 /api_embarques/conf
 conf
-
+.env
+.env-local
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
