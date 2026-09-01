@@ -1,1 +1,26 @@
-[]
+[
+      {
+            "embarque_documento": 43,
+            "embarque_id": 45,
+            "transporte_id": 27,
+            "descripcion": "EUROVAN",
+            "transporte_capacidad": 3500.0,
+            "destinos": [
+                  714,
+                  713
+            ],
+            "ocupado": 0.0,
+            "destinos_coords": [
+                  {
+                        "destino": 714,
+                        "latitud": 19.775933,
+                        "longitud": -98.56698
+                  },
+                  {
+                        "destino": 713,
+                        "latitud": 19.517714,
+                        "longitud": -99.151903
+                  }
+            ]
+      }
+]

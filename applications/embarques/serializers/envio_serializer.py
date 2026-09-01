@@ -26,7 +26,7 @@ class EnvioInstruccionSerializer(serializers.ModelSerializer):
     anotaciones = AnotacionesSerializer(many=True) 
     class Meta:
         model= Envio
-        fields= ['id','documento','fecha_documento','sucursal','tipo_documento','destinatario','detalles', 'kilos','instruccion','pasan','usuario_pasan','date_created','anotaciones','surtido','pagado' ]
+        fields= ['id','documento','fecha_documento','sucursal','sucursal_entrega','tipo_documento','destinatario','detalles', 'kilos','instruccion','pasan','usuario_pasan','date_created','anotaciones','surtido','pagado' ]
         #tefields = '__all__'
 
 class EnvioSerializer(serializers.ModelSerializer):
