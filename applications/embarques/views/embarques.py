@@ -27,6 +27,18 @@ from datetime import date, datetime
 from decimal import Decimal
 
 
+def get_envio_cantidades(envio):
+    """Cantidad ya asignada/enviada y saldo pendiente del envío."""
+    detalles = EnvioDet.objects.filter(envio=envio).exclude(clave='CORTE')
+    total_cantidad = detalles.aggregate(total=Sum('me_cantidad'))['total'] or Decimal('0')
+    total_enviado = EntregaDet.objects.filter(
+        envio_det__envio=envio,
+    ).exclude(
+        envio_det__clave='CORTE',
+    ).aggregate(total=Sum('cantidad'))['total'] or Decimal('0')
+    return total_enviado, total_cantidad - total_enviado
+
+
 
 
 class PendientesSalida(ListAPIView):
@@ -560,6 +572,85 @@ def registrar_recepcion_documentos_embarque(request):
     return Response({"embarque":embarque_serialized.data, "message":"Actualizado correctamente"})
 
 
+def format_direccion_instruccion(instruccion):
+    if not instruccion:
+        return None
+    partes = []
+    if instruccion.direccion_calle:
+        calle = instruccion.direccion_calle
+        if instruccion.direccion_numero_exterior:
+            calle = f"{calle} {instruccion.direccion_numero_exterior}"
+        partes.append(calle.strip())
+    if instruccion.direccion_colonia:
+        partes.append(instruccion.direccion_colonia)
+    if instruccion.direccion_codigo_postal:
+        partes.append(f"C.P. {instruccion.direccion_codigo_postal}")
+    if instruccion.direccion_municipio:
+        partes.append(instruccion.direccion_municipio)
+    if instruccion.direccion_estado:
+        partes.append(instruccion.direccion_estado)
+    return ', '.join(partes) if partes else None
+
+
+def build_seguimiento_entrega_dict(entrega):
+    embarque = entrega.embarque
+    operador = embarque.operador
+    instruccion = getattr(entrega.envio, 'instruccion', None)
+
+    detalles_dict = []
+    for detalle in entrega.detalles.all():
+        detalles_dict.append({
+            "id": detalle.id,
+            "clave": detalle.clave,
+            "descripcion": detalle.descripcion,
+            "cantidad": detalle.cantidad,
+        })
+
+    return {
+        "id": entrega.id,
+        "envio_id": entrega.envio_id,
+        "documento": entrega.envio.documento,
+        "tipo_documento": entrega.envio.tipo_documento,
+        "origen": entrega.envio.origen,
+        "fecha": entrega.fecha_documento,
+        "salida": embarque.or_fecha_hora_salida,
+        "arribo": entrega.arribo,
+        "recepcion": entrega.recepcion,
+        "recibio": entrega.recibio,
+        "regreso": embarque.regreso,
+        "embarque": embarque.documento,
+        "embarque_fecha": embarque.fecha,
+        "sucursal_embarque": embarque.sucursal.nombre if embarque.sucursal else None,
+        "operador": operador.nombre if operador else None,
+        "detalles": detalles_dict,
+        "destinatario": entrega.destinatario or entrega.envio.destinatario,
+        "direccion": format_direccion_instruccion(instruccion),
+    }
+
+
+def build_seguimiento_envio_sin_entrega_dict(envio):
+    instruccion = getattr(envio, 'instruccion', None)
+    return {
+        "id": envio.id,
+        "envio_id": envio.id,
+        "documento": envio.documento,
+        "tipo_documento": envio.tipo_documento,
+        "origen": envio.origen,
+        "fecha": envio.fecha_documento,
+        "destinatario": envio.destinatario,
+        "direccion": format_direccion_instruccion(instruccion),
+        "salida": None,
+        "arribo": None,
+        "recepcion": None,
+        "recibio": "Sin asignar",
+        "regreso": None,
+        "embarque": 0,
+        "embarque_fecha": date.today(),
+        "sucursal_embarque": envio.sucursal,
+        "operador": "Sin asignar",
+        "detalles": [],
+    }
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -567,60 +658,28 @@ def get_seguimiento_envio(request):
     documento = request.query_params.get('documento')
     fecha = request.query_params.get('fecha')
     sucursal = request.query_params.get('sucursal')
-    entregas = Entrega.objects.filter(envio__documento = documento, envio__sucursal= sucursal, envio__fecha_documento = fecha)
+    envios = Envio.objects.select_related('instruccion').filter(
+        documento=documento,
+        fecha_documento=fecha,
+        sucursal=sucursal,
+    )
     entregas_dict = []
-    if entregas:
-        for entrega in entregas:
-            embarque = entrega.embarque
-            operador = embarque.operador
+    for envio in envios:
+        entregas = (
+            Entrega.objects
+            .select_related(
+                'envio', 'envio__instruccion', 'embarque', 'embarque__operador', 'embarque__sucursal'
+            )
+            .prefetch_related('detalles')
+            .filter(envio=envio)
+        )
+        if entregas.exists():
+            for entrega in entregas:
+                entregas_dict.append(build_seguimiento_entrega_dict(entrega))
+        else:
+            entregas_dict.append(build_seguimiento_envio_sin_entrega_dict(envio))
 
-            detalles_dict = []
-            for detalle in entrega.detalles.all():
-                entrega_dict ={
-                    "id": detalle.id,
-                    "clave": detalle.clave,
-                    "descripcion": detalle.descripcion,
-                    "cantidad": detalle.cantidad,
-                }
-                detalles_dict.append(entrega_dict)
-
-            entrega_dict ={
-                "id": entrega.id,
-                "documento": entrega.envio.documento,
-                "fecha": entrega.fecha_documento,
-                "salida": embarque.or_fecha_hora_salida,
-                "arribo": entrega.arribo,
-                "recepcion": entrega.recepcion,
-                "recibio": entrega.recibio,
-                "regreso": embarque.regreso,
-                "embarque": embarque.documento,
-                "embarque_fecha": embarque.fecha,
-                "operador": operador.nombre,
-                "detalles": detalles_dict,
-                "destinatario": entrega.destinatario
-            }
-            entregas_dict.append(entrega_dict)
-        entregas_serialized = EntregaSeguimientoSerializer(entregas_dict, many = True)
-    else:
-        envio = Envio.objects.get(documento = documento, fecha_documento = fecha, sucursal = sucursal)
-        entrega_dict ={
-                "id": envio.id,
-                "documento": envio.documento,
-                "fecha": envio.fecha_documento,
-                "destinatario": envio.destinatario,
-                "salida": None,
-                "arribo": None,
-                "recepcion": None,
-                "recibio": "Sin asignar",
-                "regreso": None,
-                "embarque": 0,
-                "embarque_fecha": date.today(),
-                "operador": "Sin asignar",
-                "detalles": []
-            }
-        entregas_dict.append(entrega_dict)
-        entregas_serialized = EntregaSeguimientoSerializer(entregas_dict, many = True)
-     
+    entregas_serialized = EntregaSeguimientoSerializer(entregas_dict, many=True)
     return Response(entregas_serialized.data)
 
 
@@ -830,20 +889,21 @@ def get_envio_pendiente(request):
     documento = request.query_params.get('documento')
     tipo = request.query_params.get('origen')
 
-    envios = Envio.objects.filter(documento=documento, tipo_documento = tipo, sucursal = sucursal)
-    if envios:
-        envio = envios[0]
-        if envio.enviado == 0.00:
-            envio_serialized = EnvioSerializerEm(envio)
-            return Response({"message":"OK", "envio":envio_serialized.data})
-        else:
-            envio= None
-            envio_serialized = EnvioSerializerEm(envio)
-            return Response({"message":"No encontrado", "envio":envio_serialized.data})
-    else:
-        envio = None
-        envio_serialized = EnvioSerializerEm(envio)
-        return Response({"message":"No encontrado", "envio":envio_serialized.data})
+    envios_qs = Envio.objects.filter(documento=documento, tipo_documento=tipo, sucursal=sucursal)
+    envios_pendientes = []
+    for envio in envios_qs:
+        enviado, _ = get_envio_cantidades(envio)
+        if enviado == Decimal('0'):
+            envios_pendientes.append(envio)
+
+    if envios_pendientes:
+        envios_serialized = EnvioSerializerEm(envios_pendientes, many=True)
+        return Response({
+            "message": "OK",
+            "envios": envios_serialized.data,
+            "envio": envios_serialized.data[0],
+        })
+    return Response({"message": "No encontrado", "envios": [], "envio": None})
 
 
 @api_view(['GET'])
@@ -855,7 +915,8 @@ def get_envio_parcial(request):
     envios = Envio.objects.filter(documento=documento, tipo_documento = tipo, sucursal = sucursal, pasan= False)
     if envios:
         envio = envios[0]
-        if envio.enviado != 0.00 and envio.saldo != 0.00:
+        enviado, saldo = get_envio_cantidades(envio)
+        if enviado != Decimal('0') and saldo != Decimal('0'):
             envio_serialized = EnvioSerializerEm(envio)
             return Response({"message":"OK", "envio":envio_serialized.data})
         else:
@@ -888,7 +949,120 @@ def aplicacion_pago_cod_pos(request):
     print("Pago no aplicado")
     return Response({"message":"envio no encontrado o ya pagado"})
 
+class EnviosTableroPendientes(ListAPIView):
+    serializer_class = EnvioInstruccionSerializer
+    def get_queryset(self):
+        print("Envios Pendientes")
+        print (self.request.query_params)
+        fecha_inicial = self.request.query_params.get('fecha_inicial')
+        fecha_final = self.request.query_params.get('fecha_final')
+        sucursal = self.request.query_params.get('sucursal')
+        #prefetch_detalles = Prefetch('detalles', queryset=EnvioDet.objects.all())
+        #envios= Envio.objects.prefetch_related(prefetch_detalles).filter(instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final], sucursal=sucursal, pasan= False)
+        #envios = [x for x in envios_list if x.enviado == 0.00]
+        #envios = Envio.objects.pendientes_salida(fecha_inicial, fecha_final, sucursal)
 
-        
-        
+        enviado = Subquery(EntregaDet.objects.filter(envio_det__id = OuterRef('pk')).values('envio_det__id').annotate(
+            env = Sum('cantidad')
+        ).values('env'))
 
+        data = EnvioDet.objects.select_related('envio').filter(
+                envio__instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final] ,
+                envio__sucursal=sucursal,
+                envio__pasan=False
+            ).annotate(
+                asignado = Coalesce(enviado, 0, output_field=DecimalField()), 
+            ).filter(~Q(me_cantidad = Coalesce(enviado, 0, output_field=DecimalField()))).values('envio_id').distinct()
+        
+        prefetch_detalles = Prefetch(
+            'detalles',
+            queryset = EnvioDet.objects.all()
+        )
+
+        prefetch_instruccion = Prefetch(
+            'instruccion',
+            queryset = InstruccionDeEnvio.objects.all()
+        )
+
+        prefetch_anotaciones = Prefetch(
+            'anotaciones',
+            queryset = EnvioAnotaciones.objects.all()
+        )
+
+        envios = Envio.objects.prefetch_related(prefetch_detalles, prefetch_instruccion, prefetch_anotaciones).filter(id__in = data)
+
+        return envios
+
+
+class EnviosReasignadosPendientes(ListAPIView):
+    
+    serializer_class = EnvioInstruccionSerializer
+    def get_queryset(self):
+        print("Envios Reasignados Pendientes")
+        print("Sucursal de entrega: ", self.request.query_params.get('sucursal_entrega'))
+        print("*"*50)
+        print (self.request.query_params)
+        fecha_inicial = self.request.query_params.get('fecha_inicial')
+        fecha_final = self.request.query_params.get('fecha_final')
+        sucursal = self.request.query_params.get('sucursal_entrega')
+
+        enviado = Subquery(EntregaDet.objects.filter(envio_det__id = OuterRef('pk')).values('envio_det__id').annotate(
+            env = Sum('cantidad')
+        ).values('env'))
+
+        data = EnvioDet.objects.select_related('envio').filter(
+                envio__instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final] ,
+                envio__sucursal_entrega=sucursal,
+                envio__pasan=False
+            ).exclude(
+                envio__sucursal=sucursal
+            ).annotate(
+                asignado = Coalesce(enviado, 0, output_field=DecimalField()), 
+            ).filter(~Q(me_cantidad = Coalesce(enviado, 0, output_field=DecimalField()))).values('envio_id').distinct()
+
+        print("*"*50)
+        print("Envios reasignados encontrados:", data)
+        
+        prefetch_detalles = Prefetch(
+            'detalles',
+            queryset = EnvioDet.objects.all()
+        )
+
+        prefetch_instruccion = Prefetch(
+            'instruccion',
+            queryset = InstruccionDeEnvio.objects.all()
+        )
+
+        prefetch_anotaciones = Prefetch(
+            'anotaciones',
+            queryset = EnvioAnotaciones.objects.all()
+        )
+
+        envios = Envio.objects.prefetch_related(prefetch_detalles, prefetch_instruccion, prefetch_anotaciones).filter(id__in = data)
+
+        return envios        
+
+@api_view(['PUT'])
+@permission_classes([AllowAny])
+def actualizar_sucursal_entrega(request):
+    sucursal_entrega = request.data['sucursal_entrega']
+    envio = Envio.objects.get(id = request.data['envio_id'])
+    tipo_documento = (envio.tipo_documento or '').upper()
+    if tipo_documento == 'COD':
+        return Response(
+            {"message": "No se puede reasignar un envío COD; solo CON o CRE"},
+            status=400,
+        )
+    if tipo_documento not in ('CON', 'CRE'):
+        return Response(
+            {"message": "Solo se pueden reasignar envíos CON o CRE"},
+            status=400,
+        )
+    if envio.sucursal_entrega and envio.sucursal_entrega != envio.sucursal:
+        return Response(
+            {"message": "El envío ya está reasignado y no se puede reasignar nuevamente"},
+            status=400,
+        )
+    envio.sucursal_entrega = sucursal_entrega
+    envio.save()
+    return Response({"message":"Sucursal actualizada"})
