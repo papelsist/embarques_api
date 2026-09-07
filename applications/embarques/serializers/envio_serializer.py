@@ -4,6 +4,7 @@ from ..models import Envio, EnvioAnotaciones
 from .envio_det_serializer import EnvioDetSerializer, EnvioDetSaldoSerializer
 from .instruccion_envio_serializer import InstruccionEnvioSerializer
 from applications.shared.utils.date_utils import  DateUtils
+from ..services.reasignacion_service import envio_hijo_tiene_asignaciones
 
 
 class AnotacionesSerializer(serializers.ModelSerializer):
@@ -23,10 +24,24 @@ class EnvioSerializerEm(serializers.ModelSerializer):
 class EnvioInstruccionSerializer(serializers.ModelSerializer):
 
     instruccion = InstruccionEnvioSerializer()
-    anotaciones = AnotacionesSerializer(many=True) 
+    anotaciones = AnotacionesSerializer(many=True)
+    detalles = EnvioDetSerializer(many=True)
+    envio_origen_documento = serializers.SerializerMethodField()
+    tiene_asignaciones = serializers.SerializerMethodField()
+
+    def get_envio_origen_documento(self, obj):
+        if obj.envio_origen_id and obj.envio_origen:
+            return obj.envio_origen.documento
+        return None
+
+    def get_tiene_asignaciones(self, obj):
+        if not obj.envio_origen_id:
+            return False
+        return envio_hijo_tiene_asignaciones(obj)
+
     class Meta:
         model= Envio
-        fields= ['id','documento','fecha_documento','sucursal','sucursal_entrega','tipo_documento','destinatario','detalles', 'kilos','instruccion','pasan','usuario_pasan','date_created','anotaciones','surtido','pagado' ]
+        fields= ['id','documento','fecha_documento','sucursal','sucursal_entrega','envio_origen','envio_origen_documento','tipo_documento','destinatario','detalles', 'kilos','instruccion','pasan','usuario_pasan','date_created','anotaciones','surtido','pagado','tiene_asignaciones' ]
         #tefields = '__all__'
 
 class EnvioSerializer(serializers.ModelSerializer):

@@ -20,7 +20,10 @@ from rest_framework.generics import (ListAPIView,
 from ..services import (salvar_embarque, borrar_entrega_det, registrar_salida_embarque, borrar_embarque, actualizar_bitacora_embarque, 
                         eliminar_entrega_embarque, registrar_regreso_embarque, crear_embarque_por_ruteo, asignar_envios_pend, get_user_logged,
                         crear_incidencia_entrega_det, asignar_envios_parc, asignar_a_pasan, registrar_recepcion_pagos_embarque,registrar_recepcion_docs_embarque, crear_pre_entrega,
-                        asignar_instruccion)
+                        asignar_instruccion, reasignar_partidas_envio, obtener_partidas_reasignacion,
+                        cancelar_reasignacion_envio_hijo, reasignar_destino_envio_hijo)
+from ..services.envio_query_utils import filtro_envio_tablero_origen, queryset_detalles_activos, queryset_detalles_con_reasignacion
+from ..services.geocodificacion_service import geocodificar_instruccion_y_cliente
 
 from geopy import distance
 from datetime import date, datetime
@@ -29,7 +32,7 @@ from decimal import Decimal
 
 def get_envio_cantidades(envio):
     """Cantidad ya asignada/enviada y saldo pendiente del envío."""
-    detalles = EnvioDet.objects.filter(envio=envio).exclude(clave='CORTE')
+    detalles = EnvioDet.objects.filter(envio=envio, activo=True).exclude(clave='CORTE')
     total_cantidad = detalles.aggregate(total=Sum('me_cantidad'))['total'] or Decimal('0')
     total_enviado = EntregaDet.objects.filter(
         envio_det__envio=envio,
@@ -129,7 +132,7 @@ class GetEnvio(RetrieveAPIView):
 
         detalles_prefetch = Prefetch(
             'detalles', 
-            queryset = EnvioDet.objects.select_related('envio').annotate(
+            queryset = queryset_detalles_con_reasignacion().select_related('envio', 'envio_hijo').annotate(
                 asignado = Coalesce(enviado, 0, output_field=DecimalField()), 
                 saldo = F('me_cantidad') - Coalesce(enviado, 0, output_field=DecimalField()), 
             )
@@ -257,14 +260,17 @@ class EnviosPendientes(ListAPIView):
         data = EnvioDet.objects.select_related('envio').filter(
                 envio__instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final] ,
                 envio__sucursal=sucursal,
-                envio__pasan=False
+                envio__pasan=False,
+                activo=True,
+            ).filter(
+                filtro_envio_tablero_origen()
             ).annotate(
                 asignado = Coalesce(enviado, 0, output_field=DecimalField()), 
             ).filter(asignado = 0).values('envio_id').distinct()
         
         prefetch_detalles = Prefetch(
             'detalles',
-            queryset = EnvioDet.objects.all()
+            queryset = queryset_detalles_activos()
         )
 
         prefetch_instruccion = Prefetch(
@@ -294,7 +300,7 @@ class EnviosParciales(ListAPIView):
 
         detalles_prefetch = Prefetch(
             'detalles', 
-            queryset = EnvioDet.objects.select_related('envio').annotate(
+            queryset = queryset_detalles_activos().select_related('envio').annotate(
                 enviado = Coalesce(enviado, 0, output_field=DecimalField()), 
                 saldo = F('me_cantidad') - Coalesce(enviado, 0, output_field=DecimalField()), 
             )
@@ -969,14 +975,17 @@ class EnviosTableroPendientes(ListAPIView):
         data = EnvioDet.objects.select_related('envio').filter(
                 envio__instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final] ,
                 envio__sucursal=sucursal,
-                envio__pasan=False
+                envio__pasan=False,
+                activo=True,
+            ).filter(
+                filtro_envio_tablero_origen()
             ).annotate(
                 asignado = Coalesce(enviado, 0, output_field=DecimalField()), 
             ).filter(~Q(me_cantidad = Coalesce(enviado, 0, output_field=DecimalField()))).values('envio_id').distinct()
         
         prefetch_detalles = Prefetch(
             'detalles',
-            queryset = EnvioDet.objects.all()
+            queryset = queryset_detalles_con_reasignacion()
         )
 
         prefetch_instruccion = Prefetch(
@@ -1013,7 +1022,8 @@ class EnviosReasignadosPendientes(ListAPIView):
         data = EnvioDet.objects.select_related('envio').filter(
                 envio__instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final] ,
                 envio__sucursal_entrega=sucursal,
-                envio__pasan=False
+                envio__pasan=False,
+                activo=True,
             ).exclude(
                 envio__sucursal=sucursal
             ).annotate(
@@ -1025,7 +1035,7 @@ class EnviosReasignadosPendientes(ListAPIView):
         
         prefetch_detalles = Prefetch(
             'detalles',
-            queryset = EnvioDet.objects.all()
+            queryset = queryset_detalles_activos()
         )
 
         prefetch_instruccion = Prefetch(
@@ -1042,27 +1052,116 @@ class EnviosReasignadosPendientes(ListAPIView):
 
         return envios        
 
+class EnviosHijosReasignadosSalida(ListAPIView):
+    serializer_class = EnvioInstruccionSerializer
+
+    def get_queryset(self):
+        fecha_inicial = self.request.query_params.get('fecha_inicial')
+        fecha_final = self.request.query_params.get('fecha_final')
+        sucursal = self.request.query_params.get('sucursal')
+
+        prefetch_detalles = Prefetch(
+            'detalles',
+            queryset=queryset_detalles_activos(),
+        )
+        prefetch_instruccion = Prefetch(
+            'instruccion',
+            queryset=InstruccionDeEnvio.objects.all(),
+        )
+        prefetch_anotaciones = Prefetch(
+            'anotaciones',
+            queryset=EnvioAnotaciones.objects.all(),
+        )
+
+        return (
+            Envio.objects
+            .select_related('envio_origen')
+            .prefetch_related(prefetch_detalles, prefetch_instruccion, prefetch_anotaciones)
+            .filter(
+                instruccion__fecha_de_entrega__date__range=[fecha_inicial, fecha_final],
+                sucursal=sucursal,
+                envio_origen__isnull=False,
+                pasan=False,
+            )
+            .exclude(
+                Q(sucursal_entrega__isnull=True)
+                | Q(sucursal_entrega='')
+                | Q(sucursal_entrega=F('sucursal'))
+            )
+            .order_by('-id')
+        )
+
 @api_view(['PUT'])
 @permission_classes([AllowAny])
 def actualizar_sucursal_entrega(request):
-    sucursal_entrega = request.data['sucursal_entrega']
-    envio = Envio.objects.get(id = request.data['envio_id'])
-    tipo_documento = (envio.tipo_documento or '').upper()
-    if tipo_documento == 'COD':
-        return Response(
-            {"message": "No se puede reasignar un envío COD; solo CON o CRE"},
-            status=400,
-        )
-    if tipo_documento not in ('CON', 'CRE'):
-        return Response(
-            {"message": "Solo se pueden reasignar envíos CON o CRE"},
-            status=400,
-        )
-    if envio.sucursal_entrega and envio.sucursal_entrega != envio.sucursal:
-        return Response(
-            {"message": "El envío ya está reasignado y no se puede reasignar nuevamente"},
-            status=400,
-        )
-    envio.sucursal_entrega = sucursal_entrega
-    envio.save()
-    return Response({"message":"Sucursal actualizada"})
+    sucursal_entrega = request.data.get('sucursal_entrega')
+    envio_id = request.data.get('envio_id')
+    detalle_ids = request.data.get('detalle_ids', [])
+
+    try:
+        hijo = reasignar_partidas_envio(envio_id, sucursal_entrega, detalle_ids)
+        return Response({
+            "message": "Reasignación registrada",
+            "envio_hijo_id": hijo.id,
+            "envio_origen_id": hijo.envio_origen_id,
+        })
+    except Envio.DoesNotExist:
+        return Response({"message": "Envío no encontrado"}, status=404)
+    except ValueError as exc:
+        return Response({"message": str(exc)}, status=400)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def partidas_reasignacion(request, envio_id):
+    try:
+        partidas = obtener_partidas_reasignacion(envio_id)
+        return Response(partidas)
+    except Envio.DoesNotExist:
+        return Response({"message": "Envío no encontrado"}, status=404)
+    except ValueError as exc:
+        return Response({"message": str(exc)}, status=400)
+
+
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
+def cancelar_envio_hijo_reasignacion(request, envio_hijo_id):
+    try:
+        padre = cancelar_reasignacion_envio_hijo(envio_hijo_id)
+        return Response({
+            "message": "Reasignación cancelada",
+            "envio_origen_id": padre.id,
+        })
+    except Envio.DoesNotExist:
+        return Response({"message": "Envío no encontrado"}, status=404)
+    except ValueError as exc:
+        return Response({"message": str(exc)}, status=400)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def geocodificar_instruccion_envio(request, envio_id):
+    try:
+        resultado = geocodificar_instruccion_y_cliente(envio_id)
+        return Response(resultado)
+    except Envio.DoesNotExist:
+        return Response({"message": "Envío no encontrado"}, status=404)
+    except ValueError as exc:
+        return Response({"message": str(exc)}, status=400)
+
+
+@api_view(['PUT'])
+@permission_classes([AllowAny])
+def reasignar_destino_envio_hijo_view(request, envio_hijo_id):
+    sucursal_entrega = request.data.get('sucursal_entrega')
+    try:
+        hijo = reasignar_destino_envio_hijo(envio_hijo_id, sucursal_entrega)
+        return Response({
+            "message": "Destino actualizado",
+            "envio_hijo_id": hijo.id,
+            "sucursal_entrega": hijo.sucursal_entrega,
+        })
+    except Envio.DoesNotExist:
+        return Response({"message": "Envío no encontrado"}, status=404)
+    except ValueError as exc:
+        return Response({"message": str(exc)}, status=400)

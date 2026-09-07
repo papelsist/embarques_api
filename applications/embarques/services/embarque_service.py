@@ -290,7 +290,7 @@ def asignar_envios_pend(data):
     embarque = Embarque.objects.select_related('operador','sucursal').get(pk=data['embarque_id'])
     kilos_embarque = 0
     for env in data['envios']:
-        detalles_prefetch = Prefetch('detalles', queryset=EnvioDet.objects.all())
+        detalles_prefetch = Prefetch('detalles', queryset=EnvioDet.objects.filter(activo=True))
         envio = Envio.objects.prefetch_related(detalles_prefetch).get(pk=env)
         #Se crea la entrega
         entrega = Entrega(
@@ -311,7 +311,7 @@ def asignar_envios_pend(data):
         valor_entrega = 0
         print("Kilos entrega: ", kilos_entrega)
         #Agregar partidas
-        for det in envio.detalles.all():
+        for det in envio.detalles.filter(activo=True):
             if det.clave != 'CORTE':
                 envio_det = EnvioDet.objects.get(pk = det.id)
                 total_entregado = envio_det.entregas.all().aggregate(
@@ -364,7 +364,7 @@ def asignar_envios_parc(data):
     for det in  data['detalles']:
         print("*"*50)
         print(det)
-        envio_det = EnvioDet.objects.get(pk = det['id'])
+        envio_det = EnvioDet.objects.get(pk = det['id'], activo=True)
         enviar = Decimal(det['enviar'])
         kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
         valor_envio = Decimal(((envio_det.valor * enviar )/envio_det.me_cantidad))
@@ -437,7 +437,7 @@ def asignar_a_pasan(data):
     for det in  data['detalles']:
         print("*"*50)
         print(det)
-        envio_det = EnvioDet.objects.get(pk = det['id'])
+        envio_det = EnvioDet.objects.get(pk = det['id'], activo=True)
         enviar = Decimal(det['enviar'])
         kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
         valor_envio = Decimal(((envio_det.valor * enviar )/envio_det.me_cantidad))
@@ -553,7 +553,7 @@ def crear_pre_entrega (data):
     preentrega.save()
 
     for det in  data['detalles']:
-        envio_det = EnvioDet.objects.get(pk = det['id'])
+        envio_det = EnvioDet.objects.get(pk = det['id'], activo=True)
         preentrega_det = PreEntregaDet()
         preentrega_det.preentrega = preentrega
         preentrega_det.envio_det = envio_det
