@@ -74,5 +74,10 @@ urlpatterns = [
     path('api/embarques/pagar_cod', views.aplicacion_pago_cod_pos, name='aplicar_pago_cod_pos'),
     path('api/embarques/crear_entrega_traslado/', views.crear_entrega_traslado, name='crear_entrega_traslado'),
     path('api/embarques/actualizar_sucursal_entrega/', views.actualizar_sucursal_entrega, name='actualizar_sucursal_entrega'),
+    path('api/embarques/partidas_reasignacion/<int:envio_id>/', views.partidas_reasignacion, name='partidas_reasignacion'),
     path('api/embarques/envios_reasignados_pendientes', views.EnviosReasignadosPendientes.as_view(), name='envios_reasignados_pendientes'),
+    path('api/embarques/envios_hijos_reasignados_salida', views.EnviosHijosReasignadosSalida.as_view(), name='envios_hijos_reasignados_salida'),
+    path('api/embarques/cancelar_envio_hijo_reasignacion/<int:envio_hijo_id>/', views.cancelar_envio_hijo_reasignacion, name='cancelar_envio_hijo_reasignacion'),
+    path('api/embarques/reasignar_destino_envio_hijo/<int:envio_hijo_id>/', views.reasignar_destino_envio_hijo_view, name='reasignar_destino_envio_hijo'),
+    path('api/embarques/geocodificar_instruccion_envio/<int:envio_id>/', views.geocodificar_instruccion_envio, name='geocodificar_instruccion_envio'),
 ]

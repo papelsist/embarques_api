@@ -393,7 +393,14 @@ class Envio(models.Model):
     email_envio = models.CharField(max_length=255, blank=True, null=True)
     surtido = models.DateTimeField(blank=True, null=True)
     uuid = models.CharField(max_length=50, blank=True, null=True)
-
+    envio_origen = models.ForeignKey(
+        'self',
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name='envios_hijos',
+        db_column='envio_origen_id',
+    )
 
 
     
@@ -447,6 +454,15 @@ class EnvioDet(models.Model):
     me_material_peligroso = models.CharField(max_length=2, blank=True, null=True, default='No')
     surtido = models.DateTimeField(blank=True, null=True)
     surtidor = models.CharField(max_length=255, blank=True, null=True)
+    activo = models.BooleanField(default=True)
+    envio_hijo = models.ForeignKey(
+        Envio,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name='detalles_reasignados_origen',
+        db_column='envio_hijo_id',
+    )
 
 
     ''' @property
