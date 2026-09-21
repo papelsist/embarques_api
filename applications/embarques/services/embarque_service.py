@@ -317,21 +317,22 @@ def asignar_envios_pend(data):
                 total_entregado = envio_det.entregas.all().aggregate(
                     total_entregado = Coalesce(Sum('cantidad'), 0, output_field=DecimalField())
                 )
-                enviar = Decimal(det.me_cantidad)
-                kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
-                valor_envio = Decimal(((envio_det.valor * enviar )/envio_det.me_cantidad))
-                entrega_det = EntregaDet(
-                        entrega= entrega,
-                        envio_det = det,
-                        clave = det.clave,
-                        descripcion = det.me_descripcion,
-                        cantidad = det.me_cantidad - total_entregado['total_entregado'],
-                        valor = valor_envio,
-                        kilos = kilos_envio
-                    )
-                entrega_det.save()
-                kilos_entrega += kilos_envio
-                valor_entrega += valor_envio
+                if (det.me_cantidad - total_entregado['total_entregado']) > 0:
+                    enviar = Decimal(det.me_cantidad)
+                    kilos_envio = ((envio_det.me_kilos * enviar )/envio_det.me_cantidad)
+                    valor_envio = Decimal(((envio_det.valor * enviar )/envio_det.me_cantidad))
+                    entrega_det = EntregaDet(
+                            entrega= entrega,
+                            envio_det = det,
+                            clave = det.clave,
+                            descripcion = det.me_descripcion,
+                            cantidad = det.me_cantidad - total_entregado['total_entregado'],
+                            valor = valor_envio,
+                            kilos = kilos_envio
+                        )
+                    entrega_det.save()
+                    kilos_entrega += kilos_envio
+                    valor_entrega += valor_envio
         entrega.kilos = kilos_entrega
         entrega.valor = valor_entrega
         entrega.save()

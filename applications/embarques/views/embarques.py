@@ -914,6 +914,54 @@ def get_envio_pendiente(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+def get_envios_pendientes_cliente(request):
+    sucursal = request.query_params.get('sucursal')
+    rfc = (request.query_params.get('rfc') or '').strip()
+    nombre = (request.query_params.get('nombre') or '').strip()
+
+    if not sucursal or (not rfc and not nombre):
+        return Response({"message": "Parámetros incompletos", "envios": []})
+
+    filtro_cliente = Q()
+    if rfc:
+        filtro_cliente |= Q(de_rfc_destinatario__iexact=rfc)
+    if nombre:
+        filtro_cliente |= Q(destinatario__iexact=nombre)
+
+    envios_qs = Envio.objects.filter(
+        filtro_cliente,
+        sucursal=sucursal,
+        pasan=False,
+    ).filter(
+        Q(sucursal_entrega__isnull=True)
+        | Q(sucursal_entrega='')
+        | Q(sucursal_entrega=F('sucursal'))
+    )
+
+    prefetch_detalles = Prefetch('detalles', queryset=queryset_detalles_activos())
+    prefetch_instruccion = Prefetch('instruccion', queryset=InstruccionDeEnvio.objects.all())
+    prefetch_anotaciones = Prefetch('anotaciones', queryset=EnvioAnotaciones.objects.all())
+    envios_qs = envios_qs.prefetch_related(
+        prefetch_detalles, prefetch_instruccion, prefetch_anotaciones
+    ).order_by('-fecha_documento', '-date_created', '-id')
+
+    envios_pendientes = []
+    for envio in envios_qs:
+        enviado, _ = get_envio_cantidades(envio)
+        if enviado == Decimal('0'):
+            envios_pendientes.append(envio)
+
+    if envios_pendientes:
+        envios_serialized = EnvioSerializerEm(envios_pendientes, many=True)
+        return Response({
+            "message": "OK",
+            "envios": envios_serialized.data,
+        })
+    return Response({"message": "No encontrado", "envios": []})
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def get_envio_parcial(request):
     sucursal = request.query_params.get('sucursal')
     documento = request.query_params.get('documento')
