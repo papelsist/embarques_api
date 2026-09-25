@@ -416,6 +416,17 @@ class InstruccionDeEnvio(models.Model):
     de_municipio = models.CharField(max_length=255, blank=True, null=True)
     de_estado = models.CharField(max_length=255, blank=True, null=True)
     partidas_idx = models.IntegerField()
+    # Datos de contacto
+    contacto = models.CharField(max_length=255, blank=True, null= True)
+    telefono_contacto = models.CharField(max_length=14, blank=True, null= True)
+    horario_recepcion = models.BooleanField(default=False)
+    horario_recepcion_inicio = models.CharField(max_length=8, blank=True, null=True)
+    horario_recepcion_fin = models.CharField(max_length=8, blank=True, null=True)
+    horario_recepcion_inicio2 = models.CharField(max_length=8, blank=True, null=True)
+    horario_recepcion_fin2 = models.CharField(max_length=8, blank=True, null=True)
+    atiende_sabado = models.BooleanField(default=False)
+    horario_sabado_inicio = models.CharField(max_length=8, blank=True, null=True)
+    horario_sabado_fin = models.CharField(max_length=8, blank=True, null=True)
 
     class Meta:
         managed = False
